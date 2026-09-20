@@ -2,8 +2,9 @@ import {useState} from 'react';
 import {Link} from 'react-router';
 
 const FONT = "'Roboto', sans-serif";
-// Space between the page edge and the hero card (reduce/increase to taste)
-const GAP = 'clamp(8px, 1vw, 16px)';
+// Space between the page edge and the hero card. Keep in sync with Header.jsx
+const GAP_Y = '16px'; // top and bottom
+const GAP_X = '0px'; // left and right
 // Text inset inside the card (Figma: 32px)
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 
@@ -11,7 +12,7 @@ export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
   const [hover, setHover] = useState(false);
 
   return (
-    <section style={{padding: GAP, boxSizing: 'border-box', width: '100%'}}>
+    <section className="hero" style={{padding: `${GAP_Y} ${GAP_X}`, margin: 0, boxSizing: 'border-box', width: '100%'}}>
       <div
         className="relative w-full overflow-hidden"
         style={{borderRadius: 16}}

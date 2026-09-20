@@ -1,14 +1,11 @@
 import {NavLink, useLocation} from 'react-router';
 import {useAside} from '~/components/Aside';
-import logo from '~/assets/logo.png';
+import LOGO_SRC from '~/assets/logo.png'; 
 
-// Put your logo file in app/assets/ (or public/) and point to it here.
-// Option A (bundled):  import logo from '~/assets/logo.png';  then use `logo`
-// Option B (public/):  '/logo.png'
-const LOGO_SRC = '/logo.png';
 const FONT = "'Roboto', sans-serif";
-// Keep in sync with GAP in Hero.jsx
-const GAP = 'clamp(8px, 1vw, 16px)';
+// Keep in sync with GAP_Y / GAP_X in Hero.jsx
+const GAP_Y = '16px'; // top
+const GAP_X = '0px'; // left and right
 
 // Adjust the routes to match your store
 const LEFT_LINKS = [
@@ -42,9 +39,9 @@ export function Header({header}) {
   const wrapperStyle = isHome
     ? {
         position: 'absolute',
-        top: GAP,
-        left: GAP,
-        right: GAP,
+        top: GAP_Y,
+        left: GAP_X,
+        right: GAP_X,
         zIndex: 30,
         background: 'transparent',
         color: '#fff',
@@ -89,7 +86,7 @@ export function Header({header}) {
           style={{display: 'block', lineHeight: 0}}
         >
           <img
-            src={logo}
+            src={LOGO_SRC}
             alt={shop?.name || 'Home'}
             style={{
               display: 'block',
