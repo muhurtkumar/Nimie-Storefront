@@ -3,12 +3,14 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {MockShopNotice} from '~/components/MockShopNotice';
+import {Hero} from './Hero';
+import heroBanner from '~/assets/home/hero-banner.png';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{title: 'Nimie | Home'}];
 };
 
 /**
@@ -67,6 +69,20 @@ export default function Homepage() {
   return (
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
+
+      {/*
+        Leave `cta` unset while the site is in prelaunch mode (see root.jsx
+        PRELAUNCH_ALLOWED_PATHS) — add it back once /collections/all etc.
+        are unlocked.
+      */}
+      <Hero
+        image={heroBanner}
+        imageAlt="Nimie new collection"
+        eyebrow="Meet Lucknow chikankari, the Nimie way."
+        heading="The classics got a makeover."
+        cta={{label: 'JOIN THE WAITLIST', to: '#waitlist'}}
+      />
+
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
@@ -182,7 +198,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
 `;
 
-/** @typedef {import('./+types/_index').Route} Route */
+/** @typedef {import('./+types/route').Route} Route */
 /** @typedef {import('storefrontapi.generated').FeaturedCollectionFragment} FeaturedCollectionFragment */
 /** @typedef {import('storefrontapi.generated').RecommendedProductsQuery} RecommendedProductsQuery */
 /** @typedef {ReturnType<typeof useLoaderData<typeof loader>>} LoaderReturnData */
