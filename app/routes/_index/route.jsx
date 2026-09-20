@@ -99,6 +99,16 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
       height
     }
 
+    images(first: 6) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+
     options {
       name
       optionValues {

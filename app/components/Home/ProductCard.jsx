@@ -1,3 +1,4 @@
+import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 
@@ -17,7 +18,11 @@ function getColor(value) {
 }
 
 export function ProductCard({product, index}) {
-  const image = product.featuredImage;
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [disableTransition, setDisableTransition] = useState(false);
+
+  const images = product.images?.nodes ?? [];
 
   const colorOption = product.options?.find(
     (option) => option.name.toLowerCase() === 'color',
@@ -27,18 +32,103 @@ export function ProductCard({product, index}) {
 
   const badge = product.tags?.[0];
 
+  /*
+   * Automatically move to the next image while hovering.
+   */
+  useEffect(() => {
+    if (!isHovered || images.length <= 1) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setActiveImageIndex((currentIndex) => currentIndex + 1);
+    }, 1200);
+
+    return () => clearInterval(interval);
+  }, [isHovered, images.length]);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setDisableTransition(false);
+    setActiveImageIndex(0);
+  };
+
+  /*
+   * When we reach the duplicated first image,
+   * instantly reset to the real first image.
+   *
+   * Visually there is no jump because both images
+   * are exactly the same.
+   */
+  const handleTransitionEnd = () => {
+    if (images.length > 1 && activeImageIndex === images.length) {
+      setDisableTransition(true);
+      setActiveImageIndex(0);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setDisableTransition(false);
+        });
+      });
+    }
+  };
+
+  /*
+   * Duplicate the images once.
+   *
+   * Example:
+   * [1, 2, 3, 4, 1, 2, 3, 4]
+   */
+  const sliderImages =
+    images.length > 1
+      ? [...images, ...images]
+      : images;
+
   return (
     <Link
       to={`/products/${product.handle}`}
       className="group block overflow-hidden rounded-lg bg-[#f8f1df]"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-stone-200">
-        {image && (
-          <Image
-            data={image}
-            sizes="(min-width: 1024px) 33vw, 100vw"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
+        {sliderImages.length > 0 ? (
+          <div
+            className={`absolute inset-0 h-full w-full ${
+              disableTransition
+                ? ''
+                : 'transition-transform duration-700 ease-in-out'
+            }`}
+            style={{
+              transform: `translateY(-${activeImageIndex * 100}%)`,
+            }}
+            onTransitionEnd={handleTransitionEnd}
+          >
+            {sliderImages.map((image, imageIndex) => (
+              <div
+                key={`${image.id}-${imageIndex}`}
+                className="h-full w-full"
+              >
+                <Image
+                  data={image}
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          product.featuredImage && (
+            <Image
+              data={product.featuredImage}
+              sizes="(min-width: 1024px) 33vw, 100vw"
+              className="h-full w-full object-cover"
+            />
+          )
         )}
 
         {/* Product badge */}

@@ -384,6 +384,11 @@ export type ProductShowcaseItemFragment = Pick<
   featuredImage?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
+  images: {
+    nodes: Array<
+      Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+    >;
+  };
   options: Array<
     Pick<StorefrontAPI.ProductOption, 'name'> & {
       optionValues: Array<Pick<StorefrontAPI.ProductOptionValue, 'name'>>;
@@ -409,6 +414,14 @@ export type ProductShowcaseQuery = {
             'id' | 'url' | 'altText' | 'width' | 'height'
           >
         >;
+        images: {
+          nodes: Array<
+            Pick<
+              StorefrontAPI.Image,
+              'id' | 'url' | 'altText' | 'width' | 'height'
+            >
+          >;
+        };
         options: Array<
           Pick<StorefrontAPI.ProductOption, 'name'> & {
             optionValues: Array<Pick<StorefrontAPI.ProductOptionValue, 'name'>>;
@@ -1251,7 +1264,7 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
-  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    images(first: 6) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
     return: ProductShowcaseQuery;
     variables: ProductShowcaseQueryVariables;
   };
