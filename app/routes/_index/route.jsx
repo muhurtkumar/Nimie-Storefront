@@ -3,7 +3,7 @@ import {useLoaderData} from 'react-router';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {ProductShowcase} from '~/components/home/ProductShowcase';
 
-import {Hero} from './Hero';
+import {Hero} from '~/components/home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 
 /**
