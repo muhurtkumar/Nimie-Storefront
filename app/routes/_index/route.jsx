@@ -7,7 +7,7 @@ import {ProductShowcase} from '~/components/home/ProductShowcase';
 import {Hero} from '~/components/home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 
-import KnotLikeBefore from '~/components/home/KnotLikeBefore';
+import {KnotLikeBefore} from '~/components/home/KnotLikeBefore';
 
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 
