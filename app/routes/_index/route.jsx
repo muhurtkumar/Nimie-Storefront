@@ -1,10 +1,18 @@
 import {useLoaderData} from 'react-router';
 
 import {MockShopNotice} from '~/components/MockShopNotice';
+
 import {ProductShowcase} from '~/components/home/ProductShowcase';
 
 import {Hero} from './Hero';
+
 import heroBanner from '~/assets/home/hero-banner.png';
+
+
+
+import {KnotLikeBefore} from './KnotLikeBefore';
+
+import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 
 /**
  * @type {Route.MetaFunction}
@@ -57,6 +65,22 @@ function loadDeferredData({context}) {
   };
 }
 
+
+const KNOT_LIKE_BEFORE_DATA = {
+  image: knotLikeBeforeImage,
+  imageAlt: 'Nimie designer wearing a chikankari saree',
+  eyebrow: 'A NOTE FROM THE DESIGNER',
+  heading: 'Knot like Before',
+  introTitle: 'For The Love Of Where We Come From.',
+  description:
+    'Nimie is our little expression of लखनऊ (Lucknow), its craft, its people and the beauty that has always been around us. We’re taking what we love about home and bringing it into the way we dress today. Easy pieces, thoughtful details and a little something unexpected. here are 3 promises from us:',
+  points: [
+    'Handcrafted, always. Made with intention, never mass-produced.',
+    'People before products. Respecting the hands behind each piece.',
+    'Made for today. For the way you dress now.',
+  ],
+};
+
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
@@ -77,11 +101,14 @@ export default function Homepage() {
         heading="The classics got a makeover."
         cta={{label: 'JOIN THE WAITLIST', to: '#waitlist'}}
       />
+      
+      <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
 
       <ProductShowcase products={data.showcaseProducts} />
     </div>
   );
 }
+
 
 const PRODUCT_SHOWCASE_QUERY = `#graphql
   fragment ProductShowcaseItem on Product {
