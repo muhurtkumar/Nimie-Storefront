@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {Link} from 'react-router';
 
-const FONT = "'Roboto', sans-serif";
+const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the hero card. Keep in sync with Header.jsx
 const GAP_Y = '16px'; // top and bottom
 const GAP_X = '0px'; // left and right
