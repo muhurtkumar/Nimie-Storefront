@@ -8,7 +8,7 @@ import {Hero} from '~/components/home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 import {KnotLikeBefore} from '~/components/home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
-import {ThreadOfNawab} from '~/components/home/ThreadOfNawab';
+import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import nimieLogo from '~/assets/home/nimie-logo.png';
 import clip1 from '~/assets/home/clip-1.mp4';
 import clip2 from '~/assets/home/clip-2.mp4';
@@ -103,7 +103,7 @@ export default function Homepage() {
       />
       <ProductShowcase products={data.showcaseProducts} />
       <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
-      <ThreadOfNawab
+      <BehindTheScenes
         videos={[clip1, clip2, clip3, clip4]}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"

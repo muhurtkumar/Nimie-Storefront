@@ -12,7 +12,7 @@ const GOLD = '#F4D9A0';
 // Crossfade between clips, in ms
 const FADE_MS = 500;
 
-export function ThreadOfNawab({
+export function BehindTheScenes({
   image,
   imageAlt = '',
   videos,
