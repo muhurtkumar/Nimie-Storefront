@@ -6,10 +6,14 @@ import {ProductShowcase} from '~/components/home/ProductShowcase';
 
 import {Hero} from '~/components/home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
-
 import {KnotLikeBefore} from '~/components/home/KnotLikeBefore';
-
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
+import {ThreadOfNawab} from '~/components/home/ThreadOfNawab';
+import nimieLogo from '~/assets/home/nimie-logo.png';
+import clip1 from '~/assets/home/clip-1.mp4';
+import clip2 from '~/assets/home/clip-2.mp4';
+import clip3 from '~/assets/home/clip-3.mp4';
+import clip4 from '~/assets/home/clip-4.mp4'; 
 
 /**
  * @type {Route.MetaFunction}
@@ -62,7 +66,6 @@ function loadDeferredData({context}) {
   };
 }
 
-
 const KNOT_LIKE_BEFORE_DATA = {
   image: knotLikeBeforeImage,
   imageAlt: 'Nimie designer wearing a chikankari saree',
@@ -100,12 +103,16 @@ export default function Homepage() {
       />
       <ProductShowcase products={data.showcaseProducts} />
       <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
-
-      
+      <ThreadOfNawab
+        videos={[clip1, clip2, clip3, clip4]}
+        logo={nimieLogo}
+        eyebrow="From Behind the Scenes"
+        heading="Embroided with <3"
+        description="From the heart of Lucknow, take an exclusive look behind the scenes at the makers keeping centuries-old craftsmanship alive in every Nimie kurti."
+      />
     </div>
   );
 }
-
 
 const PRODUCT_SHOWCASE_QUERY = `#graphql
   fragment ProductShowcaseItem on Product {
