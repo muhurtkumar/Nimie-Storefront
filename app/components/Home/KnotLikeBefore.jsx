@@ -31,7 +31,7 @@ const css = `
   box-sizing: border-box;
   background: #fff;
   font-family: ${FONT};
-  padding: clamp(28px, 5vw, 96px) ${SIDE_GAP};
+  padding: clamp(28px, 5vw, 56px) ${SIDE_GAP};
 }
 .klb *, .klb *::before, .klb *::after { box-sizing: border-box; }
 
