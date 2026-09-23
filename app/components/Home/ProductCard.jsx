@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
+import {Heart, ShoppingCart} from 'lucide-react';
 
 const colorMap = {
   green: '#8fa33f',
@@ -17,6 +18,21 @@ function getColor(value) {
   return colorMap[value.toLowerCase()] || '#c8c8b0';
 }
 
+function formatPrice(amount, currencyCode) {
+  if (!amount) {
+    return '';
+  }
+
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currencyCode || 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+    .format(Number(amount))
+    .replace(/\s/g, '');
+}
+
 export function ProductCard({product, index}) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -31,6 +47,28 @@ export function ProductCard({product, index}) {
   const colors = colorOption?.optionValues?.slice(0, 3) || [];
 
   const badge = product.tags?.[0];
+
+  const currentPrice = product.priceRange?.minVariantPrice;
+
+  const originalPriceAmount = Number(currentPrice?.amount || 0);
+
+  const discountPercentage = Math.min(
+    Math.max(
+      Number(product.discountPercentage?.value || 0),
+      0,
+    ),
+    100,
+  );
+
+  const hasDiscount =
+    discountPercentage > 0 && originalPriceAmount > 0;
+
+  const discountedPriceAmount = hasDiscount
+    ? Math.round(
+        originalPriceAmount *
+          (1 - discountPercentage / 100),
+      )
+    : originalPriceAmount;
 
   /*
    * Automatically move to the next image while hovering.
@@ -95,7 +133,7 @@ export function ProductCard({product, index}) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-stone-200">
+      <div className="relative aspect-[4/4.5] overflow-hidden bg-stone-200">
         {sliderImages.length > 0 ? (
           <div
             className={`absolute inset-0 h-full w-full ${
@@ -131,13 +169,18 @@ export function ProductCard({product, index}) {
           )
         )}
 
-        {/* Product badge */}
+        {/* Product tag */}
         {badge && (
-          <div className="absolute left-3 top-3 flex items-center gap-1 text-[10px] uppercase tracking-wide text-white">
-            <span className="text-yellow-300">▲</span>
+          <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-2 text-[16px] font-semibold uppercase text-[#FFDF9E]">
             {badge}
           </div>
         )}
+
+        {/* Heart icon */}
+        <Heart
+          className="absolute right-4 top-4 h-8 w-8 text-[#FFDF9E]"
+          strokeWidth={1.8}
+        />
 
         {/* Bottom controls */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
@@ -159,19 +202,49 @@ export function ProductCard({product, index}) {
             aria-label={`View ${product.title}`}
             className="flex h-7 w-7 items-center justify-center rounded bg-white text-xs shadow-sm"
           >
-            ♧
+            <ShoppingCart className="h-4 w-4 text-[#345225]" strokeWidth={2} />
           </button>
         </div>
       </div>
 
-      <div className="px-3 py-3">
-        <h3 className="text-[13px] font-semibold leading-4 text-stone-800">
-          {product.title}
-        </h3>
+      <div className="h-[78px] px-3 py-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-[14px] font-semibold leading-4 text-[#345225]">
+              {product.title}
+            </h3>
 
-        <p className="mt-1 text-[10px] text-stone-600">
-          {product.productType}
-        </p>
+            <div className="mt-3 text-[13px] text-stone-600">
+              {product.productType}
+            </div>
+          </div>
+
+          <div className="shrink-0 text-right">
+            <div className="flex items-center justify-end gap-3">
+              {hasDiscount && (
+                <span className="text-[13px] font-bold text-[#345225]">
+                  {discountPercentage}% OFF
+                </span>
+              )}
+
+              <span className="text-[20px] font-bold leading-5 text-black">
+                {formatPrice(
+                  discountedPriceAmount,
+                  currentPrice?.currencyCode,
+                )}
+              </span>
+            </div>
+
+            {hasDiscount && (
+              <div className="mt-3 text-[14px] text-[#e98b8b] line-through">
+                {formatPrice(
+                  originalPriceAmount,
+                  currentPrice?.currencyCode,
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   );

@@ -384,6 +384,12 @@ export type ProductShowcaseItemFragment = Pick<
   featuredImage?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  discountPercentage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'value'>
+  >;
   images: {
     nodes: Array<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
@@ -413,6 +419,15 @@ export type ProductShowcaseQuery = {
             StorefrontAPI.Image,
             'id' | 'url' | 'altText' | 'width' | 'height'
           >
+        >;
+        priceRange: {
+          minVariantPrice: Pick<
+            StorefrontAPI.MoneyV2,
+            'amount' | 'currencyCode'
+          >;
+        };
+        discountPercentage?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Metafield, 'value'>
         >;
         images: {
           nodes: Array<
@@ -1264,7 +1279,7 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
-  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    images(first: 6) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n\n    discountPercentage: metafield(\n      namespace: "custom"\n      key: "discountpercentage"\n    ) {\n      value\n    }\n\n    images(first: 6) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
     return: ProductShowcaseQuery;
     variables: ProductShowcaseQueryVariables;
   };

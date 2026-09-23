@@ -181,6 +181,20 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
       height
     }
 
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+
+    discountPercentage: metafield(
+      namespace: "custom"
+      key: "discountpercentage"
+    ) {
+      value
+    }
+
     images(first: 6) {
       nodes {
         id
