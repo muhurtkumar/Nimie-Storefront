@@ -9,11 +9,13 @@ import heroBanner from '~/assets/home/hero-banner.png';
 import {KnotLikeBefore} from '~/components/home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
+import {InstagramReels} from '~/components/home/InstagramReels';
 import nimieLogo from '~/assets/home/nimie-logo.png';
 import clip1 from '~/assets/home/clip-1.mp4';
 import clip2 from '~/assets/home/clip-2.mp4';
 import clip3 from '~/assets/home/clip-3.mp4';
-import clip4 from '~/assets/home/clip-4.mp4'; 
+import clip4 from '~/assets/home/clip-4.mp4';
+import instagramPlaceholder from '~/assets/home/hero-banner.png';
 
 /**
  * @type {Route.MetaFunction}
@@ -85,6 +87,47 @@ export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
 
+  /*
+   * Dummy Instagram Reel data for local development.
+   *
+   * No Instagram API or video files are used here.
+   * The permalink is the actual Instagram Reel URL.
+   */
+  const dummyInstagramReels = [
+    {
+      id: 'dummy-reel-1',
+      thumbnail_url: instagramPlaceholder,
+      permalink:
+        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
+      caption:
+        'A craft passed from one generation to the next. Every stitch taking its own time.',
+    },
+    {
+      id: 'dummy-reel-2',
+      thumbnail_url: instagramPlaceholder,
+      permalink:
+        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
+      caption:
+        'Threads that follow the rhythm of the needle. Bringing each piece quietly to life.',
+    },
+    {
+      id: 'dummy-reel-3',
+      thumbnail_url: instagramPlaceholder,
+      permalink:
+        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
+      caption:
+        'From the heart of Lucknow, keeping centuries-old craftsmanship alive.',
+    },
+    {
+      id: 'dummy-reel-4',
+      thumbnail_url: instagramPlaceholder,
+      permalink:
+        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
+      caption:
+        'Handcrafted, always. Made with intention, never mass-produced.',
+    },
+  ];
+
   return (
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
@@ -101,14 +144,22 @@ export default function Homepage() {
         heading="The classics got a makeover."
         cta={{label: 'JOIN THE WAITLIST', to: '#waitlist'}}
       />
+
       <ProductShowcase products={data.showcaseProducts} />
+
       <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
+
       <BehindTheScenes
         videos={[clip1, clip2, clip3, clip4]}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"
         heading="Embroided with <3"
         description="From the heart of Lucknow, take an exclusive look behind the scenes at the makers keeping centuries-old craftsmanship alive in every Nimie kurti."
+      />
+
+      <InstagramReels
+        reels={dummyInstagramReels}
+        instagramHandle="@NIMIE.IN"
       />
     </div>
   );
