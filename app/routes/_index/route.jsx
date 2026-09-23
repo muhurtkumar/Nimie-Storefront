@@ -8,7 +8,6 @@ import {Hero} from '~/components/home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 
 import {KnotLikeBefore} from '~/components/home/KnotLikeBefore';
-
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 
 /**
@@ -156,6 +155,8 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
     }
   }
 `;
+
+
 
 /** @typedef {import('./+types/route').Route} Route */
 /** @typedef {ReturnType<typeof useLoaderData<typeof loader>>} LoaderReturnData */
