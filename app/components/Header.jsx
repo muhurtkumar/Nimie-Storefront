@@ -18,11 +18,12 @@ const NAV_PAD_Y = 'clamp(16px, 3vw, 32px)';
 // Adjust the routes to match your store
 const LEFT_LINKS = [
   {label: 'Shop', to: '/collections'},
-  {label: 'About', to: '/pages/about'},
+  {label: 'Our Story', to: '/our-story'},
 ];
 const RIGHT_LINKS = [
-  {label: 'Wishlist', to: '/pages/wishlist'},
-  {label: 'Contact', to: '/pages/contact'},
+  {label: 'Wishlist', to: '/wishlist'},
+  {label: 'Cart', to: '/cart'},
+  {label: 'Contact', to: '/contact'},
 ];
 const MOBILE_LINKS = [{label: 'Home', to: '/'}, ...LEFT_LINKS, ...RIGHT_LINKS];
 
