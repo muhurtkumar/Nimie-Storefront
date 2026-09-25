@@ -1,0 +1,227 @@
+import React from "react";
+
+const FONT =
+  "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+
+const css = `
+/* =========================================================
+   ABOUT THE CURATOR
+   ========================================================= */
+
+.about-curator {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ${FONT};
+
+  max-width: 1600px;
+  margin: 0 auto;
+
+  padding-block: clamp(28px, 5vw, 56px);
+  padding-inline: clamp(24px, 6vw, 100px);
+
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(28px, 5vw, 64px);
+}
+
+/* =========================================================
+   PHOTO
+   ========================================================= */
+
+.about-curator__media {
+  flex: 0 0 42%;
+  max-width: 42%;
+}
+
+.about-curator__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+
+  border: 6px solid #f4ecd8;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   TEXT CONTENT
+   ========================================================= */
+
+.about-curator__content {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.about-curator__eyebrow {
+  margin: 0 0 clamp(12px, 2vw, 20px);
+  color: #3f6b3f;
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.about-curator__body {
+  color: #1f2620;
+}
+
+.about-curator__body p {
+  margin: 0 0 1.1em;
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.about-curator__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   SIGNATURE
+   ========================================================= */
+
+.about-curator__sign {
+  margin-top: clamp(18px, 3vw, 32px);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.about-curator__sign-image {
+  height: clamp(44px, 5vw, 60px);
+  width: auto;
+  display: block;
+}
+
+.about-curator__sign-accent {
+  width: clamp(70px, 8vw, 100px);
+  height: auto;
+  color: #d6348f; /* swap via currentColor if you swap the swash */
+  margin-top: clamp(4px, 1vw, 10px); /* sits above the sign's baseline, not level with it */
+  transform: rotate(-4deg);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .about-curator {
+    gap: clamp(20px, 4vw, 36px);
+    align-items: center; /* keep photo and text visually balanced on medium screens */
+  }
+
+  .about-curator__media {
+    flex: 0 0 45%;
+    max-width: 45%;
+  }
+
+  .about-curator__eyebrow {
+    margin-bottom: clamp(10px, 2vw, 16px);
+  }
+
+  .about-curator__body p {
+    margin-bottom: 0.9em;
+  }
+}
+
+/* =========================================================
+   MOBILE — stack photo above text
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .about-curator {
+    flex-direction: column;
+  }
+
+  .about-curator__media {
+    flex: 1 1 auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .about-curator__image {
+    aspect-ratio: 4 / 3;
+  }
+}
+`;
+
+/* =========================================================
+   DECORATIVE SIGNATURE SWASH
+   (inline SVG so you don't need an extra image asset;
+   pass a custom `signatureAccent` image instead if you'd
+   rather use a designed one)
+   ========================================================= */
+
+function DefaultSignatureAccent() {
+  return (
+    <svg
+      className="about-curator__sign-accent"
+      viewBox="0 0 100 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M2 12 Q 26 2, 50 11 T 98 8"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/* =========================================================
+   COMPONENT
+   ========================================================= */
+
+export function AboutCurator({
+  image,
+  imageAlt = "",
+  eyebrow = "About the curator",
+  paragraphs = [],
+  signature,
+  signatureAlt = "Signature",
+  signatureAccent, // optional custom image, else default squiggle
+}) {
+  return (
+    <section className="about-curator" aria-label="About the curator">
+      <style>{css}</style>
+
+      <div className="about-curator__media">
+        <img className="about-curator__image" src={image} alt={imageAlt} />
+      </div>
+
+      <div className="about-curator__content">
+        <p className="about-curator__eyebrow">{eyebrow}</p>
+
+        <div className="about-curator__body">
+          {paragraphs.map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
+        </div>
+
+        <div className="about-curator__sign">
+          <img
+            className="about-curator__sign-image"
+            src={signature}
+            alt={signatureAlt}
+          />
+          {signatureAccent ? (
+            <img
+              className="about-curator__sign-accent"
+              src={signatureAccent}
+              alt=""
+              aria-hidden="true"
+            />
+          ) : (
+            <DefaultSignatureAccent />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
