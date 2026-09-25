@@ -9,13 +9,13 @@ import heroBanner from '~/assets/home/hero-banner.png';
 import {KnotLikeBefore} from '~/components/Home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
-import {InstagramReels} from '~/components/Home/InstagramReels';
+import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
+import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import nimieLogo from '~/assets/home/nimie-logo.png';
 import clip1 from '~/assets/home/clip-1.mp4';
 import clip2 from '~/assets/home/clip-2.mp4';
 import clip3 from '~/assets/home/clip-3.mp4';
 import clip4 from '~/assets/home/clip-4.mp4';
-import instagramPlaceholder from '~/assets/home/hero-banner.png';
 
 /**
  * @type {Route.MetaFunction}
@@ -64,7 +64,6 @@ function loadDeferredData({context}) {
       console.error(error);
       return null;
     });
-
   return {
     showcaseProducts,
   };
@@ -88,47 +87,6 @@ const KNOT_LIKE_BEFORE_DATA = {
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
-
-  /*
-   * Dummy Instagram Reel data for local development.
-   *
-   * No Instagram API or video files are used here.
-   * The permalink is the actual Instagram Reel URL.
-   */
-  const dummyInstagramReels = [
-    {
-      id: 'dummy-reel-1',
-      thumbnail_url: instagramPlaceholder,
-      permalink:
-        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
-      caption:
-        'A craft passed from one generation to the next. Every stitch taking its own time.',
-    },
-    {
-      id: 'dummy-reel-2',
-      thumbnail_url: instagramPlaceholder,
-      permalink:
-        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
-      caption:
-        'Threads that follow the rhythm of the needle. Bringing each piece quietly to life.',
-    },
-    {
-      id: 'dummy-reel-3',
-      thumbnail_url: instagramPlaceholder,
-      permalink:
-        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
-      caption:
-        'From the heart of Lucknow, keeping centuries-old craftsmanship alive.',
-    },
-    {
-      id: 'dummy-reel-4',
-      thumbnail_url: instagramPlaceholder,
-      permalink:
-        'https://www.instagram.com/reel/Dc-z_6QICOs/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==',
-      caption:
-        'Handcrafted, always. Made with intention, never mass-produced.',
-    },
-  ];
 
   return (
     <div className="Home">

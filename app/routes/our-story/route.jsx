@@ -4,6 +4,8 @@ import { AboutNimie } from "~/components/OurStory/AboutNimie";
 import ourStoryHeroImage from "~/assets/OurStory/OurStoryHero.png";
 import nimieLogoGreen from "~/assets/OurStory/nimi-logo-green.png";
 import nimieLogoWhite from "~/assets/OurStory/nimi-logo-white.png";
+import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
+import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 
 /**
  * @type {Route.MetaFunction}
@@ -40,6 +42,11 @@ export default function PreviewOurStory() {
 
       {/* About Nimie */}
       <AboutNimie {...ABOUT_NIMIE_DATA} />
+
+      <InstagramReels
+              reels={dummyInstagramReels}
+              instagramHandle="@NIMIE.IN"
+            />
     </main>
   );
 }

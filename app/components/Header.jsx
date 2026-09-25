@@ -41,7 +41,7 @@ const linkStyle = ({isActive}) => ({
 export function Header({header}) {
   const {shop} = header;
   const {pathname} = useLocation();
-  const isHome = pathname === '/';
+  const isHome = pathname === '/contact' || pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
 
@@ -91,8 +91,8 @@ export function Header({header}) {
     : {
         position: 'relative',
         zIndex: 30,
-        background: '#fff',
-        color: '#000',
+        background: '#345225',
+        color: '#fff',
         borderBottom: '1px solid rgba(0,0,0,0.1)',
       };
 

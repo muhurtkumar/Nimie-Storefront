@@ -1,5 +1,3 @@
-import {Instagram, Mail, MessageCircle} from 'lucide-react';
-
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
 const GAP_Y = '16px';
@@ -26,7 +24,6 @@ const DEFAULT_ITEMS = [
   },
 ];
 
-const ICONS = {mail: Mail, instagram: Instagram, whatsapp: MessageCircle};
 
 export function ContactMethod({image, imageAlt = '', items = DEFAULT_ITEMS}) {
   return (
@@ -68,34 +65,13 @@ export function ContactMethod({image, imageAlt = '', items = DEFAULT_ITEMS}) {
               className="flex flex-1 items-center justify-center gap-3 transition-opacity hover:opacity-80"
               style={{textDecoration: 'none'}}
             >
-              {(() => {
-                const Icon = ICONS[item.icon];
-                return Icon ? (
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      display: 'grid',
-                      placeItems: 'center',
-                      flex: '0 0 auto',
-                      width: 42,
-                      height: 42,
-                      border: '3px solid #1684db',
-                      borderRadius: '50%',
-                      background: '#ffc72c',
-                      color: '#11170D',
-                      boxShadow: '3px 3px 0 #1684db',
-                    }}
-                  >
-                    <Icon size={20} strokeWidth={2.5} />
-                  </span>
-                ) : null;
-              })()}
+              
               <span style={{textAlign: 'center'}}>
                 <span
                   style={{
                     display: 'block',
                     fontSize: 11,
-                    fontWeight: 400,
+                    fontWeight: 500,
                     letterSpacing: '0.06em',
                     textTransform: 'uppercase',
                     color: 'rgba(255,255,255,0.75)',
