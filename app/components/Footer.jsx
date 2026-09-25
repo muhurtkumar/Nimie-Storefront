@@ -165,8 +165,8 @@ const css = `
 // Static columns — Shopify has no menu for these, so they're hardcoded.
 // Adjust the hrefs to match your real routes.
 const STORE_LINKS = [
-  {label: 'Shop', href: '/shop'},
-  {label: 'About', href: '/about'},
+  {label: 'Shop', href: '/'},
+  {label: 'Our Story', href: '/our-story'},
   {label: 'FAQs', href: '/faqs'},
   {label: 'Contact Us', href: '/contact'},
 ];
