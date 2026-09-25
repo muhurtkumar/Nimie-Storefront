@@ -56,7 +56,9 @@ async function loadCriticalData({context}) {
  */
 function loadDeferredData({context}) {
   const showcaseProducts = context.storefront
-    .query(PRODUCT_SHOWCASE_QUERY)
+    .query(PRODUCT_SHOWCASE_QUERY, {
+      cache: context.storefront.CacheShort(),
+    })
     .catch((error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
