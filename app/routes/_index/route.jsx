@@ -5,17 +5,17 @@ import {MockShopNotice} from '~/components/MockShopNotice';
 import {ProductShowcase} from '~/components/Home/ProductShowcase';
 
 import {Hero} from '~/components/Home/Hero';
-import heroBanner from '~/assets/Home/hero-banner.png';
+import heroBanner from '~/assets/home/hero-banner.png';
 import {KnotLikeBefore} from '~/components/Home/KnotLikeBefore';
-import knotLikeBeforeImage from '~/assets/Home/knot-like-before.png';
+import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
-import nimieLogo from '~/assets/Home/nimie-logo.png';
-import clip1 from '~/assets/Home/clip-1.mp4';
-import clip2 from '~/assets/Home/clip-2.mp4';
-import clip3 from '~/assets/Home/clip-3.mp4';
-import clip4 from '~/assets/Home/clip-4.mp4';
+import nimieLogo from '~/assets/home/nimie-logo.png';
+import clip1 from '~/assets/home/clip-1.mp4';
+import clip2 from '~/assets/home/clip-2.mp4';
+import clip3 from '~/assets/home/clip-3.mp4';
+import clip4 from '~/assets/home/clip-4.mp4';
 
 /**
  * @type {Route.MetaFunction}
@@ -155,6 +155,26 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
       value
     }
 
+    colorPattern: metafield(
+      namespace: "shopify"
+      key: "color-pattern"
+    ) {
+      type
+      value
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            id
+            type
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+
     images(first: 6) {
       nodes {
         id
@@ -162,13 +182,6 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
         altText
         width
         height
-      }
-    }
-
-    options {
-      name
-      optionValues {
-        name
       }
     }
   }
@@ -188,7 +201,6 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
     }
   }
 `;
-
 
 
 /** @typedef {import('./+types/route').Route} Route */
