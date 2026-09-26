@@ -8,6 +8,9 @@ import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import { AboutCurator } from "~/components/OurStory/AboutCurator";
 
+import { OurStoryQuote } from "~/components/OurStory/OurStoryQuote";
+import ourStoryQuoteImage from "~/assets/OurStory/OurStoryQuote.png";
+
 import aboutCuratorImage from "~/assets/OurStory/AboutCurator.png";
 import aboutCuratorSignature from "~/assets/OurStory/AboutCuratorSignature.png";
 
@@ -39,6 +42,11 @@ const ABOUT_NIMIE_DATA = {
   logoMarkAlt: "Nimie",
 };
 
+const OUR_STORY_QUOTE_DATA = {
+  image: ourStoryQuoteImage,
+  quote: "Because tradition doesn't have to stay the same to stay meaningful.",
+};
+
 const ABOUT_CURATOR_DATA = {
   image: aboutCuratorImage,
   imageAlt: "Anika, founder of Nimie",
@@ -60,6 +68,8 @@ export default function PreviewOurStory() {
 
       {/* About Nimie */}
       <AboutNimie {...ABOUT_NIMIE_DATA} />
+
+      <OurStoryQuote {...OUR_STORY_QUOTE_DATA} />
 
       <AboutCurator {...ABOUT_CURATOR_DATA} />
 
