@@ -222,4 +222,4 @@ export function OurStoryQuote({ image, imageAlt = "", quote }) {
   );
 }
 
-// this is the comment for the our story quote
+// this is our story quote.
