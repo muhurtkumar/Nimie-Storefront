@@ -3,6 +3,7 @@ import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import {useLoaderData} from 'react-router';
 import {ContactMethod} from '~/components/Contact/ContactMethod.jsx';
+import FAQs from '~/components/Pdp/FAQs';
 
 export const meta = () => {
   return [{title: `Nimie | Contact`}];
@@ -17,6 +18,7 @@ export default function ContactPage() {
         reels={dummyInstagramReels}
         instagramHandle="@NIMIE.IN"
       />
+      <FAQs/>
     </>
   );
 }
