@@ -66,12 +66,13 @@ const css = `
   mark's own font-size (which itself is a clamp()), the amount
   they poke outside the text scales proportionally at every
   screen size instead of needing separate breakpoint values.
+
 */
 
 .our-story-quote__content {
   position: relative;
   z-index: 2;
-  width: 60%; /* 3/5 of the component */
+  width: 60%; /* 3/5 of the component  */
   max-width: 1100px;
   margin: 0 auto;
   color: #ffffff;
@@ -97,6 +98,7 @@ const css = `
 }
 
 /* upper-left, tucked slightly into the text block */
+
 .our-story-quote__mark--open {
   top: 0;
   left: 0;
