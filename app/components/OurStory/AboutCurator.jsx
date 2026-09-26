@@ -13,11 +13,11 @@ const css = `
   box-sizing: border-box;
   font-family: ${FONT};
 
-  max-width: 1600px;
+  max-width: 1350px;
   margin: 0 auto;
 
-  padding-block: clamp(28px, 5vw, 56px);
-  padding-inline: clamp(24px, 6vw, 100px);
+  padding-block: clamp(18px, 5vw, 56px);
+  padding-inline: clamp(20px, 5vw, 40px);
 
   display: flex;
   align-items: flex-start;
@@ -69,8 +69,8 @@ const css = `
 
 .about-curator__body p {
   margin: 0 0 1.1em;
-  font-size: clamp(15px, 1.3vw, 17px);
-  line-height: 1.65;
+  font-size: clamp(15px, 1.3vw, 15px);
+  line-height: 1.5;
   font-weight: 400;
 }
 
@@ -85,8 +85,8 @@ const css = `
 .about-curator__sign {
   margin-top: clamp(18px, 3vw, 32px);
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .about-curator__sign-image {
@@ -96,11 +96,10 @@ const css = `
 }
 
 .about-curator__sign-accent {
-  width: clamp(70px, 8vw, 100px);
+  width: clamp(64px, 8vw, 96px);
   height: auto;
-  color: #d6348f; /* swap via currentColor if you swap the swash */
-  margin-top: clamp(4px, 1vw, 10px); /* sits above the sign's baseline, not level with it */
-  transform: rotate(-4deg);
+  color: #c23b7a; /* swap via currentColor if you swap the swash */
+  transform: translateY(4px);
 }
 
 /* =========================================================
@@ -110,20 +109,6 @@ const css = `
 @media (max-width: 900px) {
   .about-curator {
     gap: clamp(20px, 4vw, 36px);
-    align-items: center; /* keep photo and text visually balanced on medium screens */
-  }
-
-  .about-curator__media {
-    flex: 0 0 45%;
-    max-width: 45%;
-  }
-
-  .about-curator__eyebrow {
-    margin-bottom: clamp(10px, 2vw, 16px);
-  }
-
-  .about-curator__body p {
-    margin-bottom: 0.9em;
   }
 }
 
@@ -131,7 +116,7 @@ const css = `
    MOBILE — stack photo above text
    ========================================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .about-curator {
     flex-direction: column;
   }
@@ -165,9 +150,9 @@ function DefaultSignatureAccent() {
       aria-hidden="true"
     >
       <path
-        d="M2 12 Q 26 2, 50 11 T 98 8"
+        d="M2 14 C 30 4, 70 4, 98 12"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeWidth="2.5"
         strokeLinecap="round"
       />
     </svg>
