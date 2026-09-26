@@ -1,30 +1,11 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
-import footerBg from '~/assets/layout/footer-bg.png';
+import footerBg from '~/assets/layout/footer-bg.mp4';
 import nimiLogo from '~/assets/layout/nimi-logo-white.png';
 
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-/**
- * FOOTER (site-wide — rendered once by PageLayout, on every route)
- * ------
- * One full-bleed background photo. Layered on top of it:
- * 1. Info card — floats near the top of the photo. STORE / SUPPORT are
- *    static links (below). Terms & Conditions is populated live from the
- *    Shopify footer menu (Suspense + Await).
- * 2. Logo mark — centered in the remaining space below the card.
- *
- * Layout notes
- * - The OVERLAY owns the height (min-height); the visual band just wraps it,
- *   and the photo is absolutely positioned behind. This way the logo area
- *   really can grow/shrink with the height (percentage heights on a parent
- *   that only has min-height don't resolve).
- * - Mobile:  2-column card (STORE | SUPPORT), Terms & Conditions full width
- *            underneath, compact logo with breathing room.
- * - 640px+:  3-column card.
- * - 1024px+: card goes near full-width, taller photo, bigger logo + space.
- */
 const css = `
 .ftr {
   width: 100%;
@@ -218,20 +199,21 @@ const FALLBACK_FOOTER_MENU = {
   ],
 };
 
-/**
- * Props (unchanged from the skeleton Footer — PageLayout keeps working
- * exactly as it already does, no changes needed there):
- * - footer               Promise<FooterQuery|null>
- * - header               HeaderQuery
- * - publicStoreDomain    string
- */
 export function Footer({footer: footerPromise, header, publicStoreDomain}) {
   return (
     <footer className="ftr">
       <style>{css}</style>
 
       <div className="ftr__visual">
-        <img className="ftr__bg" src={footerBg} alt="" aria-hidden="true" />
+        <video
+          className="ftr__bg"
+          src={footerBg}
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-hidden="true"
+        />
 
         <div className="ftr__overlay">
           <div className="ftr__info">
