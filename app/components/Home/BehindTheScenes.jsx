@@ -28,7 +28,12 @@ export function BehindTheScenes({
 
   return (
     <section
-      style={{padding: `${GAP_Y} ${GAP_X}`, margin: 0, boxSizing: 'border-box', width: '100%'}}
+      style={{
+        padding: `${GAP_Y} ${GAP_X}`,
+        margin: 0,
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
     >
       <Wrapper
         {...wrapperProps}
@@ -158,9 +163,11 @@ function VideoCarousel({sources}) {
   // browsers; nudge playback whenever the active clip changes.
   useEffect(() => {
     const el = videoRefs.current[active];
+
     if (el) {
       el.currentTime = 0;
       const playPromise = el.play();
+
       if (playPromise) playPromise.catch(() => {});
     }
   }, [active]);
@@ -174,7 +181,7 @@ function VideoCarousel({sources}) {
           src={src}
           muted
           playsInline
-          preload={Math.abs(i - active) <= 1 ? 'auto' : 'none'}
+          preload={i === active ? 'auto' : 'none'}
           onEnded={i === active ? goToNext : undefined}
           style={{
             display: 'block',
