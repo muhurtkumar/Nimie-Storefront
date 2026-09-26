@@ -1,6 +1,5 @@
 import React from "react";
 
-// Same font stack used by the rest of the site
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -96,7 +95,7 @@ const css = `
 }
 
 /* =========================================================
-   TABLET + DESKTOP
+   TABLET + DESKTOP.
    ========================================================= */
 
 @media (min-width: 768px) {
