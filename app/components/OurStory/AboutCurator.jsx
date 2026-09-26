@@ -13,14 +13,14 @@ const css = `
   box-sizing: border-box;
   font-family: ${FONT};
 
-  max-width: 1350px;
+  max-width: 1700px;
   margin: 0 auto;
 
-  padding-block: clamp(18px, 5vw, 56px);
+  padding-block: clamp(10px, 5vw, 56px);
   padding-inline: clamp(20px, 5vw, 40px);
 
   display: flex;
-  align-items: flex-start;
+  align-items: stretch; /* row height = tallest item; media stretches to match */
   gap: clamp(28px, 5vw, 64px);
 }
 
@@ -29,20 +29,21 @@ const css = `
    ========================================================= */
 
 .about-curator__media {
-  flex: 0 0 42%;
-  max-width: 42%;
+  flex: 0 0 46%;
+  max-width: 62%;
+  overflow: hidden;
+
+  border: 6px solid #f4ecd8;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .about-curator__image {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 5;
+  height: 100%; /* fills whatever height the text column establishes */
   object-fit: cover;
-
-  border: 6px solid #f4ecd8;
-  border-radius: 4px;
-  box-sizing: border-box;
+  object-position: center;
 }
 
 /* =========================================================
@@ -50,14 +51,22 @@ const css = `
    ========================================================= */
 
 .about-curator__content {
-  flex: 1 1 0%;
+  flex: 1 1 50%;
   min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  /* this padding IS the "little after top / little above bottom"
+     inset now, since the image height always matches this box */
+  padding-top: clamp(18px, 2.6vw, 54px);
+  padding-bottom: clamp(14px, 2.6vw, 34px);
 }
 
 .about-curator__eyebrow {
   margin: 0 0 clamp(12px, 2vw, 20px);
   color: #3f6b3f;
-  font-size: clamp(11px, 1vw, 13px);
+  font-size: clamp(15px, 1vw, 13px);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -69,7 +78,7 @@ const css = `
 
 .about-curator__body p {
   margin: 0 0 1.1em;
-  font-size: clamp(15px, 1.3vw, 15px);
+  font-size: clamp(15px, 1.3vw, 25px);
   line-height: 1.5;
   font-weight: 400;
 }
@@ -98,7 +107,7 @@ const css = `
 .about-curator__sign-accent {
   width: clamp(64px, 8vw, 96px);
   height: auto;
-  color: #c23b7a; /* swap via currentColor if you swap the swash */
+  color: #c23b7a;
   transform: translateY(4px);
 }
 
@@ -106,19 +115,26 @@ const css = `
    TABLET
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .about-curator {
     gap: clamp(20px, 4vw, 36px);
+  }
+
+  .about-curator__body p {
+    font-size: 15px;
+    line-height: 1.45;
+    margin-bottom: 0.9em;
   }
 }
 
 /* =========================================================
-   MOBILE — stack photo above text
+   MOBILE — stack photo above text, fixed image ratio
    ========================================================= */
 
 @media (max-width: 800px) {
   .about-curator {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .about-curator__media {
@@ -128,16 +144,38 @@ const css = `
   }
 
   .about-curator__image {
-    aspect-ratio: 4 / 3;
+    height: auto;
+    aspect-ratio: 4 / 3; /* fixed again since there's no row to match */
+  }
+
+  .about-curator__content {
+    padding-top: clamp(14px, 4vw, 20px);
+    padding-bottom: 0;
+  }
+
+  .about-curator__eyebrow {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+
+  .about-curator__body p {
+    font-size: 11px;
+    line-height: 1.45;
+    margin-bottom: 0.9em;
+  }
+
+  .about-curator__sign-image {
+    height: 36px;
+  }
+
+  .about-curator__sign-accent {
+    width: 56px;
   }
 }
 `;
 
 /* =========================================================
    DECORATIVE SIGNATURE SWASH
-   (inline SVG so you don't need an extra image asset;
-   pass a custom `signatureAccent` image instead if you'd
-   rather use a designed one)
    ========================================================= */
 
 function DefaultSignatureAccent() {
@@ -170,7 +208,7 @@ export function AboutCurator({
   paragraphs = [],
   signature,
   signatureAlt = "Signature",
-  signatureAccent, // optional custom image, else default squiggle
+  signatureAccent,
 }) {
   return (
     <section className="about-curator" aria-label="About the curator">
