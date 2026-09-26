@@ -23,7 +23,7 @@ export const meta = () => {
 };
 
 /* =========================================================
-   OUR STORY HERO DATA   
+   OUR STORY HERO DATA
    ========================================================= */
 
 const OUR_STORY_HERO_DATA = {
