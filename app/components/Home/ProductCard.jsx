@@ -3,21 +3,6 @@ import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import {Heart, ShoppingCart} from 'lucide-react';
 
-const colorMap = {
-  green: '#8fa33f',
-  blue: '#4f9da6',
-  cream: '#d9d5a5',
-  beige: '#d8c99a',
-  white: '#e8e4d0',
-  black: '#252b22',
-  brown: '#756044',
-  pink: '#d7a5a5',
-};
-
-function getColor(value) {
-  return colorMap[value.toLowerCase()] || '#c8c8b0';
-}
-
 function formatPrice(amount, currencyCode) {
   if (!amount) {
     return '';
@@ -40,11 +25,32 @@ export function ProductCard({product, index}) {
 
   const images = product.images?.nodes ?? [];
 
-  const colorOption = product.options?.find(
-    (option) => option.name.toLowerCase() === 'color',
-  );
+  const colors =
+    product.colorPattern?.references?.nodes
+      ?.slice(0, 3)
+      .map((color) => {
+        const labelField = color.fields?.find(
+          (field) => field.key === 'label',
+        );
 
-  const colors = colorOption?.optionValues?.slice(0, 3) || [];
+        const colorField = color.fields?.find(
+          (field) => field.key === 'color',
+        );
+
+        const imageField = color.fields?.find(
+          (field) => field.key === 'image',
+        );
+
+        return {
+          id: color.id,
+          name:
+            labelField?.value ||
+            color.displayName ||
+            'Color',
+          color: colorField?.value || null,
+          image: imageField?.value || null,
+        };
+      }) || [];
 
   const badge = product.tags?.[0];
 
@@ -136,20 +142,20 @@ export function ProductCard({product, index}) {
       <div className="relative aspect-[4/4.5] overflow-hidden bg-stone-200">
         {sliderImages.length > 0 ? (
           <div
-            className={`absolute inset-0 h-full w-full ${
+            className={`absolute inset-0 flex h-full w-full ${
               disableTransition
                 ? ''
                 : 'transition-transform duration-700 ease-in-out'
             }`}
             style={{
-              transform: `translateY(-${activeImageIndex * 100}%)`,
+              transform: `translateX(-${activeImageIndex * 100}%)`,
             }}
             onTransitionEnd={handleTransitionEnd}
           >
             {sliderImages.map((image, imageIndex) => (
               <div
                 key={`${image.id}-${imageIndex}`}
-                className="h-full w-full"
+                className="h-full min-w-full"
               >
                 <Image
                   data={image}
@@ -171,7 +177,7 @@ export function ProductCard({product, index}) {
 
         {/* Product tag */}
         {badge && (
-          <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-2 text-[16px] font-semibold uppercase text-[#FFDF9E]">
+          <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
             {badge}
           </div>
         )}
@@ -184,15 +190,24 @@ export function ProductCard({product, index}) {
 
         {/* Bottom controls */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             {colors.map((color) => (
               <span
-                key={color.name}
+                key={color.id}
                 title={color.name}
-                className="h-5 w-5 rounded border border-white/70"
-                style={{
-                  backgroundColor: getColor(color.name),
-                }}
+                className="h-6 w-6 overflow-hidden rounded border border-white/70"
+                style={
+                  color.image
+                    ? {
+                        backgroundImage: `url(${color.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : {
+                        backgroundColor:
+                          color.color || '#c8c8b0',
+                      }
+                }
               />
             ))}
           </div>
@@ -202,7 +217,10 @@ export function ProductCard({product, index}) {
             aria-label={`View ${product.title}`}
             className="flex h-7 w-7 items-center justify-center rounded bg-white text-xs shadow-sm"
           >
-            <ShoppingCart className="h-4 w-4 text-[#345225]" strokeWidth={2} />
+            <ShoppingCart
+              className="h-4 w-4 text-[#345225]"
+              strokeWidth={2}
+            />
           </button>
         </div>
       </div>

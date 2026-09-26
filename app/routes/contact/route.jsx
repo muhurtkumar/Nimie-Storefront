@@ -1,4 +1,4 @@
-import heroBanner from '~/assets/Home/hero-banner.png';
+import heroBanner from '~/assets/home/hero-banner.png';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import {useLoaderData} from 'react-router';

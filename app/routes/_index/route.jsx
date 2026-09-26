@@ -102,7 +102,7 @@ export default function Homepage() {
         imageAlt="Nimie new collection"
         eyebrow="Meet Lucknow chikankari, the Nimie way."
         heading="The classics got a makeover."
-        cta={{label: 'JOIN THE WAITLIST', to: '#waitlist'}}
+        cta={{label: 'SHOP NOW', to: '/collections/all'}}
       />
 
       <ProductShowcase products={data.showcaseProducts} />
@@ -155,6 +155,26 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
       value
     }
 
+    colorPattern: metafield(
+      namespace: "shopify"
+      key: "color-pattern"
+    ) {
+      type
+      value
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            id
+            type
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+
     images(first: 6) {
       nodes {
         id
@@ -162,13 +182,6 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
         altText
         width
         height
-      }
-    }
-
-    options {
-      name
-      optionValues {
-        name
       }
     }
   }
@@ -188,7 +201,6 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
     }
   }
 `;
-
 
 
 /** @typedef {import('./+types/route').Route} Route */

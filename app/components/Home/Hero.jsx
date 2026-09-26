@@ -1,7 +1,9 @@
+import { ScalarLeafsRule } from 'graphql';
 import {useState} from 'react';
 import {Link} from 'react-router';
 
-const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT =
+  "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the hero card. Keep in sync with Header.jsx
 const GAP_Y = '16px'; // top and bottom
 const GAP_X = '0px'; // left and right
@@ -9,10 +11,16 @@ const GAP_X = '0px'; // left and right
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 
 export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
-  const [hover, setHover] = useState(false);
-
   return (
-    <section className="hero" style={{padding: `${GAP_Y} ${GAP_X}`, margin: 0, boxSizing: 'border-box', width: '100%'}}>
+    <section
+      className="hero"
+      style={{
+        padding: `${GAP_Y} ${GAP_X}`,
+        margin: 0,
+        boxSizing: 'border-box',
+        width: '100%',
+      }}
+    >
       <div
         className="relative w-full overflow-hidden"
         style={{borderRadius: 16}}
@@ -46,64 +54,65 @@ export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
           }}
         />
 
-        {/* Bottom-left content */}
+        {/* Bottom content row: text bottom-left, CTA bottom-right */}
         <div
-          className="absolute inset-x-0 bottom-0 z-10"
+          className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4"
           style={{padding: `0 ${INSET} ${INSET}`, fontFamily: FONT}}
         >
-          {eyebrow && (
-            <p
+          <div style={{minWidth: 0}}>
+            {eyebrow && (
+              <p
+                style={{
+                  margin: '0 0 12px',
+                  maxWidth: 320,
+                  fontFamily: FONT,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  lineHeight: 1.4,
+                  color: '#fff',
+                }}
+              >
+                {eyebrow}
+              </p>
+            )}
+
+            <h1
               style={{
-                margin: '0 0 12px',
-                maxWidth: 320,
+                margin: 0,
+                maxWidth: 594,
                 fontFamily: FONT,
-                fontSize: 14,
-                fontWeight: 700,
-                lineHeight: 1.4,
+                fontSize: 'clamp(36px, 4.5vw, 64px)',
+                fontWeight: 400,
+                lineHeight: 1.22,
+                letterSpacing: 0,
                 color: '#fff',
               }}
             >
-              {eyebrow}
-            </p>
-          )}
-
-          <h1
-            style={{
-              margin: 0,
-              maxWidth: 594,
-              fontFamily: FONT,
-              fontSize: 'clamp(36px, 4.5vw, 64px)',
-              fontWeight: 400,
-              lineHeight: 1.22,
-              letterSpacing: 0,
-              color: '#fff',
-            }}
-          >
-            {heading}
-          </h1>
+              {heading}
+            </h1>
+          </div>
 
           {cta && (
             <Link
               to={cta.to}
-              onMouseEnter={() => setHover(true)}
-              onMouseLeave={() => setHover(false)}
               style={{
-                marginTop: 20,
+                flex: '0 0 auto',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                height: 32,
+                height: 44,
                 padding: '0 32px',
-                border: '1px solid #fff',
-                borderRadius: 9999,
+                borderRadius: 12,
                 fontFamily: FONT,
-                fontSize: 12,
-                fontWeight: 400,
+                fontSize: 13,
+                fontWeight: 500,
                 textTransform: 'uppercase',
                 textDecoration: 'none',
-                color: hover ? '#000' : '#fff',
-                background: hover ? '#fff' : 'transparent',
-                transition: 'background 0.2s, color 0.2s',
+                whiteSpace: 'nowrap',
+                color: '#000',
+                background: '#fff',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
               }}
             >
               {cta.label}

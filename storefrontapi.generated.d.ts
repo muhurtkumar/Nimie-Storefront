@@ -390,16 +390,22 @@ export type ProductShowcaseItemFragment = Pick<
   discountPercentage?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Metafield, 'value'>
   >;
+  colorPattern?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          Pick<StorefrontAPI.Metaobject, 'id' | 'type'> & {
+            fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>;
+          }
+        >;
+      }>;
+    }
+  >;
   images: {
     nodes: Array<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
     >;
   };
-  options: Array<
-    Pick<StorefrontAPI.ProductOption, 'name'> & {
-      optionValues: Array<Pick<StorefrontAPI.ProductOptionValue, 'name'>>;
-    }
-  >;
 };
 
 export type ProductShowcaseQueryVariables = StorefrontAPI.Exact<{
@@ -429,6 +435,19 @@ export type ProductShowcaseQuery = {
         discountPercentage?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Metafield, 'value'>
         >;
+        colorPattern?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+            references?: StorefrontAPI.Maybe<{
+              nodes: Array<
+                Pick<StorefrontAPI.Metaobject, 'id' | 'type'> & {
+                  fields: Array<
+                    Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>
+                  >;
+                }
+              >;
+            }>;
+          }
+        >;
         images: {
           nodes: Array<
             Pick<
@@ -437,11 +456,6 @@ export type ProductShowcaseQuery = {
             >
           >;
         };
-        options: Array<
-          Pick<StorefrontAPI.ProductOption, 'name'> & {
-            optionValues: Array<Pick<StorefrontAPI.ProductOptionValue, 'name'>>;
-          }
-        >;
       }
     >;
   };
@@ -1279,7 +1293,7 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
-  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n\n    discountPercentage: metafield(\n      namespace: "custom"\n      key: "discountpercentage"\n    ) {\n      value\n    }\n\n    images(first: 6) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment ProductShowcaseItem on Product {\n    id\n    title\n    handle\n    productType\n    tags\n\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n\n    discountPercentage: metafield(\n      namespace: "custom"\n      key: "discountpercentage"\n    ) {\n      value\n    }\n\n    colorPattern: metafield(\n      namespace: "shopify"\n      key: "color-pattern"\n    ) {\n      type\n      value\n      references(first: 10) {\n        nodes {\n          ... on Metaobject {\n            id\n            type\n            fields {\n              key\n              value\n            }\n          }\n        }\n      }\n    }\n\n    images(first: 6) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query ProductShowcase(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(\n      first: 5\n      sortKey: CREATED_AT\n      reverse: true\n    ) {\n      nodes {\n        ...ProductShowcaseItem\n      }\n    }\n  }\n': {
     return: ProductShowcaseQuery;
     variables: ProductShowcaseQueryVariables;
   };
