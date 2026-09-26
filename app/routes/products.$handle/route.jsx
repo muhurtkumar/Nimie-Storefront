@@ -7,7 +7,7 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductDetails} from '~/components/pdp/ProductDetails';
+import {ProductDetails} from '~/components/Pdp/ProductDetails';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 /**
