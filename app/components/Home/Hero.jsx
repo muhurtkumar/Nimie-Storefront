@@ -1,4 +1,3 @@
-import { ScalarLeafsRule } from 'graphql';
 import {useState} from 'react';
 import {Link} from 'react-router';
 
@@ -54,9 +53,10 @@ export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
           }}
         />
 
-        {/* Bottom content row: text bottom-left, CTA bottom-right */}
+        {/* Mobile: text then CTA stacked, own rows so the heading gets full width.
+            md+: text bottom-left, CTA bottom-right, on one row. */}
         <div
-          className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4"
+          className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between"
           style={{padding: `0 ${INSET} ${INSET}`, fontFamily: FONT}}
         >
           <div style={{minWidth: 0}}>

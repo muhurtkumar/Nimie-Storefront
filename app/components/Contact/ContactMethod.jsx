@@ -35,7 +35,7 @@ export function ContactMethod({image, imageAlt = '', items = DEFAULT_ITEMS}) {
           <img
             src={image}
             alt={imageAlt}
-            style={{display: 'block', width: '100%', height: 'auto', minHeight: 260, objectFit: 'cover'}}
+            style={{display: 'block', width: '100%', height: 'auto', minHeight: 580, objectFit: 'cover'}}
           />
         ) : (
           <div className="bg-stone-300" style={{width: '100%', height: 260}} />
