@@ -36,8 +36,6 @@ const STATIC_PRODUCT_INFO = {
 
   reviews: 5,
 
-  discountPercentage: 40,
-
   fabricDetails:
     'Pure cotton-linen fabric with traditional Lucknow Chikankari embroidery. Designed with an oversized silhouette for a relaxed fit.',
 
@@ -280,12 +278,43 @@ export function ProductDetails({
   /* Shopify price data */
   const price = selectedVariant?.price;
 
-  const compareAtPrice =
-    selectedVariant?.compareAtPrice;
+  /*
+   * Discount percentage from Shopify.
+   *
+   * Product metafield:
+   * custom.discountpercentage
+   */
+  const discountPercentage = Math.min(
+    Math.max(
+      Number(product.discountPercentage?.value || 0),
+      0,
+    ),
+    100,
+  );
 
-  /* Static discount for now. */
-  const discountPercentage =
-    STATIC_PRODUCT_INFO.discountPercentage;
+  /*
+   * Original Shopify variant price.
+   */
+  const originalPriceAmount = Number(
+    price?.amount || 0,
+  );
+
+  /*
+   * Calculate discounted selling price.
+   *
+   * Example:
+   * ₹2499 with 40% discount
+   * = ₹1499.4
+   * = ₹1499 after rounding
+   */
+  const discountedPriceAmount =
+    originalPriceAmount > 0 &&
+    discountPercentage > 0
+      ? Math.round(
+          originalPriceAmount *
+            (1 - discountPercentage / 100),
+        )
+      : originalPriceAmount;
 
   /* Quantity controls */
   const increaseQuantity = () => {
@@ -334,7 +363,7 @@ export function ProductDetails({
   return (
     <main className="min-h-screen bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
 
           {/* =====================================================
               LEFT SIDE
@@ -343,9 +372,8 @@ export function ProductDetails({
           <div className="flex min-w-0 gap-4">
 
             {/* Desktop thumbnails */}
-            <div className="relative hidden w-[72px] shrink-0 sm:block">
-              <div className="flex max-h-[calc(100vh-32px)] flex-col gap-2 overflow-hidden">
-
+            <div className="relative hidden w-[92px] shrink-0 self-stretch sm:flex">
+              <div className="flex h-full w-full flex-col gap-2 overflow-y-auto overflow-x-hidden">
                 {galleryImages.map((image, index) => (
                   <button
                     key={`${image.id}-${index}`}
@@ -353,11 +381,15 @@ export function ProductDetails({
                     onClick={() =>
                       setSelectedImage(index)
                     }
-                    className={`relative h-[96px] w-[72px] shrink-0 overflow-hidden rounded-md transition ${
+                    className={`relative w-[72px] shrink-0 overflow-hidden rounded-md transition ${
                       selectedImage === index
                         ? 'ring-2 ring-[#345225]'
                         : ''
                     }`}
+                    style={{
+                      height:
+                        'calc((100% - 24px) / 4)',
+                    }}
                   >
                     <img
                       src={image.url}
@@ -369,7 +401,6 @@ export function ProductDetails({
                     />
                   </button>
                 ))}
-
               </div>
             </div>
 
@@ -402,7 +433,7 @@ export function ProductDetails({
 
             {/* Main image */}
             <div className="relative min-w-0 flex-1">
-              <div className="aspect-[4/4.5] w-full overflow-hidden rounded-xl bg-[#e8e0c8]">
+              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8]">
 
                 {galleryImages.length > 0 ? (
                   <img
@@ -453,79 +484,84 @@ export function ProductDetails({
               RIGHT SIDE
           ====================================================== */}
 
-          <div className="flex flex-col pt-1 lg:pt-2">
+          <div className="flex h-full min-h-0 flex-col pt-1 lg:pt-2">
 
             {/* Rating - STATIC */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-0.5">
-                {Array.from({length: 5}).map(
-                  (_, index) => (
-                    <Star
-                      key={index}
-                      className="h-[15px] w-[15px] fill-[#f5b51b] text-[#f5b51b]"
-                      strokeWidth={1}
-                    />
-                  ),
-                )}
-              </div>
+            <div className="!m-0 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-0.5">
+                        {Array.from({length: 5}).map(
+                            (_, index) => (
+                            <Star
+                                key={index}
+                                className="h-[18px] w-[18px] fill-[#f5b51b] text-[#f5b51b]"
+                                strokeWidth={1}
+                            />
+                            ),
+                        )}
+                    </div>
 
-              <span className="text-[11px] font-semibold text-[#345225]">
-                {STATIC_PRODUCT_INFO.rating}/5
-              </span>
+                    <span className="text-[14px] font-semibold text-[#345225]">
+                        {STATIC_PRODUCT_INFO.rating}/5
+                    </span>
+                </div>
+
+                <button
+                    type="button"
+                    aria-label="Add to wishlist"
+                    className="!m-0 shrink-0"
+                >
+                    <Heart
+                    className="h-6 w-6 text-[#345225]"
+                    strokeWidth={1.5}
+                    />
+                </button>
             </div>
 
-            {/* Product title */}
             <div className="mt-3 flex items-start justify-between gap-4">
-              <div>
-                <h1 className="text-[25px] font-bold leading-[1.1] text-[#ad3d9f] sm:text-[29px] lg:text-[30px]">
+              <div className="!m-0">
+                <h1 className="!m-0 text-[25px] font-bold leading-[0.95] text-[#ad3d9f] sm:text-[29px] lg:text-[30px]">
                   {product.title}
                 </h1>
 
-                {/* STATIC product type */}
-                <p className="mt-1 text-[16px] text-stone-600">
+                <p className="!mt-1 !mb-0 text-[16px] leading-none text-stone-600">
                   {STATIC_PRODUCT_INFO.type}
                 </p>
               </div>
-
-              <button
-                type="button"
-                aria-label="Add to wishlist"
-                className="mt-1 shrink-0"
-              >
-                <Heart
-                  className="h-6 w-6 text-[#345225]"
-                  strokeWidth={1.5}
-                />
-              </button>
             </div>
 
-            {/* Price - SHOPIFY */}
+            {/* Price - CALCULATED FROM SHOPIFY PRICE + DISCOUNT */}
             <div className="mt-2 flex flex-wrap items-center gap-2.5">
+              {/* Discounted / Selling Price */}
               <span className="text-[25px] font-bold leading-none text-black">
                 {formatPrice(
-                  price?.amount,
+                  discountedPriceAmount,
                   price?.currencyCode,
                 )}
               </span>
 
-              {compareAtPrice?.amount && (
-                <span className="text-[18px] text-[#e98b8b] line-through">
-                  {formatPrice(
-                    compareAtPrice.amount,
-                    compareAtPrice.currencyCode,
-                  )}
+              {/* Original Price */}
+              {discountPercentage > 0 &&
+                originalPriceAmount > discountedPriceAmount && (
+                  <span className="text-[18px] text-[#e98b8b] line-through">
+                    {formatPrice(
+                      originalPriceAmount,
+                      price?.currencyCode,
+                    )}
+                  </span>
+                )}
+
+              {/* Discount */}
+              {discountPercentage > 0 && (
+                <span className="rounded-full bg-[#345225] px-3 py-1 text-[11px] font-medium text-[#ffdf9e]">
+                  {discountPercentage}% OFF
                 </span>
               )}
-
-              {/* STATIC discount */}
-              <span className="rounded-full bg-[#345225] px-3 py-1 text-[11px] font-medium text-[#ffdf9e]">
-                {discountPercentage}% OFF
-              </span>
             </div>
 
             {/* Description - SHOPIFY */}
             <div
-              className="mt-3 max-w-[650px] text-[11px] leading-[1.55] text-stone-500"
+              className="mt-3 max-h-[71px] max-w-[650px] overflow-y-auto pr-2 text-[11px] leading-[1.55] text-stone-500"
               dangerouslySetInnerHTML={{
                 __html:
                   product.descriptionHtml ||
@@ -546,7 +582,7 @@ export function ProductDetails({
                   Select Colors
                 </p>
 
-                <div className="flex items-center gap-2.5">
+                <div className="mt-1 flex items-center gap-2.5">
 
                   {colors.map((color) => {
                     const isSelected =
@@ -645,7 +681,7 @@ export function ProductDetails({
             ================================================== */}
 
             {sizes.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-2">
 
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[12px] text-stone-600">
@@ -655,9 +691,9 @@ export function ProductDetails({
                   {/* STATIC */}
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-[10px] uppercase text-stone-600"
+                    className="flex items-center gap-1 text-[12px] uppercase text-stone-600"
                   >
-                    <Ruler className="h-3 w-3" />
+                    <Ruler className="h-4 w-4" />
                     Size Guide
                   </button>
                 </div>
@@ -762,7 +798,6 @@ export function ProductDetails({
               >
                 Add to Cart
               </button>
-
             </div>
 
             {/* =================================================

@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+
 import {
   getSelectedProductOptions,
   Analytics,
@@ -7,7 +8,9 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
+
 import {ProductDetails} from '~/components/Pdp/ProductDetails';
+
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 /**
@@ -78,7 +81,7 @@ async function loadCriticalData({context, params, request}) {
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
  * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
+ *
  * @param {Route.LoaderArgs} args
  */
 function loadDeferredData({context, params}) {
@@ -224,6 +227,13 @@ const PRODUCT_FRAGMENT = `#graphql
           }
         }
       }
+    }
+
+    discountPercentage: metafield(
+      namespace: "custom"
+      key: "discountpercentage"
+    ) {
+      value
     }
 
     colorPattern: metafield(

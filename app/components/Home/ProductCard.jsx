@@ -162,6 +162,10 @@ export function ProductCard({product, index}) {
       ? selectedColorGallery.images
       : images;
 
+  const selectedColorName = colors.find(
+    (color) => color.id === selectedColorId,
+  )?.name;
+
   const badge = product.tags?.[0];
 
   const currentPrice = product.priceRange?.minVariantPrice;
@@ -244,7 +248,13 @@ export function ProductCard({product, index}) {
 
   return (
     <Link
-      to={`/products/${product.handle}`}
+      to={
+        selectedColorName
+          ? `/products/${product.handle}?Size=XS&Color=${encodeURIComponent(
+              selectedColorName,
+            )}`
+          : `/products/${product.handle}?Size=XS`
+      }
       className="group block overflow-hidden rounded-lg bg-[#f8f1df]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
