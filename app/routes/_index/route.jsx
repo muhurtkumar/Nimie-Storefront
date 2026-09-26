@@ -161,14 +161,71 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
     ) {
       type
       value
+
       references(first: 10) {
         nodes {
           ... on Metaobject {
             id
             type
+
             fields {
               key
               value
+            }
+          }
+        }
+      }
+    }
+
+    colorGalleries: metafield(
+      namespace: "custom"
+      key: "color_galleries"
+    ) {
+      type
+      value
+
+      references(first: 20) {
+        nodes {
+          __typename
+
+          ... on Metaobject {
+            id
+            type
+
+            fields {
+              key
+              type
+              value
+
+              reference {
+                __typename
+
+                ... on Metaobject {
+                  id
+                  type
+                }
+              }
+
+              references(first: 20) {
+                nodes {
+                  __typename
+
+                  ... on MediaImage {
+                    id
+                    image {
+                      url
+                      altText
+                      width
+                      height
+                    }
+                  }
+
+                  ... on GenericFile {
+                    id
+                    url
+                  }
+                }
+              }
             }
           }
         }

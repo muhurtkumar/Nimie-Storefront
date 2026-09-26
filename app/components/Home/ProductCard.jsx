@@ -23,6 +23,20 @@ export function ProductCard({product, index}) {
   const [isHovered, setIsHovered] = useState(false);
   const [disableTransition, setDisableTransition] = useState(false);
 
+  /*
+   * Get the first color gallery's color ID directly from
+   * the product data so it can be selected on the very
+   * first render.
+   */
+  const firstColorGalleryColorId =
+    product.colorGalleries?.references?.nodes?.[0]?.fields?.find(
+      (field) => field.key === 'color',
+    )?.reference?.id || null;
+
+  const [selectedColorId, setSelectedColorId] = useState(
+    firstColorGalleryColorId,
+  );
+
   const images = product.images?.nodes ?? [];
 
   const colors =
@@ -43,14 +57,110 @@ export function ProductCard({product, index}) {
 
         return {
           id: color.id,
-          name:
-            labelField?.value ||
-            color.displayName ||
-            'Color',
+          name: labelField?.value || 'Color',
           color: colorField?.value || null,
           image: imageField?.value || null,
         };
       }) || [];
+
+  /*
+   * Color Galleries
+   *
+   * Each Color Gallery contains:
+   * - color -> reference to Shopify Color
+   * - images -> list of Shopify images
+   */
+  const colorGalleries =
+    product.colorGalleries?.references?.nodes
+      ?.map((gallery) => {
+        const colorField = gallery.fields?.find(
+          (field) => field.key === 'color',
+        );
+
+        const imagesField = gallery.fields?.find(
+          (field) => field.key === 'images',
+        );
+
+        /*
+         * Get the Color metaobject ID referenced by
+         * the Color Gallery.
+         */
+        const colorId = colorField?.reference?.id || null;
+
+        /*
+         * Get all images referenced by this Color Gallery.
+         */
+        const galleryImages =
+          imagesField?.references?.nodes
+            ?.map((image) => {
+              /*
+               * Shopify Image (File) fields normally return
+               * MediaImage references.
+               */
+              if (
+                image?.__typename === 'MediaImage' &&
+                image?.image
+              ) {
+                return {
+                  id: image.id,
+                  url: image.image.url,
+                  altText: image.image.altText,
+                  width: image.image.width,
+                  height: image.image.height,
+                };
+              }
+
+              /*
+               * Fallback for GenericFile references.
+               */
+              if (
+                image?.__typename === 'GenericFile' &&
+                image?.url
+              ) {
+                return {
+                  id: image.id,
+                  url: image.url,
+                  altText: '',
+                  width: undefined,
+                  height: undefined,
+                };
+              }
+
+              return null;
+            })
+            .filter(Boolean) || [];
+
+        return {
+          id: gallery.id,
+          colorId,
+          images: galleryImages,
+        };
+      })
+      .filter(
+        (gallery) =>
+          gallery.colorId && gallery.images.length > 0,
+      ) || [];
+
+  /*
+   * Find the Color Gallery belonging to the selected color.
+   */
+  const selectedColorGallery = colorGalleries.find(
+    (gallery) => gallery.colorId === selectedColorId,
+  );
+
+  /*
+   * Use the selected color's gallery images.
+   *
+   * If no color has been selected, use the normal product
+   * media exactly as before.
+   *
+   * If the selected color does not have a gallery, also
+   * fall back to the normal product media.
+   */
+  const activeImages =
+    selectedColorGallery?.images?.length > 0
+      ? selectedColorGallery.images
+      : images;
 
   const badge = product.tags?.[0];
 
@@ -80,7 +190,7 @@ export function ProductCard({product, index}) {
    * Automatically move to the next image while hovering.
    */
   useEffect(() => {
-    if (!isHovered || images.length <= 1) {
+    if (!isHovered || activeImages.length <= 1) {
       return;
     }
 
@@ -89,7 +199,7 @@ export function ProductCard({product, index}) {
     }, 1200);
 
     return () => clearInterval(interval);
-  }, [isHovered, images.length]);
+  }, [isHovered, activeImages.length]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -104,12 +214,12 @@ export function ProductCard({product, index}) {
   /*
    * When we reach the duplicated first image,
    * instantly reset to the real first image.
-   *
-   * Visually there is no jump because both images
-   * are exactly the same.
    */
   const handleTransitionEnd = () => {
-    if (images.length > 1 && activeImageIndex === images.length) {
+    if (
+      activeImages.length > 1 &&
+      activeImageIndex === activeImages.length
+    ) {
       setDisableTransition(true);
       setActiveImageIndex(0);
 
@@ -128,9 +238,9 @@ export function ProductCard({product, index}) {
    * [1, 2, 3, 4, 1, 2, 3, 4]
    */
   const sliderImages =
-    images.length > 1
-      ? [...images, ...images]
-      : images;
+    activeImages.length > 1
+      ? [...activeImages, ...activeImages]
+      : activeImages;
 
   return (
     <Link
@@ -192,10 +302,27 @@ export function ProductCard({product, index}) {
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
           <div className="flex gap-2">
             {colors.map((color) => (
-              <span
+              <button
                 key={color.id}
+                type="button"
                 title={color.name}
-                className="h-6 w-6 overflow-hidden rounded border border-white/70"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+
+                  setSelectedColorId(color.id);
+                  setActiveImageIndex(0);
+                  setDisableTransition(true);
+
+                  requestAnimationFrame(() => {
+                    setDisableTransition(false);
+                  });
+                }}
+                className={`h-6 w-6 overflow-hidden rounded border ${
+                  selectedColorId === color.id
+                    ? 'border-2 border-[#345225]'
+                    : 'border-white/70'
+                }`}
                 style={
                   color.image
                     ? {
