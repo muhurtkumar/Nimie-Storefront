@@ -221,3 +221,5 @@ export function OurStoryQuote({ image, imageAlt = "", quote }) {
     </section>
   );
 }
+
+// this is the comment for the our story quote
