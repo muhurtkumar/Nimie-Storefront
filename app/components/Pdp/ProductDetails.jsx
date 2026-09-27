@@ -8,6 +8,7 @@ import {
   Ruler,
   Star,
   Heart,
+  X,
 } from 'lucide-react';
 
 function formatPrice(amount, currencyCode = 'INR') {
@@ -63,6 +64,10 @@ export function ProductDetails({
 
   const [openSection, setOpenSection] = useState(null);
 
+  /* Size Guide */
+  const [openSizeGuide, setOpenSizeGuide] =
+    useState(false);
+
   const navigate = useNavigate();
 
   /* Shopify product images */
@@ -117,8 +122,8 @@ export function ProductDetails({
   const isColorSoldOut =
     selectedColorVariants.length > 0 &&
     selectedColorVariants.every(
-    (variant) => (variant.quantityAvailable ?? 0) <= 0,
-  );
+      (variant) => (variant.quantityAvailable ?? 0) <= 0,
+    );
 
   const colorPatternColors =
     product.colorPattern?.references?.nodes
@@ -143,13 +148,6 @@ export function ProductDetails({
         };
       }) || [];
 
-  /*
-   * Color galleries
-   *
-   * Each Color Gallery contains:
-   * - color -> reference to Shopify Color metaobject
-   * - images -> list of Shopify images
-   */
   const colorGalleries =
     product.colorGalleries?.references?.nodes
       ?.map((gallery) => {
@@ -224,13 +222,65 @@ export function ProductDetails({
           gallery.images.length > 0,
       ) || [];
 
-  /*
-   * Set initial color from selected variant.
-   *
-   * The selected variant provides the Shopify color name.
-   * We then find the matching Color metaobject so that
-   * selectedColorId points to the Color Gallery correctly.
-   */
+ const sizeGuideRows =
+  product.sizeGuide?.references?.nodes
+    ?.map((sizeGuideEntry) => {
+      const sizeField = sizeGuideEntry.fields?.find(
+        (field) => field.key === 'size',
+      );
+
+      const measurementsField =
+        sizeGuideEntry.fields?.find(
+          (field) => field.key === 'measurements',
+        );
+
+      let measurementValues = [];
+
+      try {
+        measurementValues = JSON.parse(
+          measurementsField?.value || '[]',
+        );
+      } catch {
+        measurementValues = [];
+      }
+
+      const measurements = measurementValues
+        .map((measurement) => {
+          const [name, ...valueParts] =
+            measurement.split(':');
+
+          return {
+            name: name?.trim() || '',
+            value: valueParts.join(':').trim() || '',
+          };
+        })
+        .filter(
+          (measurement) =>
+            measurement.name &&
+            measurement.value,
+        );
+
+      return {
+        size: sizeField?.value?.trim() || '',
+        measurements,
+      };
+    })
+    .filter(
+      (entry) =>
+        entry.size &&
+        entry.measurements.length > 0,
+    ) || [];
+
+  const sizeGuideColumns = Array.from(
+    new Set(
+      sizeGuideRows.flatMap((row) =>
+        row.measurements.map(
+          (measurement) => measurement.name,
+        ),
+      ),
+    ),
+  );
+
   useEffect(() => {
     if (!selectedVariant?.selectedOptions) {
       return;
@@ -259,9 +309,7 @@ export function ProductDetails({
     }
   }, [selectedVariant, colorPatternColors]);
 
-  /*
-   * Set initial size from selected variant.
-   */
+  /* Set initial size from selected variant. */
   useEffect(() => {
     if (!selectedVariant?.selectedOptions) {
       return;
@@ -277,13 +325,23 @@ export function ProductDetails({
     }
   }, [selectedVariant]);
 
-  /*
-   * Find the Color Gallery belonging to
-   * the selected color.
-   */
+  /* Find the Color Gallery belonging to the selected color. */
+  const activeColorName =
+    selectedColor ||
+    selectedVariant?.selectedOptions?.find(
+      (option) =>
+        option.name?.toLowerCase() === 'color',
+    )?.value;
+
+  const activeColorMetaobject = colorPatternColors.find(
+    (item) =>
+      item.name?.trim().toLowerCase() ===
+      activeColorName?.trim().toLowerCase(),
+  );
+
   const selectedColorGallery = colorGalleries.find(
     (gallery) =>
-      gallery.colorId === selectedColorId,
+      gallery.colorId === activeColorMetaobject?.id,
   );
 
   const galleryImages = useMemo(() => {
@@ -291,19 +349,15 @@ export function ProductDetails({
       return selectedColorGallery.images;
     }
 
-    if (images.length > 0) {
-      return images;
-    }
-
     if (selectedVariant?.image) {
       return [selectedVariant.image];
     }
 
-    return [];
+    return images;
   }, [
     selectedColorGallery,
-    images,
     selectedVariant,
+    images,
   ]);
 
   /* Keep selected image valid when product or color changes. */
@@ -397,7 +451,7 @@ export function ProductDetails({
   };
 
   return (
-    <main className="min-h-screen bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
 
@@ -724,10 +778,13 @@ export function ProductDetails({
                     Choose Size
                   </p>
 
-                  {/* STATIC */}
+                  {/* SIZE GUIDE */}
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-[12px] uppercase text-stone-600"
+                    onClick={() =>
+                      setOpenSizeGuide(true)
+                    }
+                    className="flex items-center gap-1 text-[12px] uppercase text-stone-600 cursor-pointer"
                   >
                     <Ruler className="h-4 w-4" />
                     Size Guide
@@ -929,6 +986,129 @@ export function ProductDetails({
               )}
 
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =================================================
+          SIZE GUIDE SLIDE-IN PANEL
+      ================================================== */}
+
+      <div
+        className={`absolute inset-0 z-50 transition-all duration-500 ${
+          openSizeGuide
+            ? 'pointer-events-auto'
+            : 'pointer-events-none'
+        }`}
+      >
+
+        {/* Background overlay */}
+        <button
+          type="button"
+          aria-label="Close size guide"
+          onClick={() => setOpenSizeGuide(false)}
+          className={`absolute inset-0 h-full w-full bg-black/30 transition-opacity duration-500 ${
+            openSizeGuide
+              ? 'opacity-100'
+              : 'opacity-0'
+          }`}
+        />
+
+        {/* Sliding panel */}
+        <div
+          className={`absolute right-0 top-0 flex h-full w-full max-w-[580px] flex-col bg-[#fff8e9] shadow-2xl transition-transform duration-500 ease-in-out ${
+            openSizeGuide
+              ? 'translate-x-0'
+              : 'translate-x-full'
+          }`}
+        >
+
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-stone-300 px-5 py-5 sm:px-7">
+            <h2 className="text-[20px] font-semibold text-[#345225]">
+              Size Guide
+            </h2>
+
+            <button
+              type="button"
+              onClick={() => setOpenSizeGuide(false)}
+              aria-label="Close size guide"
+              className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-stone-200"
+            >
+              <X className="h-5 w-5 text-[#345225] cursor-pointer" />
+            </button>
+          </div>
+
+          {/* Table */}
+          <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
+
+            {sizeGuideRows.length > 0 &&
+            sizeGuideColumns.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[500px] border-collapse">
+
+                  <thead>
+                    <tr className="border-b border-stone-400">
+
+                      <th className="px-3 py-3 text-left text-[13px] font-semibold text-[#345225]">
+                        Size
+                      </th>
+
+                      {sizeGuideColumns.map((column) => (
+                        <th
+                          key={column}
+                          className="px-3 py-3 text-center text-[13px] font-semibold text-[#345225]"
+                        >
+                          {column}
+                        </th>
+                      ))}
+
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {sizeGuideRows.map((row) => (
+                      <tr
+                        key={row.size}
+                        className="border-b border-stone-300"
+                      >
+
+                        <td className="px-3 py-4 text-left text-[13px] font-semibold text-stone-700">
+                          {row.size}
+                        </td>
+
+                        {sizeGuideColumns.map((column) => {
+                          const measurement =
+                            row.measurements.find(
+                              (item) =>
+                                item.name === column,
+                            );
+
+                          return (
+                            <td
+                              key={column}
+                              className="px-3 py-4 text-center text-[13px] text-stone-600"
+                            >
+                              {measurement?.value
+                                ? `${measurement.value}"`
+                                : '—'}
+                            </td>
+                          );
+                        })}
+
+                      </tr>
+                    ))}
+                  </tbody>
+
+                </table>
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center text-center text-[13px] text-stone-500">
+                Size guide information is not available
+                for this product.
+              </div>
+            )}
+
           </div>
         </div>
       </div>

@@ -112,6 +112,7 @@ export default function Product() {
   return (
     <>
       <ProductDetails
+        key={product.id}
         product={product}
         selectedVariant={selectedVariant}
         productOptions={productOptions}
@@ -305,6 +306,24 @@ const PRODUCT_FRAGMENT = `#graphql
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    }
+
+    sizeGuide: metafield(
+      namespace: "custom"
+      key: "size_guide"
+    ) {
+      references(first: 50) {
+        nodes {
+          ... on Metaobject {
+            id
+
+            fields {
+              key
+              value
             }
           }
         }
