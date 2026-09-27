@@ -28,6 +28,8 @@ const css = `
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
+  padding-top: 20px;
+  padding-bottom: 52px;
 
   display: flex;
   flex-direction: column;
