@@ -1,41 +1,41 @@
-import React, { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import React, {useState} from 'react';
+import {ChevronDown, ChevronRight} from 'lucide-react';
 
 const FAQ_DATA = [
   {
-    question: "Are these pieces handmade?",
+    question: 'Are these pieces handmade?',
     answer:
-      "Yes, every Nimie piece is hand-embroidered by skilled Chikankari artisans in Lucknow.",
+      'Yes, every Nimie piece is hand-embroidered by skilled Chikankari artisans in Lucknow.',
   },
   {
-    question: "Where is Nimie based?",
+    question: 'Where is Nimie based?',
     answer:
-      "Nimie is a Lucknow-based brand, embracing the old traditional process of Chikankari.",
+      'Nimie is a Lucknow-based brand, embracing the old traditional process of Chikankari.',
   },
   {
-    question: "Will the colour bleed?",
+    question: 'Will the colour bleed?',
     answer:
-      "Our pieces are carefully finished, but we recommend following the care instructions to prevent colour bleeding.",
+      'Our pieces are carefully finished, but we recommend following the care instructions to prevent colour bleeding.',
   },
   {
-    question: "How do I select my size?",
+    question: 'How do I select my size?',
     answer:
-      "You’ll find a detailed size chart on every product page. Please check it before ordering.",
+      'You’ll find a detailed size chart on every product page. Please check it before ordering.',
   },
   {
-    question: "How can I track my order?",
+    question: 'How can I track my order?',
     answer:
-      "You’ll receive all order updates via WhatsApp, on the website, and email. You can also reach us at teamnimie@gmail.com.",
+      'You’ll receive all order updates via WhatsApp, on the website, and email. You can also reach us at teamnimie@gmail.com.',
   },
   {
-    question: "Can I cancel my order?",
+    question: 'Can I cancel my order?',
     answer:
-      "Orders can be cancelled within 24 hours of placing them. After that, cancellations aren’t accepted.",
+      'Orders can be cancelled within 24 hours of placing them. After that, cancellations aren’t accepted.',
   },
   {
-    question: "Can I return my order?",
+    question: 'Can I return my order?',
     answer:
-      "Unworn, unused, unwashed, unaltered and undamaged items with original tags can be returned within 7 days of delivery. Please refer to our Return & Exchange Policy for details.",
+      'Unworn, unused, unwashed, unaltered and undamaged items with original tags can be returned within 7 days of delivery. Please refer to our Return & Exchange Policy for details.',
   },
 ];
 
@@ -60,20 +60,13 @@ export default function FAQs() {
       "
     >
       <div className="mx-auto w-full max-w-[660px] px-4 sm:px-6">
-
         {/* Heading */}
         <h2
-          className="
-            mb-5
-            text-center
-            text-[48px]
-            font-weight-600
-            leading-none
-            text-[#345525]
-            sm:text-[48px]
-            md:text-[54px]
-            lg:text-[60px]
-          "
+          className="text-center leading-none text-[#2F5723]"
+          style={{
+            marginBottom: 'clamp(24px, 4vw, 40px)',
+            fontSize: 'clamp(30px, 5vw, 44px)',
+          }}
         >
           FAQs
         </h2>
@@ -140,8 +133,8 @@ export default function FAQs() {
                       duration-300
                       ${
                         isOpen
-                          ? "bg-[#345525] text-white"
-                          : "bg-[#DDE1DB] text-[#222222]"
+                          ? 'bg-[#345525] text-white'
+                          : 'bg-[#DDE1DB] text-[#222222]'
                       }
                     `}
                   >
@@ -168,8 +161,8 @@ export default function FAQs() {
                     ease-in-out
                     ${
                       isOpen
-                        ? "grid-rows-[1fr] opacity-100"
-                        : "grid-rows-[0fr] opacity-0"
+                        ? 'grid-rows-[1fr] opacity-100'
+                        : 'grid-rows-[0fr] opacity-0'
                     }
                   `}
                 >
@@ -194,7 +187,6 @@ export default function FAQs() {
             );
           })}
         </div>
-
       </div>
     </section>
   );
