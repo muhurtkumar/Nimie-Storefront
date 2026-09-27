@@ -1,5 +1,5 @@
-import {useEffect} from 'react';
-import {NavLink} from 'react-router';
+import {Suspense, useEffect} from 'react';
+import {Await, NavLink, useRouteLoaderData} from 'react-router';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -7,6 +7,8 @@ const DURATION = 600;
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
 
 export function Cart({open, onClose}) {
+
+  const rootData = useRouteLoaderData('root');  
   
   useEffect(() => {
     if (!open) return undefined;
@@ -97,18 +99,39 @@ export function Cart({open, onClose}) {
           </p>
         </div>
 
-        {/* Login button */}
+        {/* Login / Proceed to Payment button */}
         <div className="shrink-0 px-[18px] py-3">
-          <NavLink
-            to="/account"
-            onClick={onClose}
-            style={{
-                color: '#fff',
-            }}
-            className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-          >
-            LOGIN
-          </NavLink>
+            <Suspense
+                fallback={
+                <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
+                    LOGIN
+                </div>
+                }
+            >
+                <Await resolve={rootData?.isLoggedIn}>
+                {(isLoggedIn) =>
+                    isLoggedIn ? (
+                    <NavLink
+                        to="/checkout"
+                        onClick={onClose}
+                        style={{color: '#fff'}}
+                        className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                    >
+                        CHECKOUT
+                    </NavLink>
+                    ) : (
+                    <NavLink
+                        to="/account/login"
+                        onClick={onClose}
+                        style={{color: '#fff'}}
+                        className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                    >
+                        LOGIN
+                    </NavLink>
+                    )
+                }
+                </Await>
+            </Suspense>
         </div>
       </div>
     </>
