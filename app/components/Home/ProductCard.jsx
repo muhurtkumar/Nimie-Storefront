@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
-import {Heart, ShoppingCart} from 'lucide-react';
+import {Heart, ShoppingCart, X} from 'lucide-react';
 
 function formatPrice(amount, currencyCode) {
   if (!amount) {
@@ -23,11 +23,7 @@ export function ProductCard({product, index}) {
   const [isHovered, setIsHovered] = useState(false);
   const [disableTransition, setDisableTransition] = useState(false);
 
-  /*
-   * Get the first color gallery's color ID directly from
-   * the product data so it can be selected on the very
-   * first render.
-   */
+  /* Get the first color gallery's color ID directly from the product data so it can be selected on the very first render. */
   const firstColorGalleryColorId =
     product.colorGalleries?.references?.nodes?.[0]?.fields?.find(
       (field) => field.key === 'color',
@@ -63,13 +59,7 @@ export function ProductCard({product, index}) {
         };
       }) || [];
 
-  /*
-   * Color Galleries
-   *
-   * Each Color Gallery contains:
-   * - color -> reference to Shopify Color
-   * - images -> list of Shopify images
-   */
+  /* Color Galleries */
   const colorGalleries =
     product.colorGalleries?.references?.nodes
       ?.map((gallery) => {
@@ -87,9 +77,7 @@ export function ProductCard({product, index}) {
          */
         const colorId = colorField?.reference?.id || null;
 
-        /*
-         * Get all images referenced by this Color Gallery.
-         */
+        /* Get all images referenced by this Color Gallery. */
         const galleryImages =
           imagesField?.references?.nodes
             ?.map((image) => {
@@ -165,6 +153,51 @@ export function ProductCard({product, index}) {
   const selectedColorName = colors.find(
     (color) => color.id === selectedColorId,
   )?.name;
+
+  /*
+   * Shopify inventory for the currently selected color.
+   */
+  const selectedColorVariants =
+    product.variants?.nodes?.filter((variant) => {
+      const colorOption = variant.selectedOptions?.find(
+        (option) =>
+          option.name?.toLowerCase() === 'color',
+      );
+
+      return (
+        colorOption?.value?.trim().toLowerCase() ===
+        selectedColorName?.trim().toLowerCase()
+      );
+    }) || [];
+
+  const isSelectedColorSoldOut =
+    selectedColorVariants.length > 0 &&
+    selectedColorVariants.every(
+      (variant) => (variant.quantityAvailable ?? 0) <= 0,
+    );
+
+  const isColorSoldOut = (colorName) => {
+    const colorVariants =
+      product.variants?.nodes?.filter((variant) => {
+        const colorOption =
+          variant.selectedOptions?.find(
+            (option) =>
+              option.name?.toLowerCase() === 'color',
+          );
+
+        return (
+          colorOption?.value?.trim().toLowerCase() ===
+          colorName?.trim().toLowerCase()
+        );
+      }) || [];
+
+    return (
+      colorVariants.length > 0 &&
+      colorVariants.every(
+        (variant) => (variant.quantityAvailable ?? 0) <= 0,
+      )
+    );
+  };
 
   const badge = product.tags?.[0];
 
@@ -294,9 +327,20 @@ export function ProductCard({product, index}) {
             />
           )
         )}
+        {/* Sold-out translucent overlay */}
+        {isSelectedColorSoldOut && (
+          <div className="absolute inset-0 z-10 bg-white/50" />
+        )}
+
+        {/* Sold out overlay */}
+        {isSelectedColorSoldOut && (
+          <div className="absolute left-3 top-3 z-20 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
+            SOLD OUT
+          </div>
+        )}
 
         {/* Product tag */}
-        {badge && (
+        {!isSelectedColorSoldOut && badge && (
           <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
             {badge}
           </div>
@@ -309,56 +353,85 @@ export function ProductCard({product, index}) {
         />
 
         {/* Bottom controls */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <div className="flex gap-2">
-            {colors.map((color) => (
-              <button
-                key={color.id}
-                type="button"
-                title={color.name}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
+        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {colors.map((color) => {
+              const colorSoldOut = isColorSoldOut(color.name);
+              const isSelected =
+                selectedColorId === color.id;
 
-                  setSelectedColorId(color.id);
-                  setActiveImageIndex(0);
-                  setDisableTransition(true);
+              return (
+                <button
+                  key={color.id}
+                  type="button"
+                  title={color.name}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                  requestAnimationFrame(() => {
-                    setDisableTransition(false);
-                  });
-                }}
-                className={`h-6 w-6 overflow-hidden rounded border ${
-                  selectedColorId === color.id
-                    ? 'border-2 border-[#345225]'
-                    : 'border-white/70'
-                }`}
-                style={
-                  color.image
-                    ? {
-                        backgroundImage: `url(${color.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }
-                    : {
-                        backgroundColor:
-                          color.color || '#c8c8b0',
-                      }
-                }
-              />
-            ))}
+                    setSelectedColorId(color.id);
+                    setActiveImageIndex(0);
+                    setDisableTransition(true);
+
+                    requestAnimationFrame(() => {
+                      setDisableTransition(false);
+                    });
+                  }}
+                  className={`relative flex items-center justify-center cursor-pointer transition-transform duration-200 ${
+                    isSelected
+                      ? 'h-7 w-7 scale-110 z-10'
+                      : 'h-6 w-6 scale-100'
+                  }`}
+                >
+                  <span
+                    className={`block h-full w-full overflow-hidden rounded border ${
+                      isSelected
+                        ? 'border-2 border-[#345225]'
+                        : 'border-white/70'
+                    }`}
+                    style={
+                      color.image
+                        ? {
+                            backgroundImage: `url(${color.image})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }
+                        : {
+                            backgroundColor:
+                              color.color || '#c8c8b0',
+                          }
+                    }
+                  />
+
+                  {colorSoldOut && (
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <X
+                        className="h-full w-full text-[#C0BDBD]"
+                        strokeWidth={2}
+                      />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          <button
-            type="button"
-            aria-label={`View ${product.title}`}
-            className="flex h-7 w-7 items-center justify-center rounded bg-white text-xs shadow-sm"
-          >
-            <ShoppingCart
-              className="h-4 w-4 text-[#345225]"
-              strokeWidth={2}
-            />
-          </button>
+          {isSelectedColorSoldOut ? (
+            <span className="text-[14px] font-semibold uppercase text-[#82272D]">
+              OUT OF STOCK
+            </span>
+          ) : (
+            <button
+              type="button"
+              aria-label={`View ${product.title}`}
+              className="flex h-7 w-7 items-center justify-center rounded bg-white text-xs shadow-sm"
+            >
+              <ShoppingCart
+                className="h-4 w-4 text-[#345225]"
+                strokeWidth={2}
+              />
+            </button>
+          )}
         </div>
       </div>
 

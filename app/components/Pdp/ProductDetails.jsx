@@ -451,7 +451,7 @@ export function ProductDetails({
   };
 
   return (
-    <main className="relative min-h-screen bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
 

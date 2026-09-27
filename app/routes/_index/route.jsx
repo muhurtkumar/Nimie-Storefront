@@ -241,6 +241,17 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
         height
       }
     }
+    variants(first: 100) {
+      nodes {
+        id
+        quantityAvailable
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
   }
 
   query ProductShowcase(
