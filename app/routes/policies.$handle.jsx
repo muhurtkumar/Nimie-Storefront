@@ -86,18 +86,32 @@ const policyCss = `
 }
 
 /* real <ul>/<li> bullets, if present */
-.policy__body ul,
+.policy__body ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  margin: 0 0 12px !important;
+  padding-left: 22px !important;
+}
+
 .policy__body ol {
-  margin: 0 0 12px;
-  padding-left: 22px;
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  margin: 0 0 12px !important;
+  padding-left: 22px !important;
 }
 
 .policy__body li {
+  display: list-item !important;
   margin-bottom: 8px;
 }
 
 .policy__body li:last-child {
   margin-bottom: 0;
+}
+
+.policy__body li > p {
+  display: inline; /* keeps text on the same line as the bullet marker */
+  margin: 0;
 }
 
 /* Shopify's "indent" button wraps text in <p style="padding-left:...">
