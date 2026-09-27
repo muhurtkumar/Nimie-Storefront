@@ -120,7 +120,8 @@ async function loadCriticalData({context, params, request}) {
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
+ * fetched after the initial page load. If it's unavailable,
+ *  the page should still 200.
  *
  * @param {Route.LoaderArgs} args
  */
