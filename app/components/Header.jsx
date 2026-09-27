@@ -7,13 +7,16 @@ const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-ser
 const GAP_Y = '16px'; // top
 const GAP_X = '0px'; // left and right
 
+const HEADER_RADIUS = 14;
+const HEADER_MARGIN = 'clamp(8px, 2vw, 16px)';
+
 // Mobile menu look & motion
 const PANEL_GAP = 'clamp(8px, 2vw, 16px)'; // space left on all four edges
 const PANEL_RADIUS = 16;
 const DURATION = 600; // ms
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
 const NAV_PAD_X = 'clamp(20px, 4vw, 32px)';
-const NAV_PAD_Y = 'clamp(16px, 3vw, 32px)';
+const NAV_PAD_Y = 'clamp(10px, 2vw, 20px)';
 
 // Adjust the routes to match your store
 const LEFT_LINKS = [
@@ -79,22 +82,27 @@ export function Header({header}) {
   // (same offset as the Hero's outer padding), white text.
   // Other pages: normal flow, white background, dark text.
   const wrapperStyle = isHome
-    ? {
-        position: 'absolute',
-        top: GAP_Y,
-        left: GAP_X,
-        right: GAP_X,
-        zIndex: 30,
-        background: 'transparent',
-        color: '#fff',
-      }
-    : {
-        position: 'relative',
-        zIndex: 30,
-        background: '#345225',
-        color: '#fff',
-        borderBottom: '1px solid rgba(0,0,0,0.1)',
-      };
+  ? {
+      position: 'absolute',
+      top: `calc(${GAP_Y})`,
+      left: `calc(${GAP_X})`,
+      right: `calc(${GAP_X})`,
+      zIndex: 30,
+      background: 'transparent',
+      color: '#fff',
+      borderRadius: HEADER_RADIUS,
+    }
+  : {
+      position: 'relative',
+      zIndex: 30,
+      marginTop: HEADER_MARGIN,
+      marginLeft: HEADER_MARGIN,
+      marginRight: HEADER_MARGIN,
+      background: '#345225',
+      color: '#fff',
+      borderRadius: HEADER_RADIUS,
+      border: '1px solid rgba(0,0,0,0.1)',
+    };
 
   return (
     <header style={wrapperStyle}>

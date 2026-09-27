@@ -50,7 +50,7 @@ const policyCss = `
 
 .policy__title {
   text-align: center;
-  font-size: clamp(28px, 4vw, 40px);
+  font-size: clamp(24px, 3.2vw, 34px);
   font-weight: 700;
   margin: 0 0 28px;
   letter-spacing: -0.01em;
