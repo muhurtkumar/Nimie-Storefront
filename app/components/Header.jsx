@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {NavLink, useLocation} from 'react-router';
 import LOGO_SRC from '~/assets/logo.png';
+import {Cart} from '~/components/Cart';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Keep in sync with GAP_Y / GAP_X in Hero.jsx
@@ -46,7 +47,18 @@ export function Header({header}) {
   const {pathname} = useLocation();
   const isHome = pathname === '/contact' || pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+
   const closeMenu = () => setMenuOpen(false);
+  const closeCart = () => setCartOpen(false);
+
+  const openCart = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setMenuOpen(false);
+    setCartOpen(true);
+  };
 
   // Close on route change
   useEffect(() => {
@@ -105,9 +117,10 @@ export function Header({header}) {
     };
 
   return (
+    <>
     <header style={wrapperStyle}>
       {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
-      <MobileMenu open={menuOpen} onClose={closeMenu} />
+      <MobileMenu open={menuOpen} onClose={closeMenu} onCartClick={openCart} />
 
       <div
         className="grid grid-cols-[1fr_auto_1fr] items-center"
@@ -191,12 +204,36 @@ export function Header({header}) {
         >
           {RIGHT_LINKS.map((link) => (
             <li key={link.label}>
-              <HeaderLink {...link} />
+              {link.label === 'Cart' ? (
+                <button
+                  type="button"
+                  onClick={openCart}
+                  className="cursor-pointer transition-opacity hover:opacity-70"
+                  style={{
+                    color: 'inherit',
+                    background: 'none',
+                    border: 0,
+                    padding: 0,
+                    font: 'inherit',
+                    textTransform: 'inherit',
+                    letterSpacing: 'inherit',
+                  }}
+                >
+                  Cart
+                </button>
+              ) : (
+                <HeaderLink {...link} />
+              )}
             </li>
           ))}
         </ul>
       </div>
     </header>
+    <Cart
+      open={cartOpen}
+      onClose={closeCart}
+    />
+    </>
   );
 }
 
@@ -204,7 +241,7 @@ export function Header({header}) {
  * Full-screen menu that reveals from top to bottom, with space left on
  * all four edges. Always mounted so the open/close can animate.
  */
-function MobileMenu({open, onClose}) {
+function MobileMenu({open, onClose, onCartClick}) {
   return (
     <>
       {/* Dim backdrop: tap the edge to close */}
@@ -256,33 +293,68 @@ function MobileMenu({open, onClose}) {
             padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 8px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
-          {MOBILE_LINKS.map((link, i) => (
-            <NavLink
-              key={link.label}
-              to={link.to}
-              end
-              prefetch="intent"
-              onClick={onClose}
-              tabIndex={open ? 0 : -1}
-              style={({isActive}) => ({
-                color: '#000',
-                fontSize: 'clamp(16px, 4.5vw, 20px)',
-                fontWeight: 400,
-                lineHeight: 1.1,
-                textTransform: 'uppercase',
-                letterSpacing: '0.025em',
-                textDecoration: isActive ? 'underline' : 'none',
-                textUnderlineOffset: 6,
-                // Links fade up one after another
-                opacity: open ? 1 : 0,
-                transform: open ? 'translateY(0)' : 'translateY(14px)',
-                transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
-                transitionDelay: open ? `${250 + i * 60}ms` : '0ms',
-              })}
-            >
-              {link.label}
-            </NavLink>
-          ))}
+          {MOBILE_LINKS.map((link, i) => {
+            if (link.label === 'Cart') {
+              return (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={onCartClick}
+                  className="cursor-pointer border-0 bg-transparent p-0 text-left"
+                  style={{
+                    color: '#000',
+                    fontFamily: FONT,
+                    fontSize: 'clamp(16px, 4.5vw, 20px)',
+                    fontWeight: 400,
+                    lineHeight: 1.1,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.025em',
+                    opacity: open ? 1 : 0,
+                    transform: open
+                      ? 'translateY(0)'
+                      : 'translateY(14px)',
+                    transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
+                    transitionDelay: open
+                      ? `${250 + i * 60}ms`
+                      : '0ms',
+                  }}
+                >
+                  Cart
+                </button>
+              );
+            }
+
+            return (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                end
+                prefetch="intent"
+                onClick={onClose}
+                tabIndex={open ? 0 : -1}
+                style={({isActive}) => ({
+                  color: '#000',
+                  fontSize: 'clamp(16px, 4.5vw, 20px)',
+                  fontWeight: 400,
+                  lineHeight: 1.1,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.025em',
+                  textDecoration: isActive ? 'underline' : 'none',
+                  textUnderlineOffset: 6,
+                  opacity: open ? 1 : 0,
+                  transform: open
+                    ? 'translateY(0)'
+                    : 'translateY(14px)',
+                  transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
+                  transitionDelay: open
+                    ? `${250 + i * 60}ms`
+                    : '0ms',
+                })}
+              >
+                {link.label}
+              </NavLink>
+            );
+          })}
         </nav>
       </div>
     </>
