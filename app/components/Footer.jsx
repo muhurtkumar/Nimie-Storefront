@@ -1,5 +1,3 @@
-import {Suspense} from 'react';
-import {Await, NavLink} from 'react-router';
 import footerBg from '~/assets/layout/footer-bg.mp4';
 import nimiLogo from '~/assets/layout/nimi-logo-white.png';
 
@@ -18,7 +16,7 @@ const css = `
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: #2b2b2b; /* shown while the photo loads */
+  background: #2b2b2b;
 }
 .ftr__bg {
   position: absolute;
@@ -54,10 +52,11 @@ const css = `
   column-gap: 20px;
   row-gap: 28px;
 }
-/* 3rd column (Terms & Conditions) drops to its own full-width row on mobile */
+
 .ftr__info > :nth-child(3) {
   grid-column: 1 / -1;
 }
+
 .ftr__col-title {
   margin: 0 0 12px;
   font-size: 13px;
@@ -65,6 +64,7 @@ const css = `
   letter-spacing: 0.02em;
   color: #111;
 }
+
 .ftr__col-list {
   margin: 0;
   padding: 0;
@@ -73,16 +73,19 @@ const css = `
   flex-direction: column;
   row-gap: 10px;
 }
+
 .ftr__link {
   font-size: 14px;
   line-height: 1.3;
   color: #444;
   text-decoration: none;
 }
+
 .ftr__link:hover {
   color: #A83B96;
   text-decoration: underline;
 }
+
 .ftr__link--active {
   color: #A83B96;
   font-weight: 700;
@@ -97,6 +100,7 @@ const css = `
   width: 100%;
   padding: 40px 0 24px;
 }
+
 .ftr__logo {
   width: clamp(120px, 34vw, 170px);
   height: auto;
@@ -109,95 +113,86 @@ const css = `
     min-height: 620px;
     padding: 24px;
   }
+
   .ftr__info {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     column-gap: clamp(24px, 4vw, 64px);
     row-gap: 0;
     padding: 32px clamp(28px, 4vw, 56px);
   }
-  .ftr__info > :nth-child(3) { grid-column: auto; }
-  .ftr__logo-wrap { padding: 56px 0 32px; }
-  .ftr__logo { width: clamp(150px, 22vw, 210px); }
+
+  .ftr__info > :nth-child(3) {
+    grid-column: auto;
+  }
+
+  .ftr__logo-wrap {
+    padding: 56px 0 32px;
+  }
+
+  .ftr__logo {
+    width: clamp(150px, 22vw, 210px);
+  }
 }
 
 /* ---------- desktop / large screens ---------- */
 @media (min-width: 1024px) {
   .ftr__overlay {
-    /* taller photo: scales with viewport width, capped on ultra-wide */
     min-height: clamp(600px, 40vw, 780px);
     padding: clamp(24px, 2.5vw, 48px);
   }
+
   .ftr__info {
-    /* near full-width card (was capped at 1100px) */
     max-width: 1760px;
     padding: clamp(36px, 3.2vw, 60px) clamp(48px, 5vw, 96px);
     column-gap: clamp(48px, 6vw, 140px);
   }
-  .ftr__col-title { font-size: 14px; margin-bottom: 18px; }
-  .ftr__col-list { row-gap: 14px; }
-  .ftr__link { font-size: 15px; }
 
-  /* generous space above and below the logo so it can breathe */
-  .padding: clamp(40px, 4.5vw, 90px) 0 clamp(32px, 3.5vw, 70px);
-  .ftr__logo { width: clamp(180px, 15vw, 290px); }
+  .ftr__col-title {
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .ftr__col-list {
+    row-gap: 14px;
+  }
+
+  .ftr__link {
+    font-size: 15px;
+  }
+
+  .ftr__logo-wrap {
+    padding: clamp(40px, 4.5vw, 90px) 0 clamp(32px, 3.5vw, 70px);
+  }
+
+  .ftr__logo {
+    width: clamp(180px, 15vw, 290px);
+  }
 }
 `;
 
-// Static columns — Shopify has no menu for these, so they're hardcoded.
-// Adjust the hrefs to match your real routes.
 const STORE_LINKS = [
   {label: 'Shop', href: '/'},
   {label: 'Our Story', href: '/our-story'},
   {label: 'FAQs', href: '#faqs'},
   {label: 'Contact Us', href: '/contact'},
 ];
+
 const SUPPORT_LINKS = [
   {label: 'My Account', href: '/account'},
   {label: 'Delivery & Returns', href: '/delivery-returns'},
   {label: 'Track your order', href: '/track-order'},
 ];
 
-const FALLBACK_FOOTER_MENU = {
-  id: 'gid://shopify/Menu/199655620664',
-  items: [
-    {
-      id: 'gid://shopify/MenuItem/461633060920',
-      resourceId: 'gid://shopify/ShopPolicy/23358046264',
-      tags: [],
-      title: 'Privacy Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/privacy-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633093688',
-      resourceId: 'gid://shopify/ShopPolicy/23358013496',
-      tags: [],
-      title: 'Refund Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/refund-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633126456',
-      resourceId: 'gid://shopify/ShopPolicy/23358111800',
-      tags: [],
-      title: 'Shipping Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/shipping-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633159224',
-      resourceId: 'gid://shopify/ShopPolicy/23358079032',
-      tags: [],
-      title: 'Terms of Service',
-      type: 'SHOP_POLICY',
-      url: '/policies/terms-of-service',
-      items: [],
-    },
-  ],
-};
+const POLICY_LINKS = [
+  {
+    label: 'Terms & Conditions',
+    href: '/policies/terms-of-service',
+  },
+  {
+    label: 'Privacy Policy',
+    href: '/policies/privacy-policy',
+  },
+];
 
 export function Footer({footer: footerPromise, header, publicStoreDomain}) {
   return (
@@ -218,28 +213,10 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
         <div className="ftr__overlay">
           <div className="ftr__info">
             <FooterColumn title="STORE" links={STORE_LINKS} />
+
             <FooterColumn title="SUPPORT" links={SUPPORT_LINKS} />
 
-            {/* Live Shopify policy menu, same data-fetching as before */}
-            <Suspense
-              fallback={
-                <FooterMenuColumn
-                  menu={FALLBACK_FOOTER_MENU}
-                  primaryDomainUrl={header?.shop?.primaryDomain?.url}
-                  publicStoreDomain={publicStoreDomain}
-                />
-              }
-            >
-              <Await resolve={footerPromise}>
-                {(footer) => (
-                  <FooterMenuColumn
-                    menu={footer?.menu || FALLBACK_FOOTER_MENU}
-                    primaryDomainUrl={header?.shop?.primaryDomain?.url}
-                    publicStoreDomain={publicStoreDomain}
-                  />
-                )}
-              </Await>
-            </Suspense>
+            <FooterColumn title="Policy" links={POLICY_LINKS} />
           </div>
 
           <div className="ftr__logo-wrap">
@@ -251,11 +228,11 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
   );
 }
 
-/** Static column: title + plain <a> links */
 function FooterColumn({title, links}) {
   return (
     <div>
       <p className="ftr__col-title">{title}</p>
+
       <ul className="ftr__col-list">
         {links.map((link) => (
           <li key={link.label}>
@@ -264,55 +241,6 @@ function FooterColumn({title, links}) {
             </a>
           </li>
         ))}
-      </ul>
-    </div>
-  );
-}
-
-/** Dynamic column: title + Shopify menu items (internal NavLink / external <a>) */
-function FooterMenuColumn({menu, primaryDomainUrl, publicStoreDomain}) {
-  const items = (menu || FALLBACK_FOOTER_MENU).items;
-  return (
-    <div>
-      <p className="ftr__col-title">Terms & Conditions</p>
-      <ul className="ftr__col-list">
-        {items.map((item) => {
-          if (!item.url) return null;
-          // if the url is internal, strip the domain
-          const url =
-            item.url.includes('myshopify.com') ||
-            (publicStoreDomain && item.url.includes(publicStoreDomain)) ||
-            (primaryDomainUrl && item.url.includes(primaryDomainUrl))
-              ? new URL(item.url).pathname
-              : item.url;
-          const isExternal = !url.startsWith('/');
-
-          return (
-            <li key={item.id}>
-              {isExternal ? (
-                <a
-                  className="ftr__link"
-                  href={url}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {item.title}
-                </a>
-              ) : (
-                <NavLink
-                  end
-                  to={url}
-                  prefetch="intent"
-                  className={({isActive}) =>
-                    'ftr__link' + (isActive ? ' ftr__link--active' : '')
-                  }
-                >
-                  {item.title}
-                </NavLink>
-              )}
-            </li>
-          );
-        })}
       </ul>
     </div>
   );
