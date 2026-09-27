@@ -2,8 +2,8 @@ import { OurStoryHero } from "~/components/OurStory/OurStoryHero";
 import { AboutNimie } from "~/components/OurStory/AboutNimie";
 
 import ourStoryHeroImage from "~/assets/OurStory/OurStoryHero.png";
-import nimieLogoGreen from "~/assets/OurStory/nimi-logo-green.png";
-import nimieLogoWhite from "~/assets/OurStory/nimi-logo-white.png";
+import nimieLogoGreen from "~/assets/OurStory/nimi-logo-green.gif";
+import nimieLogoWhite from "~/assets/OurStory/nimi-logo-white.gif";
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import { AboutCurator } from "~/components/OurStory/AboutCurator";
