@@ -141,6 +141,7 @@ export default function Product() {
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    quantityAvailable
 
     compareAtPrice {
       amount
@@ -206,6 +207,18 @@ const PRODUCT_FRAGMENT = `#graphql
 
     encodedVariantExistence
     encodedVariantAvailability
+
+    variants(first: 250) { 
+     nodes { 
+        id 
+        quantityAvailable 
+        availableForSale 
+        selectedOptions { 
+        name 
+        value 
+      } 
+    } 
+   } 
 
     options {
       name

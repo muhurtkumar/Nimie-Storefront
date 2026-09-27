@@ -84,6 +84,42 @@ export function ProductDetails({
   /* Shopify sizes */
   const sizes = sizeOption?.optionValues ?? [];
 
+  /* Shopify inventory for the currently selected color */
+  const selectedColorVariants = useMemo(() => {
+    const activeColor =
+      selectedColor ||
+      selectedVariant?.selectedOptions?.find(
+        (option) =>
+          option.name?.toLowerCase() === 'color',
+      )?.value;
+
+    if (!activeColor) {
+      return [];
+    }
+
+    return (
+      product.variants?.nodes?.filter((variant) => {
+        const colorOption =
+          variant.selectedOptions?.find(
+            (option) =>
+              option.name?.toLowerCase() === 'color',
+          );
+
+        return (
+          colorOption?.value?.trim().toLowerCase() ===
+          activeColor.trim().toLowerCase()
+        );
+      }) || []
+    );
+  }, [product.variants, selectedColor, selectedVariant]);
+
+  /* Check if every size for the selected color is sold out */
+  const isColorSoldOut =
+    selectedColorVariants.length > 0 &&
+    selectedColorVariants.every(
+    (variant) => (variant.quantityAvailable ?? 0) <= 0,
+  );
+
   const colorPatternColors =
     product.colorPattern?.references?.nodes
       ?.map((color) => {
@@ -704,12 +740,25 @@ export function ProductDetails({
                     const isSelected =
                       selectedSize === size.name;
 
-                    const variant =
-                      size.firstSelectableVariant;
+                    const matchingVariant =
+                      selectedColorVariants.find((variant) => {
+                        const sizeOption =
+                          variant.selectedOptions?.find(
+                            (option) =>
+                              option.name?.toLowerCase() ===
+                              'size',
+                          );
 
-                    const unavailable =
-                      variant &&
-                      !variant.availableForSale;
+                        return (
+                          sizeOption?.value?.trim().toLowerCase() ===
+                          size.name?.trim().toLowerCase()
+                        );
+                      });
+
+                    const inventory =
+                      matchingVariant?.quantityAvailable ?? 0;
+
+                    const unavailable = inventory <= 0;
 
                     return (
                       <button
@@ -717,6 +766,10 @@ export function ProductDetails({
                         type="button"
                         disabled={unavailable}
                         onClick={() => {
+                          if (unavailable) {
+                            return;
+                          }
+
                           setSelectedSize(size.name);
 
                           const params =
@@ -760,45 +813,60 @@ export function ProductDetails({
             )}
 
             {/* =================================================
-                QUANTITY + ADD TO CART
+                QUANTITY + ADD TO CART / SOLD OUT
             ================================================== */}
 
-            <div className="mt-5 flex items-center gap-3">
-
-              <div className="flex h-8 flex-1 items-center justify-between rounded-full bg-white px-3">
-
-                <button
-                  type="button"
-                  onClick={decreaseQuantity}
-                  className="flex h-6 w-6 items-center justify-center text-[#345225]"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-
-                <span className="text-[11px] text-stone-700">
-                  {quantity}
-                </span>
+            {isColorSoldOut ? (
+              <div className="mt-5 flex items-center gap-3">
+                <div className="flex flex-1 items-center justify-center">
+                  <span className="text-[18px] font-semibold text-[#345225]">
+                    SOLD OUT
+                  </span>
+                </div>
 
                 <button
                   type="button"
-                  onClick={increaseQuantity}
-                  className="flex h-6 w-6 items-center justify-center text-[#345225]"
-                  aria-label="Increase quantity"
+                  className="h-10 flex-[2.5] rounded-full bg-[#ad3d9f] text-[13px] font-medium text-white transition hover:bg-[#96348a] cursor-pointer"
                 >
-                  <Plus className="h-4 w-4" />
+                  Notify Me When Available
                 </button>
-
               </div>
+            ) : (
+              <div className="mt-5 flex items-center gap-3">
+                <div className="flex h-10 flex-1 items-center justify-between rounded-full bg-white px-3 font-semibold">
 
-              {/* Static button for now */}
-              <button
-                type="button"
-                className="h-8 flex-[2.5] rounded-full bg-[#ad3d9f] text-[11px] font-medium text-white transition hover:bg-[#96348a]"
-              >
-                Add to Cart
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    onClick={decreaseQuantity}
+                    className="flex h-6 w-6 items-center justify-center text-[#345225]"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="h-4 w-4 cursor-pointer" />
+                  </button>
+
+                  <span className="text-[13px] text-stone-700">
+                    {quantity}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={increaseQuantity}
+                    className="flex h-6 w-6 items-center justify-center text-[#345225]"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="h-4 w-4 cursor-pointer" />
+                  </button>
+
+                </div>
+
+                <button
+                  type="button"
+                  className="h-10 flex-[2.5] rounded-full bg-[#ad3d9f] text-[13px] font-medium text-white transition hover:bg-[#96348a] cursor-pointer"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            )}
 
             {/* =================================================
                 ACCORDIONS - STATIC
