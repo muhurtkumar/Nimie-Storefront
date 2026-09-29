@@ -21,6 +21,7 @@ import clip2 from '~/assets/home/clip-2.mp4';
 import clip3 from '~/assets/home/clip-3.mp4';
 import clip4 from '~/assets/home/clip-4.mp4';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ShopForMore} from '~/components/Home/ShopForMore.jsx';
 
 const PRODUCT_INFO = [
   'Fabric: Pure cotton-linen',
@@ -125,13 +126,27 @@ async function loadCriticalData({context, params, request}) {
  *
  * @param {Route.LoaderArgs} args
  */
-function loadDeferredData({context, params}) {
-  return {};
+// function loadDeferredData({context, params}) {
+//   return {};
+// }
+function loadDeferredData({context}) {
+  const showcaseProducts = context.storefront
+    .query(PRODUCT_SHOWCASE_QUERY, {
+      cache: context.storefront.CacheShort(),
+    })
+    .catch((error) => {
+      // Log query errors, but don't throw them so the page can still render
+      console.error(error);
+      return null;
+    });
+  return {
+    showcaseProducts,
+  };
 }
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product, reviews} = useLoaderData();
+  const {product, reviews, showcaseProducts} = useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -147,7 +162,6 @@ export default function Product() {
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
   });
-
   return (
     <>
       <ProductDetails
@@ -165,6 +179,8 @@ export default function Product() {
       />
 
       <Reviews reviews={reviews} />
+
+      <ShopForMore products={showcaseProducts} />
 
       <BehindTheScenes
         videos={[clip1, clip2, clip3, clip4]}
@@ -420,6 +436,129 @@ const PRODUCT_QUERY = `#graphql
   }
 
   ${PRODUCT_FRAGMENT}
+`;
+
+const PRODUCT_SHOWCASE_QUERY = `#graphql
+  fragment ProductShowcaseItem on Product {
+    id
+    title
+    handle
+    productType
+    tags
+
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+
+    discountPercentage: metafield(
+      namespace: "custom"
+      key: "discountpercentage"
+    ) {
+      value
+    }
+
+    colorPattern: metafield(
+      namespace: "shopify"
+      key: "color-pattern"
+    ) {
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            id
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+
+    colorGalleries: metafield(
+      namespace: "custom"
+      key: "color_galleries"
+    ) {
+      references(first: 20) {
+        nodes {
+          ... on Metaobject {
+            id
+            fields {
+              key
+              type
+              value
+
+              reference {
+                ... on Metaobject {
+                  id
+                }
+              }
+
+              references(first: 20) {
+                nodes {
+                  __typename
+
+                  ... on MediaImage {
+                    id
+                    image {
+                      url
+                      altText
+                      width
+                      height
+                    }
+                  }
+
+                  ... on GenericFile {
+                    id
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    images(first: 6) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+
+    variants(first: 100) {
+      nodes {
+        id
+        quantityAvailable
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
+  }
+
+  query ProductShowcase(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(
+      first: 5
+      sortKey: CREATED_AT
+      reverse: true
+    ) {
+      nodes {
+        ...ProductShowcaseItem
+      }
+    }
+  }
 `;
 
 /** @typedef {import('./+types/products.$handle').Route} Route */
