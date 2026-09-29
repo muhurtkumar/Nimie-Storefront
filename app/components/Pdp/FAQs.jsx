@@ -51,6 +51,7 @@ export default function FAQs() {
       id="faqs"
       className="
         w-full
+        scroll-mt-2
         bg-[#FFF8EA]
         px-4
         py-12

@@ -78,8 +78,6 @@ const css = `
    ========================================= */
 
 .reviews__strips {
-  border-top: 2px dotted rgba(47, 87, 35, 0.3);
-  border-bottom: 2px dotted rgba(47, 87, 35, 0.3);
   padding: clamp(20px, 3vw, 32px) 0;
 }
 
@@ -131,8 +129,8 @@ const css = `
   flex-shrink: 0;
   width: clamp(260px, 28vw, 340px);
 
-  background: #ffffff;
-  border: 1px solid rgba(47, 87, 35, 0.15);
+  background: transparent;
+  border: 1px solid rgba(47, 87, 35, 0.25);
   border-radius: 12px;
 
   padding: clamp(18px, 2.2vw, 24px);
