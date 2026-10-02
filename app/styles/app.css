@@ -200,6 +200,10 @@ aside li {
   transform: translateX(calc(var(--aside-width) * -1));
 }
 
+body:has(.account-page) {
+  background: #f7f4ef;
+}
+
 button.reset {
   border: 0;
   background: inherit;

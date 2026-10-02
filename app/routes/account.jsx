@@ -1,11 +1,11 @@
 import {
   data as remixData,
-  Form,
-  NavLink,
   Outlet,
   useLoaderData,
 } from 'react-router';
+
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {AccountSidebar} from '~/components/Account/AccountSidebar';
 
 export function shouldRevalidate() {
   return true;
@@ -16,6 +16,7 @@ export function shouldRevalidate() {
  */
 export async function loader({context}) {
   const {customerAccount} = context;
+
   const {data, errors} = await customerAccount.query(CUSTOMER_DETAILS_QUERY, {
     variables: {
       language: customerAccount.i18n.language,
@@ -40,56 +41,21 @@ export default function AccountLayout() {
   /** @type {LoaderReturnData} */
   const {customer} = useLoaderData();
 
-  const heading = customer
-    ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
-    : 'Account Details';
-
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
-      <AccountMenu />
-      <br />
-      <br />
-      <Outlet context={{customer}} />
+    <div className="account-page min-h-screen bg-[#f7f4ef] text-[#111111]">
+      <div className="mx-auto flex w-full flex-col md:flex-row md:gap-6">
+        <AccountSidebar customer={customer} />
+
+        {/* =========================
+            MAIN CONTENT
+        ========================== */}
+        <main className="min-w-0 w-full md:flex-1">
+          <div className="w-full px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-12">
+            <Outlet context={{customer}} />
+          </div>
+        </main>
+      </div>
     </div>
-  );
-}
-
-function AccountMenu() {
-  function isActiveStyle({isActive, isPending}) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
-  }
-
-  return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <Logout />
-    </nav>
-  );
-}
-
-function Logout() {
-  return (
-    <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
-    </Form>
   );
 }
 
