@@ -49,8 +49,8 @@ export default function AccountLayout() {
         {/* =========================
             MAIN CONTENT
         ========================== */}
-        <main className="min-w-0 w-full md:flex-1">
-          <div className="w-full px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-12">
+        <main className="min-w-0 w-full md:h-screen md:flex-1">
+          <div className="flex h-full w-full flex-col px-[clamp(8px,2vw,16px)] py-4 md:pl-8 md:pr-0 md:py-4 lg:pl-10 lg:py-4 xl:pl-12">
             <Outlet context={{customer}} />
           </div>
         </main>

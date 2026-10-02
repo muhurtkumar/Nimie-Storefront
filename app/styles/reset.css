@@ -30,6 +30,11 @@ h1 {
   margin-top: 2rem;
 }
 
+.account-profile h1 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 h2 {
   font-size: 1.2rem;
   font-weight: 700;
