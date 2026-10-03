@@ -290,6 +290,9 @@ export default function Addresses() {
   const [editingAddress, setEditingAddress] =
     useState(null);
 
+  const [successMessage, setSuccessMessage] =
+    useState('');
+
   /** @type {ActionReturnData} */
   const action = useActionData();
 
@@ -330,14 +333,34 @@ export default function Addresses() {
   useEffect(() => {
     if (action?.addressUpdated) {
       setEditingAddress(null);
+      setSuccessMessage('Address updated successfully.');
+    }
+    if (action?.createdAddress) {
+      setSuccessMessage('Address added successfully.');
     }
   }, [action]);
+
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const timer = setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   const addressesPerPage = isSmallScreen ? 1 : 2;
 
   const totalAddressPages = Math.ceil(
     allAddresses.length / addressesPerPage,
   );
+
+  useEffect(() => {
+    if (currentAddressPage > 0 && currentAddressPage > totalAddressPages - 1) {
+      setCurrentAddressPage(Math.max(totalAddressPages - 1, 0));
+    }
+  }, [totalAddressPages, currentAddressPage]);
 
   const visibleAddresses = allAddresses.slice(
     currentAddressPage * addressesPerPage,
@@ -370,6 +393,10 @@ export default function Addresses() {
     setEditingAddress(null);
   };
 
+  const handleAddressDeleted = () => {
+    setSuccessMessage('Address deleted successfully.');
+  };
+
   return (
     <div className="account-addresses flex h-full w-full flex-col">
       {/* =========================
@@ -387,6 +414,12 @@ export default function Addresses() {
           Manage your profile, orders, addresses and more.
         </p>
       </div>
+
+      {successMessage ? (
+        <div className="mb-4 rounded-[12px] border border-[#cfe3cf] bg-[#dcebdc] px-4 py-3 text-[13px] text-[#3f6244]">
+          {successMessage}
+        </div>
+      ) : null}
 
       {/* =========================
           SAVED ADDRESSES
@@ -472,6 +505,7 @@ export default function Addresses() {
                   address={address}
                   defaultAddress={defaultAddress}
                   onEdit={handleEditAddress}
+                  onDeleted={handleAddressDeleted}
                 />
               ))}
             </div>
@@ -533,6 +567,7 @@ function AddressCard({
   address,
   defaultAddress,
   onEdit,
+  onDeleted,
 }) {
   const addressType = getAddressType(address);
 
@@ -608,6 +643,7 @@ function AddressCard({
             address={address}
             defaultAddress={defaultAddress}
             onEdit={onEdit}
+            onDeleted={onDeleted}
           />
         </div>
 
@@ -760,12 +796,19 @@ function AddressActions({
   address,
   defaultAddress,
   onEdit,
+  onDeleted,
 }) {
   const fetcher = useFetcher();
 
   const error = fetcher.data?.error?.[address.id];
 
   const isDeleting = fetcher.state !== 'idle';
+
+  useEffect(() => {
+    if (fetcher.data?.deletedAddress) {
+      onDeleted();
+    }
+  }, [fetcher.data]);
 
   return (
     <>
