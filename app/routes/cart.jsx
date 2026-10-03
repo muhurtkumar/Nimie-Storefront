@@ -1,6 +1,7 @@
 import {useLoaderData, data} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {saveCustomerCart} from '~/lib/customer-cart';
 
 /**
  * @type {Route.MetaFunction}
@@ -77,6 +78,14 @@ export async function action({request, context}) {
   }
 
   const cartId = result?.cart?.id;
+
+  if (cartId) {
+    await saveCustomerCart({
+      context,
+      cartId,
+    });
+  }
+
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
   const {cart: cartResult, errors, warnings} = result;
 

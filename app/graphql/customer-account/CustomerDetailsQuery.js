@@ -19,6 +19,11 @@ export const CUSTOMER_FRAGMENT = `#graphql
         ...Address
       }
     }
+    cartMetafield: metafield(namespace: "custom", key: "cart_id") {
+      id
+      value
+      compareDigest
+    }
   }
   fragment Address on CustomerAddress {
     id

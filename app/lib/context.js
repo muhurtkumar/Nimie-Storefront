@@ -47,6 +47,13 @@ export async function createHydrogenRouterContext(
       i18n: {language: 'EN', country: 'US'},
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
+
+        getId: () => session.get('cartId'),
+
+        setId: (cartId) => {
+          session.set('cartId', cartId);
+          return new Headers();
+        },
       },
     },
     additionalContext,

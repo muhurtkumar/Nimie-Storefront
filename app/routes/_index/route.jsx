@@ -17,6 +17,8 @@ import clip2 from '~/assets/home/clip-2.mp4';
 import clip3 from '~/assets/home/clip-3.mp4';
 import clip4 from '~/assets/home/clip-4.mp4';
 
+import {restoreCustomerCart} from '~/lib/customer-cart';
+
 /**
  * @type {Route.MetaFunction}
  */
@@ -28,6 +30,8 @@ export const meta = () => {
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
+  await restoreCustomerCart({context: args.context});
+
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
@@ -64,6 +68,7 @@ function loadDeferredData({context}) {
       console.error(error);
       return null;
     });
+
   return {
     showcaseProducts,
   };
@@ -241,6 +246,7 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
         height
       }
     }
+
     variants(first: 100) {
       nodes {
         id
@@ -269,7 +275,6 @@ const PRODUCT_SHOWCASE_QUERY = `#graphql
     }
   }
 `;
-
 
 /** @typedef {import('./+types/route').Route} Route */
 /** @typedef {ReturnType<typeof useLoaderData<typeof loader>>} LoaderReturnData */

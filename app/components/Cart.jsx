@@ -1,5 +1,11 @@
 import {Suspense, useEffect} from 'react';
-import {Await, Link, NavLink, useRouteLoaderData} from 'react-router';
+import {
+  Await,
+  Link,
+  NavLink,
+  useRevalidator,
+  useRouteLoaderData,
+} from 'react-router';
 import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
 import {Minus, Plus, X} from 'lucide-react';
 
@@ -9,11 +15,15 @@ const DURATION = 600;
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
 
 export function Cart({open, onClose}) {
+  const rootData = useRouteLoaderData('root');
+  const revalidator = useRevalidator();
 
-  const rootData = useRouteLoaderData('root');  
-  
   useEffect(() => {
     if (!open) return undefined;
+
+    if (revalidator.state === 'idle') {
+      revalidator.revalidate();
+    }
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -31,7 +41,7 @@ export function Cart({open, onClose}) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, revalidator]);
 
   return (
     <>
@@ -60,34 +70,34 @@ export function Cart({open, onClose}) {
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between px-5 pb-5 pt-[20px]">
-        <h2
+          <h2
             className="m-0 font-light leading-none tracking-[-0.02em]"
             style={{fontSize: '30px'}}
-        >
+          >
             My Cart
-        </h2>
+          </h2>
 
-        <button
+          <button
             type="button"
             onClick={onClose}
             aria-label="Close cart"
             className="relative top-[-6px] flex h-10 w-10 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
-        >
+          >
             <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
             >
-            <path
+              <path
                 d="M6 6L18 18M18 6L6 18"
                 stroke="currentColor"
                 strokeWidth="1.4"
                 strokeLinecap="round"
-            />
+              />
             </svg>
-        </button>
+          </button>
         </div>
 
         {/* Cart items */}
@@ -99,37 +109,37 @@ export function Cart({open, onClose}) {
 
         {/* Login / Proceed to Payment button */}
         <div className="shrink-0 px-[18px] py-3">
-            <Suspense
-                fallback={
-                <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
+          <Suspense
+            fallback={
+              <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
+                LOGIN
+              </div>
+            }
+          >
+            <Await resolve={rootData?.isLoggedIn}>
+              {(isLoggedIn) =>
+                isLoggedIn ? (
+                  <NavLink
+                    to="/checkout"
+                    onClick={onClose}
+                    style={{color: '#fff'}}
+                    className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                  >
+                    CHECKOUT
+                  </NavLink>
+                ) : (
+                  <NavLink
+                    to="/account/login"
+                    onClick={onClose}
+                    style={{color: '#fff'}}
+                    className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                  >
                     LOGIN
-                </div>
-                }
-            >
-                <Await resolve={rootData?.isLoggedIn}>
-                {(isLoggedIn) =>
-                    isLoggedIn ? (
-                    <NavLink
-                        to="/checkout"
-                        onClick={onClose}
-                        style={{color: '#fff'}}
-                        className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                    >
-                        CHECKOUT
-                    </NavLink>
-                    ) : (
-                    <NavLink
-                        to="/account/login"
-                        onClick={onClose}
-                        style={{color: '#fff'}}
-                        className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                    >
-                        LOGIN
-                    </NavLink>
-                    )
-                }
-                </Await>
-            </Suspense>
+                  </NavLink>
+                )
+              }
+            </Await>
+          </Suspense>
         </div>
       </div>
     </>
@@ -200,31 +210,31 @@ function CartLineRow({line, onClose}) {
 
   const currency = merchandise?.price?.currencyCode;
 
-const originalUnitPrice = Number(
-  merchandise?.price?.amount || 0,
-);
+  const originalUnitPrice = Number(
+    merchandise?.price?.amount || 0,
+  );
 
-const discountPercentage = Number(
-  line.attributes?.find(
-    (attribute) =>
-      attribute.key === '_discount_percentage',
-  )?.value || 0,
-);
+  const discountPercentage = Number(
+    line.attributes?.find(
+      (attribute) =>
+        attribute.key === '_discount_percentage',
+    )?.value || 0,
+  );
 
-const discountedUnitPrice =
-  discountPercentage > 0
-    ? Math.round(
-        originalUnitPrice *
-          (1 - discountPercentage / 100),
-      )
-    : originalUnitPrice;
+  const discountedUnitPrice =
+    discountPercentage > 0
+      ? Math.round(
+          originalUnitPrice *
+            (1 - discountPercentage / 100),
+        )
+      : originalUnitPrice;
 
-const hasDiscount =
-  discountPercentage > 0 &&
-  discountedUnitPrice < originalUnitPrice;
+  const hasDiscount =
+    discountPercentage > 0 &&
+    discountedUnitPrice < originalUnitPrice;
 
-const total = discountedUnitPrice * quantity;
-const totalCompareAt = originalUnitPrice * quantity;
+  const total = discountedUnitPrice * quantity;
+  const totalCompareAt = originalUnitPrice * quantity;
 
   const productUrl = `/products/${merchandise?.product?.handle}?${new URLSearchParams(
     options.map((option) => [option.name, option.value]),

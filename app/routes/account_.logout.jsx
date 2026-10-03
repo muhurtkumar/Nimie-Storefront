@@ -10,7 +10,13 @@ export async function loader() {
  * @param {Route.ActionArgs}
  */
 export async function action({context}) {
-  return context.customerAccount.logout();
+  const {session} = context;
+
+  session.unset('cartId');
+
+  return context.customerAccount.logout({
+    keepSession: true,
+  });
 }
 
 /** @typedef {import('./+types/account_.logout').Route} Route */
