@@ -26,6 +26,7 @@ export function ProductCard({
   showBadge = true,
   wishlistLayout = false,
   wishlist = [],
+  onWishlistRemoved,
 }) {
   const wishlistFetcher = useFetcher();
 
@@ -339,10 +340,24 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    if (wishlistFetcher.data?.success) {
-      setIsWishlisted(Boolean(wishlistFetcher.data.added));
+    if (!wishlistFetcher.data?.success) {
+      return;
     }
-  }, [wishlistFetcher.data]);
+
+    const wasRemoved = wishlistFetcher.data.added === false;
+
+    setIsWishlisted(!wasRemoved);
+
+    if (wasRemoved && wishlistLayout && onWishlistRemoved) {
+      onWishlistRemoved(product.id, selectedColorId);
+    }
+  }, [
+    wishlistFetcher.data,
+    wishlistLayout,
+    onWishlistRemoved,
+    product.id,
+    selectedColorId,
+  ]);
 
   /*
    * When we reach the duplicated first image,

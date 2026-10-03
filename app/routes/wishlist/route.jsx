@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+import {useState} from 'react';
 import {ProductCard} from '~/components/Home/ProductCard';
 import {
   getCustomerWishlist,
@@ -112,13 +113,27 @@ export async function loader({context}) {
 
 export default function Wishlist() {
   /** @type {LoaderReturnData} */
-  const {products} = useLoaderData();
+  const {products: initialProducts} = useLoaderData();
+
+  const [products, setProducts] = useState(initialProducts);
+
+  const handleWishlistRemoved = (productId, colorId) => {
+    setProducts((currentProducts) =>
+      currentProducts.filter(
+        (product) =>
+          !(
+            product.id === productId &&
+            product.wishlistColorId === colorId
+          ),
+      ),
+    );
+  };
 
   return (
     <div className="collection">
-      <div className="mb-10 text-center">
+      <div className="mb-2 text-left">
         <h1 className="text-3xl font-semibold text-[#345225] md:text-4xl">
-          My Wishlist
+          My Wishlist : {products.length} items
         </h1>
       </div>
 
@@ -139,6 +154,7 @@ export default function Wishlist() {
               showColorPalette={false}
               showBadge={false}
               wishlistLayout={true}
+              onWishlistRemoved={handleWishlistRemoved}
             />
           ))}
         </div>
