@@ -3,7 +3,10 @@ import {Suspense} from 'react';
 
 import {ProductCard} from './ProductCard';
 
-export function ProductShowcase({products}) {
+export function ProductShowcase({
+  products,
+  wishlist = [],
+}) {
   return (
     <section className="px-4 py-8">
       <Suspense fallback={<div>Loading products...</div>}>
@@ -29,6 +32,7 @@ export function ProductShowcase({products}) {
                     <ProductCard
                       product={product}
                       index={index}
+                      wishlist={wishlist}
                     />
                   </div>
                 ))}

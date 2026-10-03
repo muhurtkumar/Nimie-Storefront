@@ -47,8 +47,6 @@ export function ProductCard({
     Boolean(initialColorId),
   );
 
-  const [optimisticWishlistKey, setOptimisticWishlistKey] = useState(null);
-
   useEffect(() => {
     if (initialColorId) {
       return;
@@ -59,10 +57,24 @@ export function ProductCard({
       return;
     }
 
-    const currentWishlistKey = `${product.id}-${selectedColorId}`;
+    // Don't let the old wishlist prop overwrite the
+    // state while the current wishlist request is running.
+    if (wishlistFetcher.state !== 'idle') {
+      return;
+    }
 
-    // Keep the locally updated state after clicking the heart.
-    if (optimisticWishlistKey === currentWishlistKey) {
+    // Use the latest wishlist returned by the toggle action.
+    if (
+      wishlistFetcher.data?.success &&
+      wishlistFetcher.data?.wishlist
+    ) {
+      const saved = wishlistFetcher.data.wishlist.some(
+        (item) =>
+          item?.productId === product.id &&
+          item?.colorId === selectedColorId,
+      );
+
+      setIsWishlisted(saved);
       return;
     }
 
@@ -78,7 +90,8 @@ export function ProductCard({
     product.id,
     selectedColorId,
     initialColorId,
-    optimisticWishlistKey,
+    wishlistFetcher.state,
+    wishlistFetcher.data,
   ]);
 
 
@@ -311,10 +324,6 @@ useEffect(() => {
     if (!selectedColorId) {
       return;
     }
-
-    const wishlistKey = `${product.id}-${selectedColorId}`;
-
-    setOptimisticWishlistKey(wishlistKey);
 
     wishlistFetcher.submit(
       {

@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+import {getCustomerWishlist} from '~/lib/customer-wishlist';
 
 import {MockShopNotice} from '~/components/MockShopNotice';
 
@@ -32,13 +33,21 @@ export const meta = () => {
 export async function loader(args) {
   await restoreCustomerCart({context: args.context});
 
+  const wishlist = await getCustomerWishlist({
+    context: args.context,
+  });
+
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return {
+    ...deferredData,
+    ...criticalData,
+    wishlist,
+  };
 }
 
 /**
@@ -110,7 +119,10 @@ export default function Homepage() {
         cta={{label: 'SHOP NOW', to: '/collections/all'}}
       />
 
-      <ProductShowcase products={data.showcaseProducts} />
+      <ProductShowcase
+        products={data.showcaseProducts}
+        wishlist={data.wishlist}
+      />
 
       <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
 
