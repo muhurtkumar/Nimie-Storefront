@@ -178,7 +178,9 @@ export async function action({request, context}) {
           return {
             error: null,
             updatedAddress: address,
+            updatedAddressId: addressId,
             defaultAddress,
+            addressUpdated: true,
           };
         } catch (error) {
           if (error instanceof Error) {
@@ -282,9 +284,56 @@ export default function Addresses() {
   const [currentAddressPage, setCurrentAddressPage] =
     useState(0);
 
-  const allAddresses = addresses?.nodes || [];
+  const [isSmallScreen, setIsSmallScreen] =
+    useState(false);
 
-  const addressesPerPage = 2;
+  const [editingAddress, setEditingAddress] =
+    useState(null);
+
+  /** @type {ActionReturnData} */
+  const action = useActionData();
+
+  const allAddresses = [...(addresses?.nodes || [])].sort(
+    (a, b) =>
+      (b.id === defaultAddress?.id) -
+      (a.id === defaultAddress?.id),
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(
+      '(max-width: 1023px)',
+    );
+
+    const handleScreenChange = () => {
+      setIsSmallScreen(mediaQuery.matches);
+    };
+
+    handleScreenChange();
+
+    mediaQuery.addEventListener(
+      'change',
+      handleScreenChange,
+    );
+
+    return () => {
+      mediaQuery.removeEventListener(
+        'change',
+        handleScreenChange,
+      );
+    };
+  }, []);
+
+  /*
+   * Return to Add New Address mode after a
+   * successful address update.
+   */
+  useEffect(() => {
+    if (action?.addressUpdated) {
+      setEditingAddress(null);
+    }
+  }, [action]);
+
+  const addressesPerPage = isSmallScreen ? 1 : 2;
 
   const totalAddressPages = Math.ceil(
     allAddresses.length / addressesPerPage,
@@ -311,6 +360,14 @@ export default function Addresses() {
     if (canGoNext) {
       setCurrentAddressPage((page) => page + 1);
     }
+  };
+
+  const handleEditAddress = (address) => {
+    setEditingAddress(address);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingAddress(null);
   };
 
   return (
@@ -414,6 +471,7 @@ export default function Addresses() {
                   key={address.id}
                   address={address}
                   defaultAddress={defaultAddress}
+                  onEdit={handleEditAddress}
                 />
               ))}
             </div>
@@ -427,7 +485,7 @@ export default function Addresses() {
       <div className="h-5 shrink-0" />
 
       {/* =========================
-          ADD NEW ADDRESS
+          ADD / EDIT ADDRESS
       ========================== */}
       <div className="rounded-[20px] border border-[#e7e2dc] bg-white">
         {/* Card Header */}
@@ -437,21 +495,30 @@ export default function Addresses() {
               className="font-serif text-[22px] leading-tight text-[#111111] sm:text-[24px]"
               style={{marginBottom: '3px'}}
             >
-              Add New Address
+              {editingAddress
+                ? 'Edit Existing Address'
+                : 'Add New Address'}
             </h2>
 
             <p
               className="text-[13px] text-[#706b65] sm:text-[14px]"
               style={{marginTop: '0px'}}
             >
-              Add a new delivery address to your account.
+              {editingAddress
+                ? 'Update your saved delivery address details.'
+                : 'Add a new delivery address to your account.'}
             </p>
           </div>
         </div>
 
-        {/* New Address Form */}
-        <div className="w-full px-3 pb-5 pt-3 sm:px-7 sm:pb-6">
-          <NewAddressForm />
+        {/* Address Form */}
+        <div className="w-full px-6 pb-5 pt-3 sm:px-7 sm:pb-6">
+          <NewAddressForm
+            key={editingAddress?.id || 'new-address'}
+            editingAddress={editingAddress}
+            defaultAddress={defaultAddress}
+            onCancelEdit={handleCancelEdit}
+          />
         </div>
       </div>
     </div>
@@ -462,7 +529,11 @@ export default function Addresses() {
    ADDRESS CARD
 ========================================================= */
 
-function AddressCard({address, defaultAddress}) {
+function AddressCard({
+  address,
+  defaultAddress,
+  onEdit,
+}) {
   const addressType = getAddressType(address);
 
   const AddressIcon =
@@ -536,6 +607,7 @@ function AddressCard({address, defaultAddress}) {
           <AddressActions
             address={address}
             defaultAddress={defaultAddress}
+            onEdit={onEdit}
           />
         </div>
 
@@ -555,10 +627,14 @@ function AddressCard({address, defaultAddress}) {
 }
 
 /* =========================================================
-   NEW ADDRESS
+   ADD / EDIT ADDRESS
 ========================================================= */
 
-function NewAddressForm() {
+function NewAddressForm({
+  editingAddress,
+  defaultAddress,
+  onCancelEdit,
+}) {
   const newAddress = {
     address1: '',
     address2: '',
@@ -577,25 +653,82 @@ function NewAddressForm() {
   /** @type {ActionReturnData} */
   const action = useActionData();
 
+  const isEditing = Boolean(editingAddress);
+
+  const formAddress = editingAddress || newAddress;
+
   useEffect(() => {
-    if (action?.createdAddress) {
+    if (action?.createdAddress && !isEditing) {
       formRef.current?.reset();
     }
-  }, [action?.createdAddress]);
+
+    if (action?.addressUpdated && isEditing) {
+      formRef.current?.reset();
+    }
+  }, [
+    action?.createdAddress,
+    action?.addressUpdated,
+    isEditing,
+  ]);
 
   return (
     <AddressForm
-      addressId="NEW_ADDRESS_ID"
-      address={newAddress}
-      defaultAddress={null}
+      addressId={
+        isEditing
+          ? editingAddress.id
+          : 'NEW_ADDRESS_ID'
+      }
+      address={formAddress}
+      defaultAddress={
+        isEditing ? defaultAddress : null
+      }
       formRef={formRef}
+      compact={false}
     >
       {({stateForMethod}) => {
         const isCreating =
           stateForMethod('POST') !== 'idle';
 
+        const isUpdating =
+          stateForMethod('PUT') !== 'idle';
+
+        if (isEditing) {
+          return (
+            <div className="flex flex-row items-center gap-3">
+              <button
+                type="button"
+                onClick={onCancelEdit}
+                disabled={isUpdating}
+                className="flex cursor-pointer items-center justify-center rounded-[8px] border border-[#ddd8d2] bg-white px-5 py-2.5 text-[12px] font-medium text-[#55504a] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel Changes
+              </button>
+
+              <button
+                disabled={isUpdating}
+                formMethod="PUT"
+                type="submit"
+                className={`flex cursor-pointer items-center justify-center gap-2 rounded-[8px] px-5 py-2.5 text-[12px] font-medium text-white transition-opacity ${
+                  isUpdating
+                    ? 'cursor-not-allowed bg-[#555555]'
+                    : 'bg-[#111111] hover:opacity-85'
+                }`}
+              >
+                <Check
+                  size={15}
+                  strokeWidth={1.7}
+                />
+
+                {isUpdating
+                  ? 'Saving Changes...'
+                  : 'Save Changes'}
+              </button>
+            </div>
+          );
+        }
+
         return (
-          <div className="flex justify-end">
+          <div className="flex justify-start md:justify-end">
             <button
               disabled={isCreating}
               formMethod="POST"
@@ -623,7 +756,11 @@ function NewAddressForm() {
    EXISTING ADDRESS ACTIONS
 ========================================================= */
 
-function AddressActions({address, defaultAddress}) {
+function AddressActions({
+  address,
+  defaultAddress,
+  onEdit,
+}) {
   const fetcher = useFetcher();
 
   const error = fetcher.data?.error?.[address.id];
@@ -637,10 +774,13 @@ function AddressActions({address, defaultAddress}) {
           type="button"
           className="flex cursor-pointer items-center gap-1.5 text-[11px] text-[#4f7d5a] transition-opacity hover:opacity-60"
           onClick={() => {
-            // Edit functionality can be added here.
+            onEdit(address);
           }}
         >
-          <Pencil size={12} strokeWidth={1.5} />
+          <Pencil
+            size={12}
+            strokeWidth={1.5}
+          />
           Edit
         </button>
 
@@ -656,9 +796,14 @@ function AddressActions({address, defaultAddress}) {
             disabled={isDeleting}
             className="flex cursor-pointer items-center gap-1.5 text-[11px] text-[#b34a4a] transition-opacity hover:opacity-60 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Trash2 size={12} strokeWidth={1.5} />
+            <Trash2
+              size={12}
+              strokeWidth={1.5}
+            />
 
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting
+              ? 'Deleting...'
+              : 'Delete'}
           </button>
         </fetcher.Form>
       </div>
@@ -682,6 +827,7 @@ function AddressActions({address, defaultAddress}) {
  *   address: CustomerAddressInput;
  *   defaultAddress: CustomerFragment['defaultAddress'];
  *   compact?: boolean;
+ *   formRef?: React.RefObject;
  *   children: (props: {
  *     stateForMethod: (
  *       method: 'PUT' | 'POST' | 'DELETE'
@@ -746,7 +892,9 @@ export function AddressForm({
                 name="firstName"
                 label="First Name"
                 placeholder="First Name"
-                defaultValue={address?.firstName ?? ''}
+                defaultValue={
+                  address?.firstName ?? ''
+                }
                 autoComplete="given-name"
                 required
               />
@@ -756,7 +904,9 @@ export function AddressForm({
                 name="lastName"
                 label="Last Name"
                 placeholder="Last Name"
-                defaultValue={address?.lastName ?? ''}
+                defaultValue={
+                  address?.lastName ?? ''
+                }
                 autoComplete="family-name"
                 required
               />
@@ -771,7 +921,9 @@ export function AddressForm({
                 name="address1"
                 label="Address Line 1"
                 placeholder="Address Line 1"
-                defaultValue={address?.address1 ?? ''}
+                defaultValue={
+                  address?.address1 ?? ''
+                }
                 autoComplete="address-line1"
                 required
               />
@@ -781,7 +933,9 @@ export function AddressForm({
                 name="address2"
                 label="Address Line 2"
                 placeholder="Apartment, suite, landmark, etc. (optional)"
-                defaultValue={address?.address2 ?? ''}
+                defaultValue={
+                  address?.address2 ?? ''
+                }
                 autoComplete="address-line2"
               />
             </div>
@@ -795,7 +949,9 @@ export function AddressForm({
                 name="city"
                 label="City"
                 placeholder="City"
-                defaultValue={address?.city ?? ''}
+                defaultValue={
+                  address?.city ?? ''
+                }
                 autoComplete="address-level2"
                 required
               />
@@ -805,7 +961,9 @@ export function AddressForm({
                 name="zoneCode"
                 label="State / Province"
                 placeholder="State / Province"
-                defaultValue={address?.zoneCode ?? ''}
+                defaultValue={
+                  address?.zoneCode ?? ''
+                }
                 autoComplete="address-level1"
                 required
               />
@@ -820,7 +978,9 @@ export function AddressForm({
                 name="zip"
                 label="Postal Code"
                 placeholder="Postal Code"
-                defaultValue={address?.zip ?? ''}
+                defaultValue={
+                  address?.zip ?? ''
+                }
                 autoComplete="postal-code"
                 required
               />
@@ -830,7 +990,9 @@ export function AddressForm({
                 name="territoryCode"
                 label="Country Code"
                 placeholder="IN"
-                defaultValue={address?.territoryCode ?? ''}
+                defaultValue={
+                  address?.territoryCode ?? ''
+                }
                 autoComplete="country"
                 maxLength={2}
                 required
@@ -846,7 +1008,9 @@ export function AddressForm({
                 name="phoneNumber"
                 label="Mobile Number"
                 placeholder="+91 98765 43210"
-                defaultValue={address?.phoneNumber ?? ''}
+                defaultValue={
+                  address?.phoneNumber ?? ''
+                }
                 autoComplete="tel"
                 type="tel"
               />
@@ -861,7 +1025,9 @@ export function AddressForm({
                   id={`${prefix}-defaultAddress`}
                   name="defaultAddress"
                   type="checkbox"
-                  defaultChecked={isDefaultAddress}
+                  defaultChecked={
+                    isDefaultAddress
+                  }
                   className="h-4 w-4 cursor-pointer accent-[#111111]"
                 />
 
@@ -875,7 +1041,9 @@ export function AddressForm({
 
               {children({
                 stateForMethod: (method) =>
-                  formMethod === method ? state : 'idle',
+                  formMethod === method
+                    ? state
+                    : 'idle',
               })}
             </div>
 
@@ -893,7 +1061,9 @@ export function AddressForm({
           <>
             {children({
               stateForMethod: (method) =>
-                formMethod === method ? state : 'idle',
+                formMethod === method
+                  ? state
+                  : 'idle',
             })}
 
             {error ? (
@@ -953,7 +1123,8 @@ function Field({
 ========================================================= */
 
 function getAddressType(address) {
-  const company = address?.company?.toLowerCase() || '';
+  const company =
+    address?.company?.toLowerCase() || '';
 
   if (company.includes('work')) {
     return 'Work';
@@ -971,6 +1142,8 @@ function getAddressType(address) {
  *   error: Record<string, string> | null;
  *   createdAddress?: AddressFragment;
  *   updatedAddress?: AddressFragment;
+ *   updatedAddressId?: string;
+ *   addressUpdated?: boolean;
  *   deletedAddress?: string;
  * }} ActionResponse
  */
