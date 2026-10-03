@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Link} from 'react-router';
+import {Link, useFetcher} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
 
@@ -18,7 +18,16 @@ function formatPrice(amount, currencyCode) {
     .replace(/\s/g, '');
 }
 
-export function ProductCard({product, index}) {
+export function ProductCard({
+  product,
+  index,
+  initialColorId = null,
+  showColorPalette = true,
+  showBadge = true,
+  wishlistLayout = false,
+}) {
+  const wishlistFetcher = useFetcher();
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [disableTransition, setDisableTransition] = useState(false);
@@ -30,8 +39,19 @@ export function ProductCard({product, index}) {
     )?.reference?.id || null;
 
   const [selectedColorId, setSelectedColorId] = useState(
-    firstColorGalleryColorId,
+    initialColorId || firstColorGalleryColorId,
   );
+
+  const [isWishlisted, setIsWishlisted] = useState(
+    Boolean(initialColorId),
+  );
+
+  useEffect(() => {
+    if (initialColorId) {
+      setSelectedColorId(initialColorId);
+      setActiveImageIndex(0);
+    }
+  }, [initialColorId]);
 
   const images = product.images?.nodes ?? [];
 
@@ -248,6 +268,33 @@ export function ProductCard({product, index}) {
     setActiveImageIndex(0);
   };
 
+  const handleWishlistToggle = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!selectedColorId) {
+      return;
+    }
+
+    wishlistFetcher.submit(
+      {
+        intent: 'toggle',
+        productId: product.id,
+        colorId: selectedColorId,
+      },
+      {
+        method: 'post',
+        action: '/wishlist',
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (wishlistFetcher.data?.success) {
+      setIsWishlisted(Boolean(wishlistFetcher.data.added));
+    }
+  }, [wishlistFetcher.data]);
+
   /*
    * When we reach the duplicated first image,
    * instantly reset to the real first image.
@@ -333,88 +380,106 @@ export function ProductCard({product, index}) {
         )}
 
         {/* Sold out overlay */}
-        {isSelectedColorSoldOut && (
+        {showBadge && isSelectedColorSoldOut && (
           <div className="absolute left-3 top-3 z-20 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
             SOLD OUT
           </div>
         )}
 
         {/* Product tag */}
-        {!isSelectedColorSoldOut && badge && (
+        {showBadge && !isSelectedColorSoldOut && badge && (
           <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
             {badge}
           </div>
         )}
 
         {/* Heart icon */}
-        <Heart
-          className="absolute right-4 top-4 h-8 w-8 text-[#FFDF9E]"
-          strokeWidth={1.8}
-        />
+        <button
+          type="button"
+          aria-label={
+            isWishlisted
+              ? 'Remove from wishlist'
+              : 'Add to wishlist'
+          }
+          onClick={handleWishlistToggle}
+          disabled={wishlistFetcher.state !== 'idle'}
+          className="absolute right-4 top-4 z-20 cursor-pointer"
+        >
+          <Heart
+            className={`h-8 w-8 ${
+              isWishlisted
+                ? 'fill-red-500 text-red-500'
+                : 'text-[#FFDF9E]'
+            }`}
+            strokeWidth={1.8}
+          />
+        </button>
 
         {/* Bottom controls */}
         <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {colors.map((color) => {
-              const colorSoldOut = isColorSoldOut(color.name);
-              const isSelected =
-                selectedColorId === color.id;
+          {showColorPalette && (
+            <div className="flex items-center gap-2">
+              {colors.map((color) => {
+                const colorSoldOut = isColorSoldOut(color.name);
+                const isSelected =
+                  selectedColorId === color.id;
 
-              return (
-                <button
-                  key={color.id}
-                  type="button"
-                  title={color.name}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                return (
+                  <button
+                    key={color.id}
+                    type="button"
+                    title={color.name}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
 
-                    setSelectedColorId(color.id);
-                    setActiveImageIndex(0);
-                    setDisableTransition(true);
+                      setSelectedColorId(color.id);
+                      setActiveImageIndex(0);
+                      setDisableTransition(true);
 
-                    requestAnimationFrame(() => {
-                      setDisableTransition(false);
-                    });
-                  }}
-                  className={`relative flex items-center justify-center cursor-pointer transition-transform duration-200 ${
-                    isSelected
-                      ? 'h-7 w-7 scale-110 z-10'
-                      : 'h-6 w-6 scale-100'
-                  }`}
-                >
-                  <span
-                    className={`block h-full w-full overflow-hidden rounded border ${
+                      requestAnimationFrame(() => {
+                        setDisableTransition(false);
+                      });
+                    }}
+                    className={`relative flex items-center justify-center cursor-pointer transition-transform duration-200 ${
                       isSelected
-                        ? 'border-2 border-[#345225]'
-                        : 'border-white/70'
+                        ? 'h-7 w-7 scale-110 z-10'
+                        : 'h-6 w-6 scale-100'
                     }`}
-                    style={
-                      color.image
-                        ? {
-                            backgroundImage: `url(${color.image})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                          }
-                        : {
-                            backgroundColor:
-                              color.color || '#c8c8b0',
-                          }
-                    }
-                  />
+                  >
+                    <span
+                      className={`block h-full w-full overflow-hidden rounded border ${
+                        isSelected
+                          ? 'border-2 border-[#345225]'
+                          : 'border-white/70'
+                      }`}
+                      style={
+                        color.image
+                          ? {
+                              backgroundImage: `url(${color.image})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }
+                          : {
+                              backgroundColor:
+                                color.color || '#c8c8b0',
+                            }
+                      }
+                    />
 
-                  {colorSoldOut && (
-                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <X
-                        className="h-full w-full text-[#C0BDBD]"
-                        strokeWidth={2}
-                      />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                    {colorSoldOut && (
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <X
+                          className="h-full w-full text-[#C0BDBD]"
+                          strokeWidth={2}
+                        />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {isSelectedColorSoldOut && (
             <span className="text-[14px] font-semibold uppercase text-[#82272D]">
@@ -424,51 +489,94 @@ export function ProductCard({product, index}) {
         </div>
       </div>
 
-            <div className="h-[88px] px-3 py-3 md:h-[108px] lg:h-[88px]">
-        <div className="flex items-start justify-between gap-3">
-          {/* Left: Product information */}
-          <div className="min-w-0 flex-1">
-            {/* Fixed-height title area */}
-             <div className="h-[32px] md:h-[40px] lg:h-[32px]">
-              <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
-                {product.title}
-              </h3>
-            </div>
+      {wishlistLayout ? (
+        <div className="px-3 py-3">
+          {/* Product title */}
+          <h3 className="line-clamp-2 text-[12px] font-semibold leading-4 text-[#345225]">
+            {product.title}
+          </h3>
 
-            {/* Product type always starts at the same vertical position */}
-            <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
-              {product.productType}
-            </div>
+          {/* Product type / tag */}
+          <div className="mt-1 text-[11px] text-stone-600">
+            {product.productType}
           </div>
 
-          {/* Right: Price information */}
-          <div className="shrink-0 text-right">
-            <div className="flex items-center justify-end gap-3">
-              {hasDiscount && (
-                <span className="text-[13px] font-bold text-[#345225]">
-                  {discountPercentage}% OFF
-                </span>
+          {/* Price row */}
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-[16px] font-bold leading-5 text-black">
+              {formatPrice(
+                discountedPriceAmount,
+                currentPrice?.currencyCode,
               )}
-
-              <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
-                {formatPrice(
-                  discountedPriceAmount,
-                  currentPrice?.currencyCode,
-                )}
-              </span>
-            </div>
+            </span>
 
             {hasDiscount && (
-              <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
-                {formatPrice(
-                  originalPriceAmount,
-                  currentPrice?.currencyCode,
-                )}
-              </div>
+              <>
+                <span className="self-center text-[11px] font-bold text-[#345225]">
+                  {discountPercentage}% OFF
+                </span>
+
+                <span className="self-center text-[12px] text-[#e98b8b] line-through">
+                  {formatPrice(
+                    originalPriceAmount,
+                    currentPrice?.currencyCode,
+                  )}
+                </span>
+              </>
             )}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="h-[88px] px-3 py-3 md:h-[108px] lg:h-[88px]">
+          <div className="flex items-start justify-between gap-3">
+
+            {/* Left: Product information */}
+            <div className="min-w-0 flex-1">
+
+              {/* Fixed-height title area */}
+              <div className="h-[32px] md:h-[40px] lg:h-[32px]">
+                <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
+                  {product.title}
+                </h3>
+              </div>
+
+              {/* Product type always starts at the same vertical position */}
+              <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
+                {product.productType}
+              </div>
+            </div>
+
+            {/* Right: Price information */}
+            <div className="shrink-0 text-right">
+              <div className="flex items-center justify-end gap-3">
+
+                {hasDiscount && (
+                  <span className="text-[13px] font-bold text-[#345225]">
+                    {discountPercentage}% OFF
+                  </span>
+                )}
+
+                <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
+                  {formatPrice(
+                    discountedPriceAmount,
+                    currentPrice?.currencyCode,
+                  )}
+                </span>
+              </div>
+
+              {hasDiscount && (
+                <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
+                  {formatPrice(
+                    originalPriceAmount,
+                    currentPrice?.currencyCode,
+                  )}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </Link>
   );
 }

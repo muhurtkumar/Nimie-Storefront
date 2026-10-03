@@ -11,6 +11,7 @@ import {
 } from 'react-router';
 import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {getCustomerWishlist} from '~/lib/customer-wishlist';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -133,9 +134,11 @@ function loadDeferredData({context}) {
       console.error(error);
       return null;
     });
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
+    wishlist: getCustomerWishlist({context}),
     footer,
   };
 }
