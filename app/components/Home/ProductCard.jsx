@@ -416,37 +416,32 @@ export function ProductCard({product, index}) {
             })}
           </div>
 
-          {isSelectedColorSoldOut ? (
+          {isSelectedColorSoldOut && (
             <span className="text-[14px] font-semibold uppercase text-[#82272D]">
               OUT OF STOCK
             </span>
-          ) : (
-            <button
-              type="button"
-              aria-label={`View ${product.title}`}
-              className="flex h-7 w-7 items-center justify-center rounded bg-white text-xs shadow-sm"
-            >
-              <ShoppingCart
-                className="h-4 w-4 text-[#345225]"
-                strokeWidth={2}
-              />
-            </button>
           )}
         </div>
       </div>
 
-      <div className="h-[78px] px-3 py-3">
+            <div className="h-[88px] px-3 py-3 md:h-[108px] lg:h-[88px]">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="text-[14px] font-semibold leading-4 text-[#345225]">
-              {product.title}
-            </h3>
+          {/* Left: Product information */}
+          <div className="min-w-0 flex-1">
+            {/* Fixed-height title area */}
+             <div className="h-[32px] md:h-[40px] lg:h-[32px]">
+              <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
+                {product.title}
+              </h3>
+            </div>
 
-            <div className="mt-3 text-[13px] text-stone-600">
+            {/* Product type always starts at the same vertical position */}
+            <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
               {product.productType}
             </div>
           </div>
 
+          {/* Right: Price information */}
           <div className="shrink-0 text-right">
             <div className="flex items-center justify-end gap-3">
               {hasDiscount && (
@@ -455,7 +450,7 @@ export function ProductCard({product, index}) {
                 </span>
               )}
 
-              <span className="text-[20px] font-bold leading-5 text-black">
+              <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
                 {formatPrice(
                   discountedPriceAmount,
                   currentPrice?.currencyCode,
@@ -464,7 +459,7 @@ export function ProductCard({product, index}) {
             </div>
 
             {hasDiscount && (
-              <div className="mt-3 text-[14px] text-[#e98b8b] line-through">
+              <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
                 {formatPrice(
                   originalPriceAmount,
                   currentPrice?.currencyCode,

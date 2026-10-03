@@ -1,7 +1,7 @@
 import {useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {ProductItem} from '~/components/ProductItem';
+import {ProductCard} from '~/components/Home/ProductCard';
 
 /**
  * @type {Route.MetaFunction}
@@ -24,12 +24,12 @@ export async function loader(args) {
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Load data necessary for rendering content above the fold.
  * @param {Route.LoaderArgs}
  */
 async function loadCriticalData({context, request}) {
   const {storefront} = context;
+
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
@@ -38,15 +38,13 @@ async function loadCriticalData({context, request}) {
     storefront.query(CATALOG_QUERY, {
       variables: {...paginationVariables},
     }),
-    // Add other queries here, so that they are loaded in parallel
   ]);
+
   return {products};
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
+ * Load data for rendering content below the fold.
  * @param {Route.LoaderArgs}
  */
 function loadDeferredData({context}) {
@@ -59,16 +57,21 @@ export default function Collection() {
 
   return (
     <div className="collection">
-      <h1>Products</h1>
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-semibold text-[#345225] md:text-4xl">
+          The Nimie Products
+        </h1>
+      </div>
+
       <PaginatedResourceSection
         connection={products}
-        resourcesClassName="products-grid"
+        resourcesClassName="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2 lg:grid-cols-3"
       >
         {({node: product, index}) => (
-          <ProductItem
+          <ProductCard
             key={product.id}
             product={product}
-            loading={index < 8 ? 'eager' : undefined}
+            index={index}
           />
         )}
       </PaginatedResourceSection>
@@ -81,17 +84,14 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
     amount
     currencyCode
   }
+
   fragment CollectionItem on Product {
     id
-    handle
     title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
+    handle
+    productType
+    tags
+
     priceRange {
       minVariantPrice {
         ...MoneyCollectionItem
@@ -100,10 +100,112 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
         ...MoneyCollectionItem
       }
     }
+
+    discountPercentage: metafield(
+      namespace: "custom"
+      key: "discountpercentage"
+    ) {
+      value
+    }
+
+    colorPattern: metafield(
+      namespace: "shopify"
+      key: "color-pattern"
+    ) {
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            id
+
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+
+    colorGalleries: metafield(
+      namespace: "custom"
+      key: "color_galleries"
+    ) {
+      references(first: 20) {
+        nodes {
+          ... on Metaobject {
+            id
+
+            fields {
+              key
+              type
+              value
+
+              reference {
+                ... on Metaobject {
+                  id
+                }
+              }
+
+              references(first: 20) {
+                nodes {
+                  __typename
+
+                  ... on MediaImage {
+                    id
+
+                    image {
+                      url
+                      altText
+                      width
+                      height
+                    }
+                  }
+
+                  ... on GenericFile {
+                    id
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    images(first: 6) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+
+    variants(first: 100) {
+      nodes {
+        id
+        quantityAvailable
+        availableForSale
+
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
+
+    featuredImage {
+      id
+      altText
+      url
+      width
+      height
+    }
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/latest/objects/product
 const CATALOG_QUERY = `#graphql
   query Catalog(
     $country: CountryCode
@@ -113,10 +215,16 @@ const CATALOG_QUERY = `#graphql
     $startCursor: String
     $endCursor: String
   ) @inContext(country: $country, language: $language) {
-    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
+    products(
+      first: $first
+      last: $last
+      before: $startCursor
+      after: $endCursor
+    ) {
       nodes {
         ...CollectionItem
       }
+
       pageInfo {
         hasPreviousPage
         hasNextPage
@@ -125,6 +233,7 @@ const CATALOG_QUERY = `#graphql
       }
     }
   }
+
   ${COLLECTION_ITEM_FRAGMENT}
 `;
 

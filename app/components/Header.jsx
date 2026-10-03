@@ -21,7 +21,7 @@ const NAV_PAD_Y = 'clamp(10px, 2vw, 20px)';
 
 // Adjust the routes to match your store
 const LEFT_LINKS = [
-  {label: 'Shop', to: '/'},
+  {label: 'Shop', to: '/collections/all'},
   {label: 'Our Story', to: '/our-story'},
 ];
 const RIGHT_LINKS = [
