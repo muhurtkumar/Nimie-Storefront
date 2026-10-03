@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from 'react';
-import {useNavigate} from 'react-router';
+import {useFetcher, useNavigate} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {
   ChevronLeft,
@@ -49,6 +49,7 @@ export function ProductDetails({
   product,
   selectedVariant,
   productOptions,
+  wishlist = [],
 }) {
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -57,6 +58,10 @@ export function ProductDetails({
 
   const [selectedColorId, setSelectedColorId] =
     useState(null);
+
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [optimisticWishlistKey, setOptimisticWishlistKey] =
+  useState(null);
 
   const [selectedSize, setSelectedSize] =
     useState(null);
@@ -70,6 +75,35 @@ export function ProductDetails({
     useState(false);
 
   const navigate = useNavigate();
+  const wishlistFetcher = useFetcher();
+
+ const handleWishlistToggle = () => {
+    if (!selectedColorId) {
+      return;
+    }
+
+    const wishlistKey = `${product.id}-${selectedColorId}`;
+
+    setOptimisticWishlistKey(wishlistKey);
+
+    wishlistFetcher.submit(
+      {
+        intent: 'toggle',
+        productId: product.id,
+        colorId: selectedColorId,
+      },
+      {
+        method: 'post',
+        action: '/wishlist',
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (wishlistFetcher.data?.success) {
+      setIsWishlisted(Boolean(wishlistFetcher.data.added));
+    }
+  }, [wishlistFetcher.data]);
 
   /* Shopify product images */
   const images = product.images?.nodes ?? [];
@@ -309,6 +343,33 @@ export function ProductDetails({
       );
     }
   }, [selectedVariant, colorPatternColors]);
+
+  useEffect(() => {
+    if (!selectedColorId) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    const currentWishlistKey = `${product.id}-${selectedColorId}`;
+
+    // Keep the locally updated state after clicking the heart.
+    if (optimisticWishlistKey === currentWishlistKey) {
+      return;
+    }
+
+    const saved = wishlist.some(
+      (item) =>
+        item?.productId === product.id &&
+        item?.colorId === selectedColorId,
+    );
+
+    setIsWishlisted(saved);
+  }, [
+    wishlist,
+    product.id,
+    selectedColorId,
+    optimisticWishlistKey,
+  ]);
 
   /* Set initial size from selected variant. */
   useEffect(() => {
@@ -628,14 +689,27 @@ export function ProductDetails({
                 </div>
 
                 <button
-                    type="button"
-                    aria-label="Add to wishlist"
-                    className="!m-0 shrink-0"
+                  type="button"
+                  aria-label={
+                    isWishlisted
+                      ? 'Remove from wishlist'
+                      : 'Add to wishlist'
+                  }
+                  onClick={handleWishlistToggle}
+                  disabled={
+                    !selectedColorId ||
+                    wishlistFetcher.state !== 'idle'
+                  }
+                  className="!m-0 shrink-0 cursor-pointer disabled:cursor-not-allowed"
                 >
-                    <Heart
-                    className="h-6 w-6 text-[#345225]"
+                  <Heart
+                    className={`h-6 w-6 ${
+                      isWishlisted
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-[#345225]'
+                    }`}
                     strokeWidth={1.5}
-                    />
+                  />
                 </button>
             </div>
 

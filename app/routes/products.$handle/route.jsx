@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+import {getCustomerWishlist} from '~/lib/customer-wishlist';
 
 import {
   getSelectedProductOptions,
@@ -86,6 +87,8 @@ async function loadCriticalData({context, params, request}) {
     throw new Error('Expected product handle to be defined');
   }
 
+  const wishlist = await getCustomerWishlist({context});
+
   const [{product}, {metaobjects}] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
@@ -116,6 +119,7 @@ async function loadCriticalData({context, params, request}) {
   return {
     product,
     reviews,
+    wishlist,
   };
 }
 
@@ -146,7 +150,7 @@ function loadDeferredData({context}) {
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product, reviews, showcaseProducts} = useLoaderData();
+  const {product, reviews, showcaseProducts, wishlist} = useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -169,6 +173,7 @@ export default function Product() {
         product={product}
         selectedVariant={selectedVariant}
         productOptions={productOptions}
+        wishlist={wishlist}
       />
 
       <ProductIntro

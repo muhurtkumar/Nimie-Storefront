@@ -25,6 +25,7 @@ export function ProductCard({
   showColorPalette = true,
   showBadge = true,
   wishlistLayout = false,
+  wishlist = [],
 }) {
   const wishlistFetcher = useFetcher();
 
@@ -46,12 +47,47 @@ export function ProductCard({
     Boolean(initialColorId),
   );
 
+  const [optimisticWishlistKey, setOptimisticWishlistKey] = useState(null);
+
   useEffect(() => {
     if (initialColorId) {
-      setSelectedColorId(initialColorId);
-      setActiveImageIndex(0);
+      return;
     }
-  }, [initialColorId]);
+
+    if (!selectedColorId) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    const currentWishlistKey = `${product.id}-${selectedColorId}`;
+
+    // Keep the locally updated state after clicking the heart.
+    if (optimisticWishlistKey === currentWishlistKey) {
+      return;
+    }
+
+    const saved = wishlist.some(
+      (item) =>
+        item?.productId === product.id &&
+        item?.colorId === selectedColorId,
+    );
+
+    setIsWishlisted(saved);
+  }, [
+    wishlist,
+    product.id,
+    selectedColorId,
+    initialColorId,
+    optimisticWishlistKey,
+  ]);
+
+
+useEffect(() => {
+  if (initialColorId) {
+    setSelectedColorId(initialColorId);
+    setActiveImageIndex(0);
+  }
+}, [initialColorId]);
 
   const images = product.images?.nodes ?? [];
 
@@ -275,6 +311,10 @@ export function ProductCard({
     if (!selectedColorId) {
       return;
     }
+
+    const wishlistKey = `${product.id}-${selectedColorId}`;
+
+    setOptimisticWishlistKey(wishlistKey);
 
     wishlistFetcher.submit(
       {

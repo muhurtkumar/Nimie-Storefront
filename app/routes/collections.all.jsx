@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductCard} from '~/components/Home/ProductCard';
+import {getCustomerWishlist} from '~/lib/customer-wishlist';
 
 /**
  * @type {Route.MetaFunction}
@@ -34,13 +35,18 @@ async function loadCriticalData({context, request}) {
     pageBy: 8,
   });
 
-  const [{products}] = await Promise.all([
+  const [wishlist, {products}] = await Promise.all([
+    getCustomerWishlist({context}),
+
     storefront.query(CATALOG_QUERY, {
       variables: {...paginationVariables},
     }),
   ]);
 
-  return {products};
+  return {
+    products,
+    wishlist,
+  };
 }
 
 /**
@@ -53,7 +59,7 @@ function loadDeferredData({context}) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const {products} = useLoaderData();
+  const {products, wishlist} = useLoaderData();
 
   return (
     <div className="collection">
@@ -72,6 +78,7 @@ export default function Collection() {
             key={product.id}
             product={product}
             index={index}
+            wishlist={wishlist}
           />
         )}
       </PaginatedResourceSection>
