@@ -29,7 +29,7 @@ export function AccountSidebar({customer}) {
       {/* =========================
           SIDEBAR
       ========================== */}
-      <div className="sticky top-4 hidden h-[calc(100vh-2rem)] w-[220px] shrink-0 rounded-[20px] border border-[#ebe7e1] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:my-4 md:flex md:flex-col lg:w-[300px]">
+      <div className="sticky top-4 hidden min-h-[calc(100vh-2rem)] w-[220px] shrink-0 rounded-[20px] border border-[#ebe7e1] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:my-4 md:flex md:flex-col lg:w-[300px]">
         {/* Customer Information */}
         <div className="px-8 pb-8 pt-10">
           <div className="flex items-center gap-4">
