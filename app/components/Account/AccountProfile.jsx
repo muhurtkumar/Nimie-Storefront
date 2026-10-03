@@ -15,7 +15,7 @@ export const meta = () => {
 
 export default function AccountProfile() {
   const account = useOutletContext();
-  const {state} = useNavigation();
+  const navigation = useNavigation();
 
   /** @type {ActionReturnData} */
   const action = useActionData();
@@ -48,7 +48,7 @@ export default function AccountProfile() {
   const email = customer?.emailAddress?.emailAddress || '—';
   const phone = customer?.phoneNumber?.phoneNumber || '—';
 
-  const isSubmitting = state !== 'idle';
+  const isSubmitting = navigation.state === 'submitting' && navigation.formMethod?.toLowerCase() === 'put';
 
   return (
     <div className="account-profile flex h-full w-full flex-col">
