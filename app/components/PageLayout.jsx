@@ -27,12 +27,18 @@ export function PageLayout({
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
+        <Suspense fallback={null}>
+          <Await resolve={cart}>
+            {(resolvedCart) => (
+              <Header
+                header={header}
+                cart={resolvedCart}
+                isLoggedIn={isLoggedIn}
+                publicStoreDomain={publicStoreDomain}
+              />
+            )}
+          </Await>
+        </Suspense>
       )}
       <main>{children}</main>
       <Footer

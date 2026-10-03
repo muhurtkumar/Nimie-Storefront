@@ -42,9 +42,10 @@ const linkStyle = ({isActive}) => ({
 /**
  * @param {HeaderProps}
  */
-export function Header({header}) {
+export function Header({header, cart}) {
   const {shop} = header;
   const {pathname} = useLocation();
+  const cartCount = cart?.totalQuantity ?? 0;
   const isHome = pathname === '/contact' || pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -219,7 +220,7 @@ export function Header({header}) {
                     letterSpacing: 'inherit',
                   }}
                 >
-                  Cart
+                  Cart ({cartCount})
                 </button>
               ) : (
                 <HeaderLink {...link} />
