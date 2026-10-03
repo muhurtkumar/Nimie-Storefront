@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router';
+import {CartForm} from '@shopify/hydrogen';
 import {
   ChevronLeft,
   ChevronRight,
@@ -366,6 +367,21 @@ export function ProductDetails({
   }, [product.id, selectedColorId]);
 
   /* Shopify price data */
+    /* Variant matching the selected color + size */
+  const cartVariant = selectedColorVariants.find((variant) =>
+    variant.selectedOptions?.some(
+      (option) =>
+        option.name?.toLowerCase() === 'size' &&
+        option.value?.trim().toLowerCase() ===
+          selectedSize?.trim().toLowerCase(),
+    ),
+  );
+
+  const canAddToCart =
+    Boolean(cartVariant) &&
+    (cartVariant.quantityAvailable ?? 0) > 0;
+
+  /* Shopify price data */
   const price = selectedVariant?.price;
 
   /*
@@ -381,6 +397,21 @@ export function ProductDetails({
     ),
     100,
   );
+
+  /* First PDP image and discount percentage stored on the cart line */
+  const cartLineAttributes = [
+    ...(galleryImages[0]?.url
+      ? [{key: '_image', value: galleryImages[0].url}]
+      : []),
+    ...(discountPercentage > 0
+      ? [
+          {
+            key: '_discount_percentage',
+            value: String(discountPercentage),
+          },
+        ]
+      : []),
+  ];
 
   /*
    * Original Shopify variant price.
@@ -916,12 +947,38 @@ export function ProductDetails({
 
                 </div>
 
-                <button
-                  type="button"
-                  className="h-10 flex-[2.5] rounded-full bg-[#ad3d9f] text-[13px] font-medium text-white transition hover:bg-[#96348a] cursor-pointer"
-                >
-                  Add to Cart
-                </button>
+                  <div className="flex-[2.5]">
+                  <CartForm
+                    route="/cart"
+                    action={CartForm.ACTIONS.LinesAdd}
+                    inputs={{
+                      lines: cartVariant
+                        ? [
+                            {
+                              merchandiseId: cartVariant.id,
+                              quantity,
+                              attributes: cartLineAttributes,
+                            },
+                          ]
+                        : [],
+                    }}
+                  >
+                    {(fetcher) => (
+                      <button
+                        type="submit"
+                        disabled={
+                          !canAddToCart ||
+                          fetcher.state !== 'idle'
+                        }
+                        className="h-10 w-full rounded-full bg-[#ad3d9f] text-[13px] font-medium text-white transition hover:bg-[#96348a] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {fetcher.state !== 'idle'
+                          ? 'Adding...'
+                          : 'Add to Cart'}
+                      </button>
+                    )}
+                  </CartForm>
+                </div>
               </div>
             )}
 

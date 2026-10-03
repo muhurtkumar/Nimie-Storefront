@@ -1,5 +1,7 @@
 import {Suspense, useEffect} from 'react';
-import {Await, NavLink, useRouteLoaderData} from 'react-router';
+import {Await, Link, NavLink, useRouteLoaderData} from 'react-router';
+import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
+import {Minus, Plus, X} from 'lucide-react';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -88,16 +90,12 @@ export function Cart({open, onClose}) {
         </button>
         </div>
 
-        {/* Empty cart */}
-        <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
-          <h3 className="m-0 text-[21px] font-normal leading-[1.2]">
-            Your Bag is Empty
-          </h3>
-
-          <p className="mt-[14px] text-[12px] font-normal leading-[1.4]">
-            You haven't added anything to your bag yet.
-          </p>
-        </div>
+        {/* Cart items */}
+        <Suspense fallback={<EmptyCart />}>
+          <Await resolve={rootData?.cart}>
+            {(cart) => <CartBody cart={cart} onClose={onClose} />}
+          </Await>
+        </Suspense>
 
         {/* Login / Proceed to Payment button */}
         <div className="shrink-0 px-[18px] py-3">
@@ -135,5 +133,206 @@ export function Cart({open, onClose}) {
         </div>
       </div>
     </>
+  );
+}
+
+function formatPrice(amount, currencyCode = 'INR') {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+    .format(Number(amount))
+    .replace(/\s/g, '');
+}
+
+function EmptyCart() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
+      <h3 className="m-0 text-[21px] font-normal leading-[1.2]">
+        Your Bag is Empty
+      </h3>
+
+      <p className="mt-[14px] text-[12px] font-normal leading-[1.4]">
+        You haven't added anything to your bag yet.
+      </p>
+    </div>
+  );
+}
+
+function CartBody({cart: originalCart, onClose}) {
+  const cart = useOptimisticCart(originalCart);
+  const lines = cart?.lines?.nodes ?? [];
+
+  if (!lines.length) {
+    return <EmptyCart />;
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto px-5">
+      <ul className="m-0 list-none p-0">
+        {lines.map((line) => (
+          <CartLineRow key={line.id} line={line} onClose={onClose} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CartLineRow({line, onClose}) {
+  const {id, quantity, merchandise, isOptimistic} = line;
+
+  const options = merchandise?.selectedOptions ?? [];
+
+  const size = options.find(
+    (option) => option.name?.toLowerCase() === 'size',
+  )?.value;
+
+  const color = options.find(
+    (option) => option.name?.toLowerCase() === 'color',
+  )?.value;
+
+  /* First PDP image saved on the line, falls back to variant image */
+  const imageUrl =
+    line.attributes?.find((attribute) => attribute.key === '_image')
+      ?.value || merchandise?.image?.url;
+
+  const currency = merchandise?.price?.currencyCode;
+
+const originalUnitPrice = Number(
+  merchandise?.price?.amount || 0,
+);
+
+const discountPercentage = Number(
+  line.attributes?.find(
+    (attribute) =>
+      attribute.key === '_discount_percentage',
+  )?.value || 0,
+);
+
+const discountedUnitPrice =
+  discountPercentage > 0
+    ? Math.round(
+        originalUnitPrice *
+          (1 - discountPercentage / 100),
+      )
+    : originalUnitPrice;
+
+const hasDiscount =
+  discountPercentage > 0 &&
+  discountedUnitPrice < originalUnitPrice;
+
+const total = discountedUnitPrice * quantity;
+const totalCompareAt = originalUnitPrice * quantity;
+
+  const productUrl = `/products/${merchandise?.product?.handle}?${new URLSearchParams(
+    options.map((option) => [option.name, option.value]),
+  )}`;
+
+  return (
+    <li className="flex gap-4 border-b border-stone-200 py-4">
+      <Link
+        to={productUrl}
+        onClick={onClose}
+        className="min-h-[110px] w-[88px] shrink-0 self-stretch overflow-hidden rounded-md bg-[#e8e0c8]"
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={merchandise?.product?.title}
+            className="h-full w-full object-cover"
+          />
+        ) : null}
+      </Link>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="m-0 text-[15px] font-bold leading-tight text-black">
+            {merchandise?.product?.title}
+          </p>
+
+          <CartForm
+            route="/cart"
+            action={CartForm.ACTIONS.LinesRemove}
+            inputs={{lineIds: [id]}}
+          >
+            <button
+              type="submit"
+              disabled={!!isOptimistic}
+              aria-label="Remove item"
+              className="cursor-pointer border-0 bg-transparent p-0 text-black disabled:opacity-50"
+            >
+              <X className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+          </CartForm>
+        </div>
+
+        {color ? (
+          <p className="m-0 mt-1 text-[12px] text-stone-500">
+            Color: {color}
+          </p>
+        ) : null}
+
+        <div className="mt-2 flex items-center gap-2">
+          {size ? (
+            <span className="rounded bg-[#f4f4f5] px-2.5 py-1 text-[12px] font-semibold text-black">
+              Size: {size}
+            </span>
+          ) : null}
+
+          <div className="flex items-center gap-2 rounded bg-[#f4f4f5] px-2 py-1 text-[12px] font-semibold text-black">
+            <CartForm
+              route="/cart"
+              action={CartForm.ACTIONS.LinesUpdate}
+              inputs={{lines: [{id, quantity: Math.max(1, quantity - 1)}]}}
+            >
+              <button
+                type="submit"
+                disabled={quantity <= 1 || !!isOptimistic}
+                aria-label="Decrease quantity"
+                className="flex cursor-pointer items-center border-0 bg-transparent p-0 text-black disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+            </CartForm>
+
+            <span>Qty: {quantity}</span>
+
+            <CartForm
+              route="/cart"
+              action={CartForm.ACTIONS.LinesUpdate}
+              inputs={{lines: [{id, quantity: quantity + 1}]}}
+            >
+              <button
+                type="submit"
+                disabled={!!isOptimistic}
+                aria-label="Increase quantity"
+                className="flex cursor-pointer items-center border-0 bg-transparent p-0 text-black disabled:opacity-40"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </CartForm>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[15px] font-bold text-black">
+            {formatPrice(total, currency)}
+          </span>
+
+          {hasDiscount ? (
+            <>
+              <span className="text-[13px] text-stone-400 line-through">
+                {formatPrice(totalCompareAt, currency)}
+              </span>
+              <span className="text-[13px] text-[#ff5c5c]">
+                {formatPrice(totalCompareAt - total, currency)} OFF
+              </span>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </li>
   );
 }
