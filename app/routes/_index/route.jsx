@@ -7,6 +7,7 @@ import {ProductShowcase} from '~/components/Home/ProductShowcase';
 
 import {Hero} from '~/components/Home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
+import heroBannerVideo from '~/assets/home/hero-banner-video.webm';
 import {KnotLikeBefore} from '~/components/Home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 import knotLikeBeforeHeading from '~/assets/home/KnotLikeBeforeHeading.png';
@@ -117,6 +118,7 @@ export default function Homepage() {
       */}
       <Hero
         image={heroBanner}
+        video={heroBannerVideo}
         imageAlt="Nimie new collection"
         eyebrow="Meet Lucknow chikankari, the Nimie way."
         heading="The classics got a makeover."

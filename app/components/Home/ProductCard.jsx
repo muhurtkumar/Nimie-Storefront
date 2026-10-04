@@ -450,9 +450,16 @@ useEffect(() => {
           </div>
         )}
 
+        {/* Out of stock text: top right on small screens */}
+        {isSelectedColorSoldOut && (
+          <span className="absolute right-3 top-3 z-20 text-[14px] font-semibold uppercase text-[#82272D] md:hidden">
+            OUT OF STOCK
+          </span>
+        )}
+
         {/* Product tag */}
         {showBadge && !isSelectedColorSoldOut && badge && (
-          <div className="absolute left-3 top-3 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E]">
+          <div className="absolute left-auto right-3 top-3 rounded-full bg-[#345225] px-4 py-1 text-[14px] font-semibold uppercase text-[#FFDF9E] md:left-3 md:right-auto">
             {badge}
           </div>
         )}
@@ -467,20 +474,20 @@ useEffect(() => {
           }
           onClick={handleWishlistToggle}
           disabled={wishlistFetcher.state !== 'idle'}
-          className="absolute right-4 top-4 z-20 cursor-pointer"
+          className="absolute bottom-3 right-3 top-auto z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white md:bottom-auto md:right-4 md:top-4 md:h-auto md:w-auto md:rounded-none md:bg-transparent"
         >
           <Heart
-            className={`h-8 w-8 ${
+            className={`h-5 w-5 md:h-8 md:w-8 ${
               isWishlisted
                 ? 'fill-red-500 text-red-500'
-                : 'text-[#FFDF9E]'
+                : 'text-[#345225] md:text-[#FFDF9E]'
             }`}
             strokeWidth={1.8}
           />
         </button>
 
         {/* Bottom controls */}
-        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between">
+        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pr-12 md:pr-0">
           {showColorPalette && (
             <div className="flex items-center gap-2">
               {colors.map((color) => {
@@ -546,7 +553,7 @@ useEffect(() => {
           )}
 
           {isSelectedColorSoldOut && (
-            <span className="text-[14px] font-semibold uppercase text-[#82272D]">
+            <span className="hidden text-[14px] font-semibold uppercase text-[#82272D] md:block">
               OUT OF STOCK
             </span>
           )}
@@ -590,8 +597,46 @@ useEffect(() => {
             )}
           </div>
         </div>
-      ) : (
-        <div className="h-[88px] px-3 py-3 md:h-[108px] lg:h-[88px]">
+        ) : (
+        <>
+        {/* Small screens: title on top, then type + discount + prices on one row */}
+        <div className="px-3 py-3 md:hidden">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-5 text-[#111]">
+            {product.title}
+          </h3>
+
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span className="text-[13px] text-stone-600">
+              {product.productType}
+            </span>
+
+            <div className="flex items-center gap-2">
+              {hasDiscount && (
+                <>
+                  <span className="rounded-full bg-[#345225] px-2 py-0.5 text-[11px] font-bold text-[#FFDF9E]">
+                    {discountPercentage}% OFF
+                  </span>
+
+                  <span className="text-[14px] font-bold text-[#e98b8b] line-through">
+                    {formatPrice(
+                      originalPriceAmount,
+                      currentPrice?.currencyCode,
+                    )}
+                  </span>
+                </>
+              )}
+
+              <span className="text-[20px] font-bold leading-5 text-black">
+                {formatPrice(
+                  discountedPriceAmount,
+                  currentPrice?.currencyCode,
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden h-[88px] px-3 py-3 md:block md:h-[108px] lg:h-[88px]">
           <div className="flex items-start justify-between gap-3">
 
             {/* Left: Product information */}
@@ -640,6 +685,7 @@ useEffect(() => {
 
           </div>
         </div>
+        </>
       )}
     </Link>
   );

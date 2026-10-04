@@ -30,15 +30,15 @@ export function BehindTheScenes({
     <section
       style={{
         padding: `${GAP_Y} ${GAP_X}`,
-        margin: 0,
+        margin: '0 -16px',
         boxSizing: 'border-box',
-        width: '100%',
+        width: 'calc(100% + 32px)',
       }}
     >
       <Wrapper
         {...wrapperProps}
         className="relative block w-full overflow-hidden"
-        style={{borderRadius: 16, textDecoration: 'none', lineHeight: 0}}
+        style={{borderRadius: 0, textDecoration: 'none', lineHeight: 0}}
       >
         {videos && videos.length > 0 ? (
           <VideoCarousel sources={videos} />
@@ -94,7 +94,7 @@ export function BehindTheScenes({
 
             <h2
               style={{
-                margin: '8px 0 0',
+                margin: '8px 0 0 -0.05em',
                 maxWidth: 720,
                 fontFamily: FONT,
                 fontSize: 'clamp(40px, 6.2vw, 88px)',

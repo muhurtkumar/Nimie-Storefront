@@ -149,7 +149,7 @@ export function Header({header, cart, isLoggedIn}) {
         />
 
         <div
-          className="grid grid-cols-[1fr_auto_1fr] items-center"
+          className="grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]"
           style={{
             position: 'relative',
             zIndex: 2,
@@ -163,29 +163,8 @@ export function Header({header, cart, isLoggedIn}) {
             letterSpacing: '0.025em',
           }}
         >
-          {/* Left: hamburger on mobile/tablet, links on desktop */}
-          <div className="flex items-center">
-            <button
-              type="button"
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-              className="md:hidden"
-              onClick={() => setMenuOpen((o) => !o)}
-              style={{
-                background: 'none',
-                border: 0,
-                // 44px tap target; negative margin keeps the icon on the inset line
-                padding: 10,
-                margin: -10,
-                color: menuOpen ? '#000' : 'inherit',
-                lineHeight: 0,
-                cursor: 'pointer',
-                transition: `color ${DURATION / 2}ms ${EASE}`,
-              }}
-            >
-              <MenuIcon open={menuOpen} />
-            </button>
+          {/* Left: links on desktop only */}
+          <div className="hidden items-center md:flex">
 
             <ul
               className="hidden items-center gap-5 md:flex lg:gap-8"
@@ -209,13 +188,13 @@ export function Header({header, cart, isLoggedIn}) {
             end
             aria-label={shop?.name}
             onClick={closeMenu}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: 0,
-            }}
-          >
+              className="justify-start md:justify-center"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                lineHeight: 0,
+              }}
+            >
             <img
               src={LOGO_SRC}
               alt={shop?.name || 'Home'}
@@ -281,10 +260,16 @@ export function Header({header, cart, isLoggedIn}) {
               </li>
             ))}
           </ul>
-          {/* Profile + cart icons: small and medium screens only */}
+                    {/* Pill: user (if logged in) | menu | cart. Small and medium screens only */}
           <div
-            className="flex items-center md:hidden"
-            style={{justifySelf: 'end', marginRight: -10}}
+            className="flex items-center divide-x divide-black/10 md:hidden"
+            style={{
+              justifySelf: 'end',
+              background: '#fff',
+              color: '#000',
+              borderRadius: 12,
+              overflow: 'hidden',
+            }}
           >
             {isLoggedIn ? (
               <NavLink
@@ -294,10 +279,9 @@ export function Header({header, cart, isLoggedIn}) {
                 onClick={closeMenu}
                 style={{
                   display: 'block',
-                  padding: 10,
-                  color: menuOpen ? '#000' : 'inherit',
+                  padding: 8,
+                  color: 'inherit',
                   lineHeight: 0,
-                  transition: `color ${DURATION / 2}ms ${EASE}`,
                 }}
               >
                 <User size={24} strokeWidth={2} />
@@ -306,16 +290,33 @@ export function Header({header, cart, isLoggedIn}) {
 
             <button
               type="button"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen((o) => !o)}
+              style={{
+                background: 'none',
+                border: 0,
+                padding: 8,
+                color: 'inherit',
+                lineHeight: 0,
+                cursor: 'pointer',
+              }}
+            >
+              <MenuIcon open={menuOpen} />
+            </button>
+
+            <button
+              type="button"
               aria-label="Open cart"
               onClick={openCart}
               style={{
                 background: 'none',
                 border: 0,
-                padding: 10,
-                color: menuOpen ? '#000' : 'inherit',
+                padding: 8,
+                color: 'inherit',
                 lineHeight: 0,
                 cursor: 'pointer',
-                transition: `color ${DURATION / 2}ms ${EASE}`,
               }}
             >
               <ShoppingBag size={24} strokeWidth={2} />
@@ -387,7 +388,7 @@ function MobileMenu({
             flexDirection: 'column',
             gap: 22,
             // clears the nav row (icon + logo) and lines links up with the icon
-            padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 8px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
+            padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 28px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
           {MOBILE_LINKS.filter(

@@ -10,7 +10,7 @@ const GAP_X = '0px'; // left and right
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
 
-export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
+export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
   return (
     <section
       className="hero"
@@ -25,15 +25,35 @@ export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
         className="relative w-full overflow-hidden"
         style={{borderRadius: 16}}
       >
-        {image ? (
+        {video ? (
+          <video
+            src={video}
+            poster={image}
+            aria-label={imageAlt}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="h-[calc(100dvh-32px)] md:h-auto"
+            style={{
+              display: 'block',
+              width: '100%',
+              maxHeight: MAX_HEIGHT,
+              minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
+              objectFit: 'cover',
+              borderRadius: 0,
+            }}
+          />
+        ) : image ? (
           // In normal flow: the image sets the card's height, so it is never cropped
           <img
             src={image}
             alt={imageAlt}
+            className="h-[calc(100dvh-32px)] md:h-auto"
             style={{
               display: 'block',
               width: '100%',
-              height: 'auto',
               maxHeight: MAX_HEIGHT,
               minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
               objectFit: 'cover',
