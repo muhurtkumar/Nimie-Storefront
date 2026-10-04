@@ -2,6 +2,8 @@ const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-ser
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
 const GAP_Y = '16px';
 const GAP_X = '0px';
+// Card can never be taller than the screen minus the top and bottom gap
+const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
 
 const DEFAULT_ITEMS = [
   {
@@ -25,17 +27,50 @@ const DEFAULT_ITEMS = [
 ];
 
 
-export function ContactMethod({image, imageAlt = '', items = DEFAULT_ITEMS}) {
+export function ContactMethod({
+  image,
+  video,
+  imageAlt = '',
+  items = DEFAULT_ITEMS,
+}) {
   return (
     <section
-      style={{padding: `${GAP_Y} ${GAP_X}`, margin: 0, boxSizing: 'border-box', width: '100%'}}
+      className="-mx-4 w-[calc(100%+2rem)] py-0! lg:mx-0 lg:w-full lg:py-4!"
+      style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden" style={{borderRadius: 16, lineHeight: 0}}>
-        {image ? (
+      <div
+        className="relative w-full overflow-hidden rounded-none lg:rounded-2xl"
+        style={{lineHeight: 0}}
+      >
+        {video ? (
+          <video
+            src={video}
+            poster={image}
+            aria-label={imageAlt}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            style={{
+              display: 'block',
+              width: '100%',
+              minHeight: `min(520px, ${MAX_HEIGHT})`,
+              objectFit: 'cover',
+            }}
+          />
+        ) : image ? (
           <img
             src={image}
             alt={imageAlt}
-            style={{display: 'block', width: '100%', height: 'auto', minHeight: 580, objectFit: 'cover'}}
+            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            style={{
+              display: 'block',
+              width: '100%',
+              minHeight: `min(520px, ${MAX_HEIGHT})`,
+              objectFit: 'cover',
+            }}
           />
         ) : (
           <div className="bg-stone-300" style={{width: '100%', height: 260}} />

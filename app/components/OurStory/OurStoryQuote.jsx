@@ -188,14 +188,27 @@ const css = `
    COMPONENT
    ========================================================= */
 
-export function OurStoryQuote({ image, imageAlt = "", quote }) {
+export function OurStoryQuote({ image, video, imageAlt = "", quote }) {
   return (
     <section className="our-story-quote" aria-label="Our story quote">
       <style>{css}</style>
 
-      {/* Background image */}
-      <img className="our-story-quote__image" src={image} alt={imageAlt} />
-
+      {/* Background video (falls back to the image if no video is passed) */}
+      {video ? (
+        <video
+          className="our-story-quote__image"
+          src={video}
+          poster={image}
+          aria-label={imageAlt}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        />
+      ) : (
+        <img className="our-story-quote__image" src={image} alt={imageAlt} />
+      )}
       {/* Dark overlay */}
       <div className="our-story-quote__overlay" aria-hidden="true" />
 

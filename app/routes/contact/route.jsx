@@ -1,4 +1,5 @@
 import heroBanner from '~/assets/home/hero-banner.png';
+import contactVideo from '~/assets/Contact/Contact.webm';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import {useLoaderData} from 'react-router';
@@ -12,7 +13,11 @@ export default function ContactPage() {
   const data = useLoaderData();
   return (
     <>
-      <ContactMethod image={heroBanner} imageAlt="Nimie team" />
+      <ContactMethod
+        image={heroBanner}
+        video={contactVideo}
+        imageAlt="Nimie team"
+      />
       <InstagramReels
         reels={dummyInstagramReels}
         instagramHandle="@NIMIE.IN"

@@ -10,6 +10,7 @@ import { AboutCurator } from "~/components/OurStory/AboutCurator";
 
 import { OurStoryQuote } from "~/components/OurStory/OurStoryQuote";
 import ourStoryQuoteImage from "~/assets/OurStory/OurStoryQuote.png";
+import ourStoryQuoteVideo from "~/assets/OurStory/OurStoryQuote.webm";
 
 import aboutCuratorImage from "~/assets/OurStory/AboutCurator.png";
 import aboutCuratorSignature from "~/assets/OurStory/AboutCuratorSignature.png";
@@ -45,6 +46,7 @@ const ABOUT_NIMIE_DATA = {
 
 const OUR_STORY_QUOTE_DATA = {
   image: ourStoryQuoteImage,
+  video: ourStoryQuoteVideo,
   quote: "Because tradition doesn't have to stay the same to stay meaningful.",
 };
 
