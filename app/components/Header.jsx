@@ -1,14 +1,20 @@
 import {useEffect, useState} from 'react';
+import {ShoppingBag, User} from 'lucide-react';
 import {NavLink, useLocation} from 'react-router';
+
 import LOGO_SRC from '~/assets/logo.png';
+
 import {Cart} from '~/components/Cart';
 
-const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT =
+  "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+
 // Keep in sync with GAP_Y / GAP_X in Hero.jsx
 const GAP_Y = '16px'; // top
 const GAP_X = '0px'; // left and right
 
 const HEADER_RADIUS = 14;
+
 const HEADER_MARGIN = 'clamp(8px, 2vw, 16px)';
 
 // Mobile menu look & motion
@@ -24,12 +30,18 @@ const LEFT_LINKS = [
   {label: 'Shop', to: '/collections/all'},
   {label: 'Our Story', to: '/our-story'},
 ];
+
 const RIGHT_LINKS = [
   {label: 'Wishlist', to: '/wishlist'},
   {label: 'Cart', to: '/cart'},
   {label: 'Contact', to: '/contact'},
 ];
-const MOBILE_LINKS = [{label: 'Home', to: '/'}, ...LEFT_LINKS, ...RIGHT_LINKS];
+
+const MOBILE_LINKS = [
+  {label: 'Home', to: '/'},
+  ...LEFT_LINKS,
+  ...RIGHT_LINKS.filter((link) => link.label !== 'Cart'),
+];
 
 // Inline styles on purpose: global `a { color }` rules in app.css would
 // otherwise turn these links black and beat Tailwind utility classes.
@@ -42,11 +54,13 @@ const linkStyle = ({isActive}) => ({
 /**
  * @param {HeaderProps}
  */
-export function Header({header, cart}) {
+export function Header({header, cart, isLoggedIn}) {
   const {shop} = header;
   const {pathname} = useLocation();
   const cartCount = cart?.totalQuantity ?? 0;
+
   const isHome = pathname === '/contact' || pathname === '/';
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -72,6 +86,7 @@ export function Header({header, cart}) {
     const onChange = (e) => {
       if (e.matches) setMenuOpen(false);
     };
+
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
@@ -79,12 +94,16 @@ export function Header({header, cart}) {
   // Escape to close + lock page scroll while open
   useEffect(() => {
     if (!menuOpen) return undefined;
+
     const onKey = (e) => {
       if (e.key === 'Escape') setMenuOpen(false);
     };
+
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
     window.addEventListener('keydown', onKey);
+
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKey);
@@ -95,145 +114,209 @@ export function Header({header, cart}) {
   // (same offset as the Hero's outer padding), white text.
   // Other pages: normal flow, white background, dark text.
   const wrapperStyle = isHome
-  ? {
-      position: 'absolute',
-      top: `calc(${GAP_Y})`,
-      left: `calc(${GAP_X})`,
-      right: `calc(${GAP_X})`,
-      zIndex: 30,
-      background: 'transparent',
-      color: '#fff',
-      borderRadius: HEADER_RADIUS,
-    }
-  : {
-      position: 'relative',
-      zIndex: 30,
-      marginTop: HEADER_MARGIN,
-      marginLeft: HEADER_MARGIN,
-      marginRight: HEADER_MARGIN,
-      background: '#345225',
-      color: '#fff',
-      borderRadius: HEADER_RADIUS,
-      border: '1px solid rgba(0,0,0,0.1)',
-    };
+    ? {
+        position: 'absolute',
+        top: `calc(${GAP_Y})`,
+        left: `calc(${GAP_X})`,
+        right: `calc(${GAP_X})`,
+        zIndex: 30,
+        background: 'transparent',
+        color: '#fff',
+        borderRadius: HEADER_RADIUS,
+      }
+    : {
+        position: 'relative',
+        zIndex: 30,
+        marginTop: HEADER_MARGIN,
+        marginLeft: HEADER_MARGIN,
+        marginRight: HEADER_MARGIN,
+        background: '#345225',
+        color: '#fff',
+        borderRadius: HEADER_RADIUS,
+        border: '1px solid rgba(0,0,0,0.1)',
+      };
 
   return (
     <>
-    <header style={wrapperStyle}>
-      {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
-      <MobileMenu open={menuOpen} onClose={closeMenu} onCartClick={openCart} />
+      <header style={wrapperStyle}>
+        {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
+        <MobileMenu
+          open={menuOpen}
+          onClose={closeMenu}
+          onCartClick={openCart}
+          isLoggedIn={isLoggedIn}
+        />
 
-      <div
-        className="grid grid-cols-[1fr_auto_1fr] items-center"
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          padding: `${NAV_PAD_Y} ${NAV_PAD_X}`,
-          fontSize: 'clamp(12px, 1.3vw, 14px)',
-          fontFamily: FONT,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.025em',
-        }}
-      >
-        {/* Left: hamburger on mobile/tablet, links on desktop */}
-        <div className="flex items-center">
-          <button
-            type="button"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            className="md:hidden"
-            onClick={() => setMenuOpen((o) => !o)}
+        <div
+          className="grid grid-cols-[1fr_auto_1fr] items-center"
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            padding: `${NAV_PAD_Y} ${NAV_PAD_X}`,
+            fontSize: 'clamp(12px, 1.3vw, 14px)',
+            fontFamily: FONT,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.025em',
+          }}
+        >
+          {/* Left: hamburger on mobile/tablet, links on desktop */}
+          <div className="flex items-center md:translate-y-[7px]">
+            <button
+              type="button"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              className="md:hidden"
+              onClick={() => setMenuOpen((o) => !o)}
+              style={{
+                background: 'none',
+                border: 0,
+                // 44px tap target; negative margin keeps the icon on the inset line
+                padding: 10,
+                margin: -10,
+                color: menuOpen ? '#000' : 'inherit',
+                lineHeight: 0,
+                cursor: 'pointer',
+                transition: `color ${DURATION / 2}ms ${EASE}`,
+              }}
+            >
+              <MenuIcon open={menuOpen} />
+            </button>
+
+            <ul
+              className="hidden items-center gap-5 md:flex lg:gap-8"
+              style={{listStyle: 'none', margin: 0, padding: 0}}
+            >
+              {LEFT_LINKS.map((link) => (
+                <li key={link.label}>
+                  <HeaderLink {...link} />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Center: logo */}
+          <NavLink
+            prefetch="intent"
+            to="/"
+            end
+            aria-label={shop?.name}
+            onClick={closeMenu}
             style={{
-              background: 'none',
-              border: 0,
-              // 44px tap target; negative margin keeps the icon on the inset line
-              padding: 10,
-              margin: -10,
-              color: menuOpen ? '#000' : 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               lineHeight: 0,
-              cursor: 'pointer',
-              transition: `color ${DURATION / 2}ms ${EASE}`,
             }}
           >
-            <MenuIcon open={menuOpen} />
-          </button>
+            <img
+              src={LOGO_SRC}
+              alt={shop?.name || 'Home'}
+              style={{
+                display: 'block',
+                height: 'clamp(28px, 3vw, 40px)',
+                width: 'auto',
+                borderRadius: 0,
+                // turns the logo black while the white menu panel is open
+                filter: menuOpen ? 'brightness(0)' : 'none',
+                transition: `filter ${DURATION / 2}ms ${EASE}`,
+                // If your logo is dark and should be white on the hero, use:
+                // filter: menuOpen ? 'none' : isHome ? 'brightness(0) invert(1)' : 'none',
+              }}
+            />
+          </NavLink>
 
+          {/* Right: links on desktop */}
           <ul
-            className="hidden items-center gap-5 md:flex lg:gap-8"
-            style={{listStyle: 'none', margin: 0, padding: 0}}
+            className="hidden items-center justify-end gap-5 md:flex lg:gap-8"
+            style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: 0,
+              transform: 'translateY(7px)',
+            }}
           >
-            {LEFT_LINKS.map((link) => (
+            {RIGHT_LINKS.map((link) => (
               <li key={link.label}>
-                <HeaderLink {...link} />
+                {link.label === 'Cart' ? (
+                  <button
+                    type="button"
+                    onClick={openCart}
+                    className="cursor-pointer transition-opacity hover:opacity-70"
+                    style={{
+                      color: 'inherit',
+                      background: 'none',
+                      border: 0,
+                      padding: 0,
+                      font: 'inherit',
+                      textTransform: 'inherit',
+                      letterSpacing: 'inherit',
+                    }}
+                  >
+                    Cart ({cartCount})
+                  </button>
+                ) : (
+                  <HeaderLink
+                    label={
+                      link.label === 'Contact' && isLoggedIn
+                        ? 'Account'
+                        : link.label
+                    }
+                    to={
+                      link.label === 'Contact' && isLoggedIn
+                        ? '/account'
+                        : link.to
+                    }
+                  />
+                )}
               </li>
             ))}
           </ul>
+          {/* Profile + cart icons: small and medium screens only */}
+          <div
+            className="flex items-center md:hidden"
+            style={{justifySelf: 'end', marginRight: -10}}
+          >
+            {isLoggedIn ? (
+              <NavLink
+                to="/account"
+                prefetch="intent"
+                aria-label="Account"
+                onClick={closeMenu}
+                style={{
+                  display: 'block',
+                  padding: 10,
+                  color: menuOpen ? '#000' : 'inherit',
+                  lineHeight: 0,
+                  transition: `color ${DURATION / 2}ms ${EASE}`,
+                }}
+              >
+                <User size={24} strokeWidth={2} />
+              </NavLink>
+            ) : null}
+
+            <button
+              type="button"
+              aria-label="Open cart"
+              onClick={openCart}
+              style={{
+                background: 'none',
+                border: 0,
+                padding: 10,
+                color: menuOpen ? '#000' : 'inherit',
+                lineHeight: 0,
+                cursor: 'pointer',
+                transition: `color ${DURATION / 2}ms ${EASE}`,
+              }}
+            >
+              <ShoppingBag size={24} strokeWidth={2} />
+            </button>
+          </div>
         </div>
+      </header>
 
-        {/* Center: logo */}
-        <NavLink
-          prefetch="intent"
-          to="/"
-          end
-          aria-label={shop?.name}
-          onClick={closeMenu}
-          style={{display: 'block', lineHeight: 0}}
-        >
-          <img
-            src={LOGO_SRC}
-            alt={shop?.name || 'Home'}
-            style={{
-              display: 'block',
-              height: 'clamp(28px, 3vw, 40px)',
-              width: 'auto',
-              borderRadius: 0,
-              // turns the logo black while the white menu panel is open
-              filter: menuOpen ? 'brightness(0)' : 'none',
-              transition: `filter ${DURATION / 2}ms ${EASE}`,
-              // If your logo is dark and should be white on the hero, use:
-              // filter: menuOpen ? 'none' : isHome ? 'brightness(0) invert(1)' : 'none',
-            }}
-          />
-        </NavLink>
-
-        {/* Right: links on desktop */}
-        <ul
-          className="hidden items-center justify-end gap-5 md:flex lg:gap-8"
-          style={{listStyle: 'none', margin: 0, padding: 0}}
-        >
-          {RIGHT_LINKS.map((link) => (
-            <li key={link.label}>
-              {link.label === 'Cart' ? (
-                <button
-                  type="button"
-                  onClick={openCart}
-                  className="cursor-pointer transition-opacity hover:opacity-70"
-                  style={{
-                    color: 'inherit',
-                    background: 'none',
-                    border: 0,
-                    padding: 0,
-                    font: 'inherit',
-                    textTransform: 'inherit',
-                    letterSpacing: 'inherit',
-                  }}
-                >
-                  Cart ({cartCount})
-                </button>
-              ) : (
-                <HeaderLink {...link} />
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </header>
-    <Cart
-      open={cartOpen}
-      onClose={closeCart}
-    />
+      <Cart open={cartOpen} onClose={closeCart} />
     </>
   );
 }
@@ -242,7 +325,12 @@ export function Header({header, cart}) {
  * Full-screen menu that reveals from top to bottom, with space left on
  * all four edges. Always mounted so the open/close can animate.
  */
-function MobileMenu({open, onClose, onCartClick}) {
+function MobileMenu({
+  open,
+  onClose,
+  onCartClick,
+  isLoggedIn,
+}) {
   return (
     <>
       {/* Dim backdrop: tap the edge to close */}
@@ -294,7 +382,9 @@ function MobileMenu({open, onClose, onCartClick}) {
             padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 8px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
-          {MOBILE_LINKS.map((link, i) => {
+          {MOBILE_LINKS.filter(
+            (link) => !(isLoggedIn && link.label === 'Contact'),
+          ).map((link, i) => {
             if (link.label === 'Cart') {
               return (
                 <button
@@ -328,7 +418,11 @@ function MobileMenu({open, onClose, onCartClick}) {
             return (
               <NavLink
                 key={link.label}
-                to={link.to}
+                to={
+                  link.label === 'Contact' && isLoggedIn
+                    ? '/account'
+                    : link.to
+                }
                 end
                 prefetch="intent"
                 onClick={onClose}
@@ -352,7 +446,9 @@ function MobileMenu({open, onClose, onCartClick}) {
                     : '0ms',
                 })}
               >
-                {link.label}
+                {link.label === 'Contact' && isLoggedIn
+                  ? 'Account'
+                  : link.label}
               </NavLink>
             );
           })}
@@ -365,10 +461,19 @@ function MobileMenu({open, onClose, onCartClick}) {
 /** Three lines that morph into a cross */
 function MenuIcon({open}) {
   const base = {
-    transition: `transform ${DURATION}ms ${EASE}, opacity ${DURATION / 2}ms ${EASE}`,
+    transition: `transform ${DURATION}ms ${EASE}, opacity ${
+      DURATION / 2
+    }ms ${EASE}`,
   };
+
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M3 6h18"
         stroke="currentColor"
@@ -377,9 +482,12 @@ function MenuIcon({open}) {
         style={{
           ...base,
           transformOrigin: '12px 6px',
-          transform: open ? 'translateY(6px) rotate(45deg)' : 'none',
+          transform: open
+            ? 'translateY(6px) rotate(45deg)'
+            : 'none',
         }}
       />
+
       <path
         d="M3 12h18"
         stroke="currentColor"
@@ -392,6 +500,7 @@ function MenuIcon({open}) {
           opacity: open ? 0 : 1,
         }}
       />
+
       <path
         d="M3 18h18"
         stroke="currentColor"
@@ -400,7 +509,9 @@ function MenuIcon({open}) {
         style={{
           ...base,
           transformOrigin: '12px 18px',
-          transform: open ? 'translateY(-6px) rotate(-45deg)' : 'none',
+          transform: open
+            ? 'translateY(-6px) rotate(-45deg)'
+            : 'none',
         }}
       />
     </svg>
