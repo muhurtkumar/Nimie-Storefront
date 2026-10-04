@@ -24,6 +24,8 @@ const css = `
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 /* =========================================================
@@ -89,6 +91,7 @@ const css = `
   height: 100%;
 
   max-width: none;
+  border-radius: 0;
 
   object-fit: cover;
   object-position: center center;

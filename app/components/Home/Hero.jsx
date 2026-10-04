@@ -13,18 +13,10 @@ const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
 export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
   return (
     <section
-      className="hero"
-      style={{
-        padding: `${GAP_Y} ${GAP_X}`,
-        margin: 0,
-        boxSizing: 'border-box',
-        width: '100%',
-      }}
+      className="hero -mx-4 w-[calc(100%+2rem)] py-0! lg:mx-0 lg:w-full lg:py-4!"
+      style={{boxSizing: 'border-box'}}
     >
-      <div
-        className="relative w-full overflow-hidden"
-        style={{borderRadius: 16}}
-      >
+      <div className="relative w-full overflow-hidden rounded-none lg:rounded-2xl">
         {video ? (
           <video
             src={video}
@@ -35,11 +27,10 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
             muted
             playsInline
             preload="auto"
-            className="h-[calc(100dvh-32px)] md:h-auto"
+            className="h-lvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
             style={{
               display: 'block',
               width: '100%',
-              maxHeight: MAX_HEIGHT,
               minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
               objectFit: 'cover',
               borderRadius: 0,
@@ -50,11 +41,10 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
           <img
             src={image}
             alt={imageAlt}
-            className="h-[calc(100dvh-32px)] md:h-auto"
+            className="h-lvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
             style={{
               display: 'block',
               width: '100%',
-              maxHeight: MAX_HEIGHT,
               minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
               objectFit: 'cover',
               borderRadius: 0,

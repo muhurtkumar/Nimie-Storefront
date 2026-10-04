@@ -118,8 +118,6 @@ export function Header({header, cart, isLoggedIn}) {
     ? {
         position: 'absolute',
         top: `calc(${GAP_Y})`,
-        left: '16px',
-        right: '16px',
         zIndex: 30,
         background: 'transparent',
         color: '#fff',
@@ -139,7 +137,10 @@ export function Header({header, cart, isLoggedIn}) {
 
   return (
     <>
-      <header style={wrapperStyle}>
+      <header
+        className={isHome ? 'left-0 right-0 md:left-4 md:right-4' : undefined}
+        style={wrapperStyle}
+      >
         {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
         <MobileMenu
           open={menuOpen}

@@ -13,6 +13,7 @@ import ourStoryQuoteImage from "~/assets/OurStory/OurStoryQuote.png";
 
 import aboutCuratorImage from "~/assets/OurStory/AboutCurator.png";
 import aboutCuratorSignature from "~/assets/OurStory/AboutCuratorSignature.png";
+import aboutCuratorLine from "~/assets/OurStory/OurStoryLine.png";
 
 
 /**
@@ -58,11 +59,12 @@ const ABOUT_CURATOR_DATA = {
   ],
   signature: aboutCuratorSignature,
   signatureAlt: "Anika's signature",
+  lineImage: aboutCuratorLine,
 };
 
 export default function PreviewOurStory() {
   return (
-    <main>
+    <main className="our-story-page">
       {/* Our Story Hero */}
       <OurStoryHero {...OUR_STORY_HERO_DATA} />
 

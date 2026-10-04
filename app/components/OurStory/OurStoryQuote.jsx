@@ -10,7 +10,8 @@ const css = `
 
 .our-story-quote {
   position: relative;
-  width: 100%;
+  width: calc(100% + 32px);
+  margin-inline: -16px;
   overflow: hidden;
   font-family: ${FONT};
 

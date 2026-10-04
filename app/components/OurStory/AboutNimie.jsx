@@ -9,7 +9,7 @@ const css = `
   font-family: ${FONT};
   background: #2F5723;
   color: #ffffff;
-  border-radius: 4px;
+  border-radius: 16px;
 
   overflow: hidden;
 }

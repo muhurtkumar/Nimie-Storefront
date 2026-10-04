@@ -16,7 +16,7 @@ const css = `
   max-width: 1700px;
   margin: 0 auto;
 
-  padding-block: clamp(10px, 5vw, 56px);
+  padding-block: clamp(6px, 2.5vw, 28px);
   padding-inline: clamp(20px, 5vw, 40px);
 
   display: flex;
@@ -33,8 +33,8 @@ const css = `
   max-width: 62%;
   overflow: hidden;
 
-  border: 6px solid #f4ecd8;
-  border-radius: 4px;
+  border: 5px solid #d4d391;
+  border-radius: 12px;
   box-sizing: border-box;
 }
 
@@ -99,16 +99,19 @@ const css = `
 }
 
 .about-curator__sign-image {
-  height: clamp(44px, 5vw, 60px);
+  height: clamp(62px, 7vw, 84px);
   width: auto;
   display: block;
 }
 
-.about-curator__sign-accent {
-  width: clamp(64px, 8vw, 96px);
+.about-curator__line {
+  display: block;
+  width: 26%;
+  max-width: 220px;
   height: auto;
-  color: #c23b7a;
-  transform: translateY(4px);
+  margin-top: 5px;
+  margin-left: 18%;
+  border-radius: 0;
 }
 
 /* =========================================================
@@ -141,6 +144,7 @@ const css = `
     flex: 1 1 auto;
     max-width: 100%;
     width: 100%;
+    border: none;
   }
 
   .about-curator__image {
@@ -165,11 +169,12 @@ const css = `
   }
 
   .about-curator__sign-image {
-    height: 36px;
+    height: 52px;
   }
 
-  .about-curator__sign-accent {
-    width: 56px;
+  .about-curator__line {
+    width: 30%;
+    max-width: 130px;
   }
 }
 `;
@@ -208,8 +213,8 @@ export function AboutCurator({
   paragraphs = [],
   signature,
   signatureAlt = "Signature",
-  signatureAccent,
-}) {
+  lineImage,
+}) { 
   return (
     <section className="about-curator" aria-label="About the curator">
       <style>{css}</style>
@@ -227,22 +232,21 @@ export function AboutCurator({
           ))}
         </div>
 
+        {lineImage && (
+          <img
+            className="about-curator__line"
+            src={lineImage}
+            alt=""
+            aria-hidden="true"
+          />
+        )}
+
         <div className="about-curator__sign">
           <img
             className="about-curator__sign-image"
             src={signature}
             alt={signatureAlt}
           />
-          {signatureAccent ? (
-            <img
-              className="about-curator__sign-accent"
-              src={signatureAccent}
-              alt=""
-              aria-hidden="true"
-            />
-          ) : (
-            <DefaultSignatureAccent />
-          )}
         </div>
       </div>
     </section>
