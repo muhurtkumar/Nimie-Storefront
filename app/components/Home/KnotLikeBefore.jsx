@@ -48,7 +48,7 @@ const css = `
 /* --- heading group --- */
 .klb__head { min-width: 0; }
 .klb__eyebrow {
-  margin: 0 0 6px;
+  margin: 0 0 14px;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.08em;
@@ -67,6 +67,8 @@ const css = `
   max-width: 520px;
   height: auto;
   overflow: visible;
+  border-radius: 0;
+  margin: -0.7vw 0;
 }
 .klb__sr {
   position: absolute;
@@ -79,9 +81,14 @@ const css = `
 
 /* --- picture --- */
 .klb__media {
+  --klb-pad: clamp(4px, 0.5vw, 7px);
   position: relative;
   min-width: 0;
   width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 59, 150, 0.12);
+  box-shadow: 0 10px 70px 6px rgba(214, 120, 190, 0.22);
 }
 /* spacer: keeps the picture at least square (but never taller than 90vh) */
 .klb__media::before {
@@ -91,15 +98,13 @@ const css = `
 }
 .klb__img {
   position: absolute;
-  inset: 0;
+  inset: var(--klb-pad);
   display: block;
-  width: 100%;
-  height: 100%;
+  width: calc(100% - var(--klb-pad) * 2);
+  height: calc(100% - var(--klb-pad) * 2);
   max-width: none;
   object-fit: cover;
-  border-radius: 5px;
-  border: 1px solid rgba(168, 59, 150, 0.12);
-  box-shadow: 0 10px 70px 6px rgba(214, 120, 190, 0.22);
+  border-radius: 14px;
 }
 
 /* --- text --- */
@@ -140,41 +145,43 @@ const css = `
   justify-content: flex-end;
   padding-right: 5%;
 }
-.klb__smile svg {
+.klb__smile img {
   display: block;
   width: 64px;
   height: auto;
+  border-radius: 0;
 }
 
 /* ================= TABLET + DESKTOP (>= 768px) ================= */
 @media (min-width: 768px) {
   .klb__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto auto 1fr;   /* was: auto 1fr auto */
+    grid-template-rows: 1fr auto auto auto 1fr;
     column-gap: clamp(24px, 4vw, 96px);
     row-gap: 0;
   }
 
-  .klb__media { grid-column: 1; grid-row: 1 / span 3; }
+  .klb__media { grid-column: 1; grid-row: 1 / span 5; }
 
-  .klb__head  { grid-column: 2; grid-row: 1; align-self: start; }
-  .klb__body  { grid-column: 2; grid-row: 2; align-self: start;
-                padding-top: clamp(20px, 3vw, 40px); }   /* was: align-self:center; padding-block: ... */
-  .klb__smile { grid-column: 2; grid-row: 3; align-self: end; }
+  .klb__head  { grid-column: 2; grid-row: 2; align-self: start; }
+  .klb__body  { grid-column: 2; grid-row: 3; align-self: start;
+                padding-top: clamp(10px, 1.5vw, 20px); }
+  .klb__smile { grid-column: 2; grid-row: 4; align-self: start;
+                padding-top: clamp(16px, 2vw, 32px); }
 
   .klb__head,
   .klb__body { padding-right: clamp(0px, 3vw, 72px); }
   .klb__smile { padding-right: clamp(0px, 3vw, 72px); }   /* was: calc(clamp(0px, 3vw, 72px) + 5%) */
 
   /* fluid type: ~13px at 768px, ~19-20px on very large screens */
-.klb__eyebrow { font-size: clamp(10px, calc(7px + 0.3vw), 13px); margin-bottom: clamp(20px, 3vw, 40px); }
+.klb__eyebrow { font-size: clamp(10px, calc(7px + 0.3vw), 13px); margin-bottom: clamp(10px, 1.5vw, 20px); }
   .klb__intro   { font-size: clamp(14px, calc(9px + 0.6vw), 21px); }
   .klb__desc,
   .klb__list    { font-size: clamp(13px, calc(8px + 0.6vw), 20px); }
   .klb__list    { margin-top: clamp(12px, 1.6vw, 28px); }
 
   .klb__svg { max-width: none; }
-  .klb__smile svg { width: clamp(48px, 5.5vw, 104px); }
+  .klb__smile img { width: clamp(48px, 5.5vw, 104px); }
 }
 `;
 
@@ -192,6 +199,8 @@ export function KnotLikeBefore({
   imageAlt,
   eyebrow,
   heading,
+  headingImage,
+  smileImage,
   introTitle,
   description,
   points,
@@ -212,27 +221,12 @@ export function KnotLikeBefore({
 
           <h2 id="knot-like-before-heading" className="klb__heading">
             <span className="klb__sr">{heading}</span>
-            <svg
+            <img
               className="klb__svg"
-              viewBox="0 15 900 150"
+              src={headingImage}
+              alt=""
               aria-hidden="true"
-              focusable="false"
-            >
-              <path id="klb-wave" d="M 8 125 C 180 148, 320 145, 420 100 C 520 65, 600 55, 680 65 C 730 72, 760 85, 900 160" fill="none" />
-              <text
-                fill="#A83B96"
-                style={{
-                  fontFamily: FONT,
-                  fontSize: 92,
-                  fontWeight: 400,
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                <textPath href="#klb-wave" startOffset="0">
-                  {heading}
-                </textPath>
-              </text>
-            </svg>
+            />
           </h2>
         </div>
 
@@ -252,30 +246,7 @@ export function KnotLikeBefore({
 
         {/* 4. SMILE (last on mobile, bottom-right on desktop) */}
         <div className="klb__smile" aria-hidden="true">
-          <svg
-            viewBox="0 0 100 85"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M30 31C27 20 26 12 30 8C34 5 38 11 41 25"
-              stroke="#A83B96"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M48 27C47 16 48 9 52 7C57 6 61 15 63 27"
-              stroke="#A83B96"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M18 37C23 56 39 67 56 65C73 63 84 51 86 34"
-              stroke="#A83B96"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
+          <img src={smileImage} alt="" />
         </div>
       </div>
     </section>

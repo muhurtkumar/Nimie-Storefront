@@ -9,6 +9,8 @@ import {Hero} from '~/components/Home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 import {KnotLikeBefore} from '~/components/Home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
+import knotLikeBeforeHeading from '~/assets/home/KnotLikeBeforeHeading.png';
+import knotLikeBeforeSmile from '~/assets/home/KnotLikeBeforeSmile.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
@@ -86,8 +88,10 @@ function loadDeferredData({context}) {
 const KNOT_LIKE_BEFORE_DATA = {
   image: knotLikeBeforeImage,
   imageAlt: 'Nimie designer wearing a chikankari saree',
-  eyebrow: 'A NOTE FROM THE DESIGNER',
+  eyebrow: 'GIRL BEHIND NIMIE',
   heading: 'Knot like Before',
+  headingImage: knotLikeBeforeHeading,
+  smileImage: knotLikeBeforeSmile,
   introTitle: 'For The Love Of Where We Come From.',
   description:
     'Nimie is our little expression of लखनऊ (Lucknow), its craft, its people and the beauty that has always been around us. We’re taking what we love about home and bringing it into the way we dress today. Easy pieces, thoughtful details and a little something unexpected. here are 3 promises from us:',
