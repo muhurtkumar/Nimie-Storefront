@@ -16,18 +16,17 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
       className="hero -mx-4 w-[calc(100%+2rem)] py-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-none lg:rounded-2xl">
+      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
         {video ? (
           <video
             src={video}
-            poster={image}
             aria-label={imageAlt}
             autoPlay
             loop
             muted
             playsInline
             preload="auto"
-            className="h-lvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
             style={{
               display: 'block',
               width: '100%',
@@ -41,7 +40,7 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
           <img
             src={image}
             alt={imageAlt}
-            className="h-lvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
             style={{
               display: 'block',
               width: '100%',

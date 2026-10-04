@@ -30,12 +30,16 @@ export function PageLayout({
         <Suspense fallback={null}>
           <Await resolve={cart}>
             {(resolvedCart) => (
-              <Header
-                header={header}
-                cart={resolvedCart}
-                isLoggedIn={isLoggedIn}
-                publicStoreDomain={publicStoreDomain}
-              />
+              <Await resolve={isLoggedIn}>
+                {(resolvedIsLoggedIn) => (
+                  <Header
+                    header={header}
+                    cart={resolvedCart}
+                    isLoggedIn={resolvedIsLoggedIn}
+                    publicStoreDomain={publicStoreDomain}
+                  />
+                )}
+              </Await>
             )}
           </Await>
         </Suspense>

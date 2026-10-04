@@ -12,6 +12,7 @@ import {
 import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {getCustomerWishlist} from '~/lib/customer-wishlist';
+import {restoreCustomerCart} from '~/lib/customer-cart';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -64,6 +65,8 @@ export function links() {
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
+  // Restore the logged-in customer's saved cart BEFORE the cart is read below
+  await restoreCustomerCart({context: args.context});
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 

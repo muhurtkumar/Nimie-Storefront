@@ -34,8 +34,6 @@ export const meta = () => {
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
-  await restoreCustomerCart({context: args.context});
-
   const wishlist = await getCustomerWishlist({
     context: args.context,
   });
