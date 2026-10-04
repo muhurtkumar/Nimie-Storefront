@@ -545,17 +545,17 @@ export function ProductDetails({
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
 
           {/* =====================================================
               LEFT SIDE
           ====================================================== */}
 
-          <div className="flex min-w-0 gap-4">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[108px_minmax(0,1fr)] md:grid-cols-[136px_minmax(0,1fr)] lg:grid-cols-[140px_minmax(0,1fr)]">
 
             {/* Desktop thumbnails */}
-            <div className="relative hidden w-[92px] shrink-0 self-stretch sm:flex">
-              <div className="flex h-full w-full flex-col gap-2 overflow-y-auto overflow-x-hidden">
+            <div className="relative hidden w-full self-stretch sm:block lg:h-[660px]">
+              <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto overflow-x-hidden p-[3px]">
                 {galleryImages.map((image, index) => (
                   <button
                     key={`${image.id}-${index}`}
@@ -563,7 +563,7 @@ export function ProductDetails({
                     onClick={() =>
                       setSelectedImage(index)
                     }
-                    className={`relative w-[72px] shrink-0 overflow-hidden rounded-md transition ${
+                    className={`relative w-full shrink-0 overflow-hidden rounded-xl transition ${
                       selectedImage === index
                         ? 'ring-2 ring-[#345225]'
                         : ''
@@ -579,7 +579,7 @@ export function ProductDetails({
                         image.altText ||
                         `${product.title} ${index + 1}`
                       }
-                      className="h-full w-full object-cover"
+                      className="h-full w-full rounded-xl object-cover"
                     />
                   </button>
                 ))}
@@ -587,7 +587,7 @@ export function ProductDetails({
             </div>
 
             {/* Mobile thumbnails */}
-            <div className="absolute z-10 mt-2 flex max-w-[calc(100%-32px)] gap-2 overflow-x-auto sm:hidden">
+            <div className="order-last flex min-w-0 gap-2 overflow-x-auto p-[3px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
               {galleryImages.map((image, index) => (
                 <button
                   key={`${image.id}-${index}`}
@@ -615,7 +615,7 @@ export function ProductDetails({
 
             {/* Main image */}
             <div className="relative min-w-0 flex-1">
-              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8]">
+              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8] lg:aspect-auto lg:h-[660px]">
 
                 {galleryImages.length > 0 ? (
                   <img
@@ -666,7 +666,7 @@ export function ProductDetails({
               RIGHT SIDE
           ====================================================== */}
 
-          <div className="flex h-full min-h-0 flex-col pt-1 lg:pt-2">
+          <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[660px] lg:justify-center lg:pt-0">
 
             {/* Rating - STATIC */}
             <div className="!m-0 flex items-center justify-between">

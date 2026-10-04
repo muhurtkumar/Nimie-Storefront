@@ -8,6 +8,7 @@ const GAP_Y = '16px'; // top and bottom
 const GAP_X = '0px'; // left and right
 // Text inset inside the card (Figma: 32px)
 const INSET = 'clamp(16px, 2.5vw, 32px)';
+const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
 
 export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
   return (
@@ -33,13 +34,17 @@ export function Hero({image, imageAlt = '', eyebrow, heading, cta}) {
               display: 'block',
               width: '100%',
               height: 'auto',
-              minHeight: 520, // only kicks in on narrow phones
+              maxHeight: MAX_HEIGHT,
+              minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
               objectFit: 'cover',
               borderRadius: 0,
             }}
           />
         ) : (
-          <div className="bg-stone-300" style={{width: '100%', height: 520}} />
+          <div 
+            className="bg-stone-300" 
+            style={{width: '100%', height: `min(520px, ${MAX_HEIGHT})`}}
+          />
         )}
 
         {/* Figma overlay: gradient with the 50% opacity baked into the stops */}
