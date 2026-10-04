@@ -327,6 +327,20 @@ const PRODUCT_FRAGMENT = `#graphql
       value
     }
 
+    fabricDetails: metafield(
+      namespace: "custom"
+      key: "fabric_details"
+    ) {
+      value
+    }
+
+    sizeTip: metafield(
+      namespace: "custom"
+      key: "size_tip"
+    ) {
+      value
+    }
+
     colorPattern: metafield(
       namespace: "shopify"
       key: "color-pattern"

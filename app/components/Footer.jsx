@@ -28,6 +28,20 @@ const css = `
   display: block;
 }
 
+/* dark scrim so the white logo stands out */
+.ftr__visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.45) 60%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  pointer-events: none;
+}
+
 /* everything below sits ON TOP of the image and defines the band's height */
 .ftr__overlay {
   position: relative;
@@ -105,6 +119,7 @@ const css = `
   width: clamp(120px, 34vw, 170px);
   height: auto;
   display: block;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
 }
 
 /* ---------- tablet: 3 columns ---------- */

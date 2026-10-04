@@ -22,7 +22,8 @@ const PANEL_GAP = 'clamp(8px, 2vw, 16px)'; // space left on all four edges
 const PANEL_RADIUS = 16;
 const DURATION = 600; // ms
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
-const NAV_PAD_X = 'clamp(20px, 4vw, 32px)';
+const NAV_PAD_X = 'clamp(32px, 3vw, 52px)';
+const HOME_NAV_PAD_X = 'clamp(16px, 2.5vw, 32px)';
 const NAV_PAD_Y = 'clamp(10px, 2vw, 20px)';
 
 // Adjust the routes to match your store
@@ -47,8 +48,8 @@ const MOBILE_LINKS = [
 // otherwise turn these links black and beat Tailwind utility classes.
 const linkStyle = ({isActive}) => ({
   color: 'inherit',
-  textDecoration: isActive ? 'underline' : 'none',
-  textUnderlineOffset: 4,
+  textDecoration: 'none',
+  fontWeight: isActive ? 700 : 400,
 });
 
 /**
@@ -117,8 +118,8 @@ export function Header({header, cart, isLoggedIn}) {
     ? {
         position: 'absolute',
         top: `calc(${GAP_Y})`,
-        left: `calc(${GAP_X})`,
-        right: `calc(${GAP_X})`,
+        left: '16px',
+        right: '16px',
         zIndex: 30,
         background: 'transparent',
         color: '#fff',
@@ -133,7 +134,7 @@ export function Header({header, cart, isLoggedIn}) {
         background: '#345225',
         color: '#fff',
         borderRadius: HEADER_RADIUS,
-        border: '1px solid rgba(0,0,0,0.1)',
+        border: 'none',
       };
 
   return (
@@ -152,16 +153,18 @@ export function Header({header, cart, isLoggedIn}) {
           style={{
             position: 'relative',
             zIndex: 2,
-            padding: `${NAV_PAD_Y} ${NAV_PAD_X}`,
+            padding: `${NAV_PAD_Y} ${
+              isHome ? HOME_NAV_PAD_X : NAV_PAD_X
+            }`,
             fontSize: 'clamp(12px, 1.3vw, 14px)',
             fontFamily: FONT,
-            fontWeight: 700,
+            fontWeight: 400,
             textTransform: 'uppercase',
             letterSpacing: '0.025em',
           }}
         >
           {/* Left: hamburger on mobile/tablet, links on desktop */}
-          <div className="flex items-center md:translate-y-[7px]">
+          <div className="flex items-center">
             <button
               type="button"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -189,7 +192,10 @@ export function Header({header, cart, isLoggedIn}) {
               style={{listStyle: 'none', margin: 0, padding: 0}}
             >
               {LEFT_LINKS.map((link) => (
-                <li key={link.label}>
+                <li
+                  key={link.label}
+                  style={{margin: 0}}
+                >
                   <HeaderLink {...link} />
                 </li>
               ))}
@@ -234,11 +240,13 @@ export function Header({header, cart, isLoggedIn}) {
               listStyle: 'none',
               margin: 0,
               padding: 0,
-              transform: 'translateY(7px)',
             }}
           >
             {RIGHT_LINKS.map((link) => (
-              <li key={link.label}>
+              <li
+                key={link.label}
+                style={{margin: 0}}
+              >
                 {link.label === 'Cart' ? (
                   <button
                     type="button"

@@ -756,7 +756,7 @@ export function ProductDetails({
 
             {/* Description - SHOPIFY */}
             <div
-              className="mt-3 max-h-[71px] max-w-[650px] overflow-y-auto pr-2 text-[11px] leading-[1.55] text-stone-500"
+              className="mt-3 max-w-[650px] pr-2 text-[11px] leading-[1.55] text-stone-500"
               dangerouslySetInnerHTML={{
                 __html:
                   product.descriptionHtml ||
@@ -971,6 +971,15 @@ export function ProductDetails({
                   })}
 
                 </div>
+
+                {product.sizeTip?.value && (
+                  <p 
+                     className="text-[10px] leading-4 text-stone-500"
+                     style={{marginTop: '3px'}}
+                  >
+                    {product.sizeTip.value}
+                  </p>
+                )}
               </div>
             )}
 
@@ -1085,7 +1094,24 @@ export function ProductDetails({
 
               {openSection === 'fabric' && (
                 <div className="border-b border-[#6c655a] px-1 py-3 text-[11px] leading-5 text-stone-500">
-                  {STATIC_PRODUCT_INFO.fabricDetails}
+                  <div className="max-h-[40px] overflow-y-auto pr-2">
+                    {(product.fabricDetails?.value ||
+                      STATIC_PRODUCT_INFO.fabricDetails)
+                      .split('\n')
+                      .map((line, index) => {
+                        const [heading, ...rest] = line.split(':');
+                        const value = rest.join(':').trim();
+
+                        return (
+                          <div key={index}>
+                            <span className="font-semibold text-stone-700">
+                              {heading}:
+                            </span>{' '}
+                            {value}
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
               )}
 
