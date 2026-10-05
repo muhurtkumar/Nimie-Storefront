@@ -99,7 +99,7 @@ const css = `
 }
 
 .about-curator__sign-image {
-  height: clamp(62px, 7vw, 84px);
+  height: clamp(80px, 8vw, 90px); 
   width: auto;
   display: block;
 }
@@ -110,7 +110,7 @@ const css = `
   max-width: 220px;
   height: auto;
   margin-top: 5px;
-  margin-left: 18%;
+  margin-left: 10%;
   border-radius: 0;
 }
 
@@ -141,11 +141,12 @@ const css = `
   }
 
   .about-curator__media {
-    flex: 1 1 auto;
-    max-width: 100%;
-    width: 100%;
-    border: none;
-  }
+  flex: 1 1 auto;
+  max-width: 100%;
+  width: 100%;
+  border: none;
+  border-radius: 0;  /* square corners so it sits flush with the edges */
+}
 
   .about-curator__image {
     height: auto;
@@ -169,13 +170,15 @@ const css = `
   }
 
   .about-curator__sign-image {
-    height: 52px;
+    height: 76px;
   }
 
   .about-curator__line {
-    width: 30%;
-    max-width: 130px;
-  }
+  width: 30%;
+  max-width: 130px;
+  margin-top: 10px;  /* clears the last line of text */
+  margin-left: 0;    /* sits at the left edge, under the paragraph */
+}
 }
 `;
 

@@ -38,10 +38,23 @@ const RIGHT_LINKS = [
   {label: 'Contact', to: '/contact'},
 ];
 
-const MOBILE_LINKS = [
+// Mobile menu: main links
+const MOBILE_PRIMARY_LINKS = [
   {label: 'Home', to: '/'},
-  ...LEFT_LINKS,
-  ...RIGHT_LINKS.filter((link) => link.label !== 'Cart'),
+  {label: 'Shop', to: '/collections/all'},
+  {label: 'Our Story', to: '/our-story'},
+  {label: 'Wishlist', to: '/wishlist'},
+  {label: 'Contact Us', to: '/contact'},
+];
+
+// Mobile menu: support + policy links from the footer
+const MOBILE_SECONDARY_LINKS = [
+  {label: 'My Account', to: '/account'},
+  {label: 'Delivery & Returns', to: '/delivery-returns'},
+  {label: 'Track your order', to: '/track-order'},
+  {label: 'FAQs', to: '#faqs'},
+  {label: 'Terms & Conditions', to: '/policies/terms-of-service'},
+  {label: 'Privacy Policy', to: '/policies/privacy-policy'},
 ];
 
 // Inline styles on purpose: global `a { color }` rules in app.css would
@@ -142,12 +155,7 @@ export function Header({header, cart, isLoggedIn}) {
         style={wrapperStyle}
       >
         {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
-        <MobileMenu
-          open={menuOpen}
-          onClose={closeMenu}
-          onCartClick={openCart}
-          isLoggedIn={isLoggedIn}
-        />
+        <MobileMenu open={menuOpen} onClose={closeMenu} />
 
         <div
           className="grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]"
@@ -166,16 +174,12 @@ export function Header({header, cart, isLoggedIn}) {
         >
           {/* Left: links on desktop only */}
           <div className="hidden items-center md:flex">
-
             <ul
               className="hidden items-center gap-5 md:flex lg:gap-8"
               style={{listStyle: 'none', margin: 0, padding: 0}}
             >
               {LEFT_LINKS.map((link) => (
-                <li
-                  key={link.label}
-                  style={{margin: 0}}
-                >
+                <li key={link.label} style={{margin: 0}}>
                   <HeaderLink {...link} />
                 </li>
               ))}
@@ -189,13 +193,13 @@ export function Header({header, cart, isLoggedIn}) {
             end
             aria-label={shop?.name}
             onClick={closeMenu}
-              className="justify-start md:justify-center"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                lineHeight: 0,
-              }}
-            >
+            className="justify-start md:justify-center"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              lineHeight: 0,
+            }}
+          >
             <img
               src={LOGO_SRC}
               alt={shop?.name || 'Home'}
@@ -223,10 +227,7 @@ export function Header({header, cart, isLoggedIn}) {
             }}
           >
             {RIGHT_LINKS.map((link) => (
-              <li
-                key={link.label}
-                style={{margin: 0}}
-              >
+              <li key={link.label} style={{margin: 0}}>
                 {link.label === 'Cart' ? (
                   <button
                     type="button"
@@ -261,7 +262,8 @@ export function Header({header, cart, isLoggedIn}) {
               </li>
             ))}
           </ul>
-                    {/* Pill: user (if logged in) | menu | cart. Small and medium screens only */}
+
+          {/* Pill: user (if logged in) | menu | cart. Small and medium screens only */}
           <div
             className="flex items-center divide-x divide-black/10 md:hidden"
             style={{
@@ -334,13 +336,74 @@ export function Header({header, cart, isLoggedIn}) {
 /**
  * Full-screen menu that reveals from top to bottom, with space left on
  * all four edges. Always mounted so the open/close can animate.
+ * Contains every page that appears in the footer.
  */
-function MobileMenu({
-  open,
-  onClose,
-  onCartClick,
-  isLoggedIn,
-}) {
+function MobileMenu({open, onClose}) {
+  const itemMotion = (i) => ({
+    opacity: open ? 1 : 0,
+    transform: open ? 'translateY(0)' : 'translateY(14px)',
+    transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
+    transitionDelay: open ? `${250 + i * 60}ms` : '0ms',
+  });
+
+  // "#faqs" style links: close the menu first (which unlocks body scroll),
+  // then scroll. Falls back to the home page anchor if not on that page.
+  const handleHashClick = (e, hash) => {
+    e.preventDefault();
+    onClose();
+    setTimeout(() => {
+      const el = document.getElementById(hash.slice(1));
+      if (el) el.scrollIntoView({behavior: 'smooth'});
+      else window.location.href = `/${hash}`;
+    }, DURATION / 2);
+  };
+
+  const renderLink = (link, i, small) => {
+    const baseStyle = {
+      color: '#000',
+      fontSize: small
+      ? 'clamp(13px, 3.6vw, 15px)'   // secondary: unchanged
+      : 'clamp(16px, 5vw, 22px)',    // primary: larger
+      fontWeight: 400,
+      lineHeight: 1.1,
+      textTransform: 'uppercase',
+      letterSpacing: '0.025em',
+      ...itemMotion(i),
+    };
+
+    if (link.to.startsWith('#')) {
+      return (
+        <a
+          key={link.label}
+          href={link.to}
+          tabIndex={open ? 0 : -1}
+          onClick={(e) => handleHashClick(e, link.to)}
+          style={{...baseStyle, textDecoration: 'none'}}
+        >
+          {link.label}
+        </a>
+      );
+    }
+
+    return (
+      <NavLink
+        key={link.label}
+        to={link.to}
+        end
+        prefetch="intent"
+        onClick={onClose}
+        tabIndex={open ? 0 : -1}
+        style={({isActive}) => ({
+          ...baseStyle,
+          textDecoration: isActive ? 'underline' : 'none',
+          textUnderlineOffset: 6,
+        })}
+      >
+        {link.label}
+      </NavLink>
+    );
+  };
+
   return (
     <>
       {/* Dim backdrop: tap the edge to close */}
@@ -392,76 +455,21 @@ function MobileMenu({
             padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 28px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
-          {MOBILE_LINKS.filter(
-            (link) => !(isLoggedIn && link.label === 'Contact'),
-          ).map((link, i) => {
-            if (link.label === 'Cart') {
-              return (
-                <button
-                  key={link.label}
-                  type="button"
-                  onClick={onCartClick}
-                  className="cursor-pointer border-0 bg-transparent p-0 text-left"
-                  style={{
-                    color: '#000',
-                    fontFamily: FONT,
-                    fontSize: 'clamp(16px, 4.5vw, 20px)',
-                    fontWeight: 400,
-                    lineHeight: 1.1,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.025em',
-                    opacity: open ? 1 : 0,
-                    transform: open
-                      ? 'translateY(0)'
-                      : 'translateY(14px)',
-                    transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
-                    transitionDelay: open
-                      ? `${250 + i * 60}ms`
-                      : '0ms',
-                  }}
-                >
-                  Cart
-                </button>
-              );
-            }
+          {MOBILE_PRIMARY_LINKS.map((link, i) => renderLink(link, i, false))}
 
-            return (
-              <NavLink
-                key={link.label}
-                to={
-                  link.label === 'Contact' && isLoggedIn
-                    ? '/account'
-                    : link.to
-                }
-                end
-                prefetch="intent"
-                onClick={onClose}
-                tabIndex={open ? 0 : -1}
-                style={({isActive}) => ({
-                  color: '#000',
-                  fontSize: 'clamp(16px, 4.5vw, 20px)',
-                  fontWeight: 400,
-                  lineHeight: 1.1,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.025em',
-                  textDecoration: isActive ? 'underline' : 'none',
-                  textUnderlineOffset: 6,
-                  opacity: open ? 1 : 0,
-                  transform: open
-                    ? 'translateY(0)'
-                    : 'translateY(14px)',
-                  transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
-                  transitionDelay: open
-                    ? `${250 + i * 60}ms`
-                    : '0ms',
-                })}
-              >
-                {link.label === 'Contact' && isLoggedIn
-                  ? 'Account'
-                  : link.label}
-              </NavLink>
-            );
-          })}
+          <div
+            aria-hidden="true"
+            style={{
+              height: 1,
+              background: 'rgba(0,0,0,0.12)',
+              margin: '4px 0',
+              ...itemMotion(MOBILE_PRIMARY_LINKS.length),
+            }}
+          />
+
+          {MOBILE_SECONDARY_LINKS.map((link, i) =>
+            renderLink(link, MOBILE_PRIMARY_LINKS.length + 1 + i, true),
+          )}
         </nav>
       </div>
     </>
@@ -492,9 +500,7 @@ function MenuIcon({open}) {
         style={{
           ...base,
           transformOrigin: '12px 6px',
-          transform: open
-            ? 'translateY(6px) rotate(45deg)'
-            : 'none',
+          transform: open ? 'translateY(6px) rotate(45deg)' : 'none',
         }}
       />
 
@@ -519,9 +525,7 @@ function MenuIcon({open}) {
         style={{
           ...base,
           transformOrigin: '12px 18px',
-          transform: open
-            ? 'translateY(-6px) rotate(-45deg)'
-            : 'none',
+          transform: open ? 'translateY(-6px) rotate(-45deg)' : 'none',
         }}
       />
     </svg>
