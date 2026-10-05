@@ -1,4 +1,5 @@
-import {useLoaderData} from 'react-router';
+import {Await, useLoaderData} from 'react-router';
+import {Suspense} from 'react';
 import {getCustomerWishlist} from '~/lib/customer-wishlist';
 
 import {MockShopNotice} from '~/components/MockShopNotice';
@@ -14,7 +15,6 @@ import knotLikeBeforeHeading from '~/assets/home/KnotLikeBeforeHeading.png';
 import knotLikeBeforeSmile from '~/assets/home/KnotLikeBeforeSmile.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
-import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import nimieLogo from '~/assets/home/nimie-logo.png';
 import clip1 from '~/assets/home/clip-1.mp4';
 import clip2 from '~/assets/home/clip-2.mp4';
@@ -79,8 +79,39 @@ function loadDeferredData({context}) {
       return null;
     });
 
+const instagramReels = import('~/lib/instafeed.server.js')
+  .then(({getInstagramFeed}) => getInstagramFeed(context.env))
+  .then((data) => {
+    const reels = (data?.data || [])
+      .filter(
+        (item) =>
+          item.type === 'video' &&
+          item.videos?.standard_resolution?.url,
+      )
+      .map((item) => ({
+        id: item.id,
+        media_type: 'VIDEO',
+        media_url: `/api/instagram-media?url=${encodeURIComponent(
+          item.videos.standard_resolution.url,
+        )}`,
+        thumbnail_url: item.images?.standard_resolution?.url
+          ? `/api/instagram-media?url=${encodeURIComponent(
+              item.images.standard_resolution.url,
+            )}`
+          : '',
+        permalink: item.link,
+        caption: item.caption?.text || '',
+      }));
+
+    return reels;
+  })
+  .catch((error) => {
+    console.error('Instafeed error:', error);
+    return [];
+  });
   return {
     showcaseProducts,
+    instagramReels,
   };
 }
 
@@ -138,10 +169,16 @@ export default function Homepage() {
         description="From the heart of Lucknow, take an exclusive look behind the scenes at the makers keeping centuries-old craftsmanship alive in every Nimie kurti."
       />
 
-      <InstagramReels
-        reels={dummyInstagramReels}
-        instagramHandle="@NIMIE.IN"
-      />
+      <Suspense fallback={null}>
+        <Await resolve={data.instagramReels}>
+          {(instagramReels) => (
+            <InstagramReels
+              reels={instagramReels}
+              instagramHandle="@NIMIE.IN"
+            />
+          )}
+        </Await>
+      </Suspense>
     </div>
   );
 }

@@ -89,20 +89,15 @@ export function InstagramReels({
               }`}
             >
               {/* Reel video */}
-              {reel.media_type === 'VIDEO' && reel.media_url ? (
+              {reel.media_type === 'VIDEO' && reel.media_url && (
                 <video
                   src={reel.media_url}
                   poster={reel.thumbnail_url}
                   muted
                   loop
                   playsInline
+                  preload="auto"
                   autoPlay
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                />
-              ) : (
-                <img
-                  src={reel.thumbnail_url || reel.media_url}
-                  alt={reel.caption || 'Nimie Instagram Reel'}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 />
               )}
