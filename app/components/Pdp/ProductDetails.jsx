@@ -53,31 +53,26 @@ export function ProductDetails({
 }) {
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const [selectedColor, setSelectedColor] =
-    useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
 
-  const [selectedColorId, setSelectedColorId] =
-    useState(null);
+  const [selectedColorId, setSelectedColorId] = useState(null);
 
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [optimisticWishlistKey, setOptimisticWishlistKey] =
-  useState(null);
+  const [optimisticWishlistKey, setOptimisticWishlistKey] = useState(null);
 
-  const [selectedSize, setSelectedSize] =
-    useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
 
   const [quantity, setQuantity] = useState(1);
 
   const [openSection, setOpenSection] = useState(null);
 
   /* Size Guide */
-  const [openSizeGuide, setOpenSizeGuide] =
-    useState(false);
+  const [openSizeGuide, setOpenSizeGuide] = useState(false);
 
   const navigate = useNavigate();
   const wishlistFetcher = useFetcher();
 
- const handleWishlistToggle = () => {
+  const handleWishlistToggle = () => {
     if (!selectedColorId) {
       return;
     }
@@ -109,13 +104,11 @@ export function ProductDetails({
   const images = product.images?.nodes ?? [];
 
   const colorOption = product.options?.find(
-    (option) =>
-      option.name?.toLowerCase() === 'color',
+    (option) => option.name?.toLowerCase() === 'color',
   );
 
   const sizeOption = product.options?.find(
-    (option) =>
-      option.name?.toLowerCase() === 'size',
+    (option) => option.name?.toLowerCase() === 'size',
   );
 
   /* Shopify colors */
@@ -129,8 +122,7 @@ export function ProductDetails({
     const activeColor =
       selectedColor ||
       selectedVariant?.selectedOptions?.find(
-        (option) =>
-          option.name?.toLowerCase() === 'color',
+        (option) => option.name?.toLowerCase() === 'color',
       )?.value;
 
     if (!activeColor) {
@@ -139,11 +131,9 @@ export function ProductDetails({
 
     return (
       product.variants?.nodes?.filter((variant) => {
-        const colorOption =
-          variant.selectedOptions?.find(
-            (option) =>
-              option.name?.toLowerCase() === 'color',
-          );
+        const colorOption = variant.selectedOptions?.find(
+          (option) => option.name?.toLowerCase() === 'color',
+        );
 
         return (
           colorOption?.value?.trim().toLowerCase() ===
@@ -161,27 +151,20 @@ export function ProductDetails({
     );
 
   const colorPatternColors =
-    product.colorPattern?.references?.nodes
-      ?.map((color) => {
-        const labelField = color.fields?.find(
-          (field) => field.key === 'label',
-        );
+    product.colorPattern?.references?.nodes?.map((color) => {
+      const labelField = color.fields?.find((field) => field.key === 'label');
 
-        const colorField = color.fields?.find(
-          (field) => field.key === 'color',
-        );
+      const colorField = color.fields?.find((field) => field.key === 'color');
 
-        const imageField = color.fields?.find(
-          (field) => field.key === 'image',
-        );
+      const imageField = color.fields?.find((field) => field.key === 'image');
 
-        return {
-          id: color.id,
-          name: labelField?.value || 'Color',
-          color: colorField?.value || null,
-          image: imageField?.value || null,
-        };
-      }) || [];
+      return {
+        id: color.id,
+        name: labelField?.value || 'Color',
+        color: colorField?.value || null,
+        image: imageField?.value || null,
+      };
+    }) || [];
 
   const colorGalleries =
     product.colorGalleries?.references?.nodes
@@ -198,8 +181,7 @@ export function ProductDetails({
          * Get the Color metaobject ID referenced by
          * this Color Gallery.
          */
-        const colorId =
-          colorField?.reference?.id || null;
+        const colorId = colorField?.reference?.id || null;
 
         /*
          * Get all images referenced by this
@@ -212,10 +194,7 @@ export function ProductDetails({
                * Shopify Image references normally
                * return MediaImage.
                */
-              if (
-                image?.__typename === 'MediaImage' &&
-                image?.image
-              ) {
+              if (image?.__typename === 'MediaImage' && image?.image) {
                 return {
                   id: image.id,
                   url: image.image.url,
@@ -228,10 +207,7 @@ export function ProductDetails({
               /*
                * Fallback for GenericFile references.
                */
-              if (
-                image?.__typename === 'GenericFile' &&
-                image?.url
-              ) {
+              if (image?.__typename === 'GenericFile' && image?.url) {
                 return {
                   id: image.id,
                   url: image.url,
@@ -251,67 +227,49 @@ export function ProductDetails({
           images: galleryImages,
         };
       })
-      .filter(
-        (gallery) =>
-          gallery.colorId &&
-          gallery.images.length > 0,
-      ) || [];
+      .filter((gallery) => gallery.colorId && gallery.images.length > 0) || [];
 
- const sizeGuideRows =
-  product.sizeGuide?.references?.nodes
-    ?.map((sizeGuideEntry) => {
-      const sizeField = sizeGuideEntry.fields?.find(
-        (field) => field.key === 'size',
-      );
+  const sizeGuideRows =
+    product.sizeGuide?.references?.nodes
+      ?.map((sizeGuideEntry) => {
+        const sizeField = sizeGuideEntry.fields?.find(
+          (field) => field.key === 'size',
+        );
 
-      const measurementsField =
-        sizeGuideEntry.fields?.find(
+        const measurementsField = sizeGuideEntry.fields?.find(
           (field) => field.key === 'measurements',
         );
 
-      let measurementValues = [];
+        let measurementValues = [];
 
-      try {
-        measurementValues = JSON.parse(
-          measurementsField?.value || '[]',
-        );
-      } catch {
-        measurementValues = [];
-      }
+        try {
+          measurementValues = JSON.parse(measurementsField?.value || '[]');
+        } catch {
+          measurementValues = [];
+        }
 
-      const measurements = measurementValues
-        .map((measurement) => {
-          const [name, ...valueParts] =
-            measurement.split(':');
+        const measurements = measurementValues
+          .map((measurement) => {
+            const [name, ...valueParts] = measurement.split(':');
 
-          return {
-            name: name?.trim() || '',
-            value: valueParts.join(':').trim() || '',
-          };
-        })
-        .filter(
-          (measurement) =>
-            measurement.name &&
-            measurement.value,
-        );
+            return {
+              name: name?.trim() || '',
+              value: valueParts.join(':').trim() || '',
+            };
+          })
+          .filter((measurement) => measurement.name && measurement.value);
 
-      return {
-        size: sizeField?.value?.trim() || '',
-        measurements,
-      };
-    })
-    .filter(
-      (entry) =>
-        entry.size &&
-        entry.measurements.length > 0,
-    ) || [];
+        return {
+          size: sizeField?.value?.trim() || '',
+          measurements,
+        };
+      })
+      .filter((entry) => entry.size && entry.measurements.length > 0) || [];
 
   const sizeGuideColumns = Array.from(
     new Set(
       sizeGuideRows.flatMap((row) =>
-        row.measurements.map(
-          (measurement) => measurement.name,
-        ),
+        row.measurements.map((measurement) => measurement.name),
       ),
     ),
   );
@@ -322,8 +280,7 @@ export function ProductDetails({
     }
 
     const color = selectedVariant.selectedOptions.find(
-      (option) =>
-        option.name?.toLowerCase() === 'color',
+      (option) => option.name?.toLowerCase() === 'color',
     );
 
     if (color?.value) {
@@ -331,16 +288,11 @@ export function ProductDetails({
 
       setSelectedColor(colorName);
 
-      const matchingColor =
-        colorPatternColors.find(
-          (item) =>
-            item.name?.trim().toLowerCase() ===
-            colorName.toLowerCase(),
-        );
-
-      setSelectedColorId(
-        matchingColor?.id || null,
+      const matchingColor = colorPatternColors.find(
+        (item) => item.name?.trim().toLowerCase() === colorName.toLowerCase(),
       );
+
+      setSelectedColorId(matchingColor?.id || null);
     }
   }, [selectedVariant, colorPatternColors]);
 
@@ -359,17 +311,11 @@ export function ProductDetails({
 
     const saved = wishlist.some(
       (item) =>
-        item?.productId === product.id &&
-        item?.colorId === selectedColorId,
+        item?.productId === product.id && item?.colorId === selectedColorId,
     );
 
     setIsWishlisted(saved);
-  }, [
-    wishlist,
-    product.id,
-    selectedColorId,
-    optimisticWishlistKey,
-  ]);
+  }, [wishlist, product.id, selectedColorId, optimisticWishlistKey]);
 
   /* Set initial size from selected variant. */
   useEffect(() => {
@@ -378,8 +324,7 @@ export function ProductDetails({
     }
 
     const size = selectedVariant.selectedOptions.find(
-      (option) =>
-        option.name?.toLowerCase() === 'size',
+      (option) => option.name?.toLowerCase() === 'size',
     );
 
     if (size?.value) {
@@ -391,19 +336,16 @@ export function ProductDetails({
   const activeColorName =
     selectedColor ||
     selectedVariant?.selectedOptions?.find(
-      (option) =>
-        option.name?.toLowerCase() === 'color',
+      (option) => option.name?.toLowerCase() === 'color',
     )?.value;
 
   const activeColorMetaobject = colorPatternColors.find(
     (item) =>
-      item.name?.trim().toLowerCase() ===
-      activeColorName?.trim().toLowerCase(),
+      item.name?.trim().toLowerCase() === activeColorName?.trim().toLowerCase(),
   );
 
   const selectedColorGallery = colorGalleries.find(
-    (gallery) =>
-      gallery.colorId === activeColorMetaobject?.id,
+    (gallery) => gallery.colorId === activeColorMetaobject?.id,
   );
 
   const galleryImages = useMemo(() => {
@@ -416,11 +358,7 @@ export function ProductDetails({
     }
 
     return images;
-  }, [
-    selectedColorGallery,
-    selectedVariant,
-    images,
-  ]);
+  }, [selectedColorGallery, selectedVariant, images]);
 
   /* Keep selected image valid when product or color changes. */
   useEffect(() => {
@@ -428,7 +366,7 @@ export function ProductDetails({
   }, [product.id, selectedColorId]);
 
   /* Shopify price data */
-    /* Variant matching the selected color + size */
+  /* Variant matching the selected color + size */
   const cartVariant = selectedColorVariants.find((variant) =>
     variant.selectedOptions?.some(
       (option) =>
@@ -439,8 +377,7 @@ export function ProductDetails({
   );
 
   const canAddToCart =
-    Boolean(cartVariant) &&
-    (cartVariant.quantityAvailable ?? 0) > 0;
+    Boolean(cartVariant) && (cartVariant.quantityAvailable ?? 0) > 0;
 
   /* Shopify price data */
   const price = selectedVariant?.price;
@@ -452,10 +389,7 @@ export function ProductDetails({
    * custom.discountpercentage
    */
   const discountPercentage = Math.min(
-    Math.max(
-      Number(product.discountPercentage?.value || 0),
-      0,
-    ),
+    Math.max(Number(product.discountPercentage?.value || 0), 0),
     100,
   );
 
@@ -477,9 +411,7 @@ export function ProductDetails({
   /*
    * Original Shopify variant price.
    */
-  const originalPriceAmount = Number(
-    price?.amount || 0,
-  );
+  const originalPriceAmount = Number(price?.amount || 0);
 
   /*
    * Calculate discounted selling price.
@@ -490,12 +422,8 @@ export function ProductDetails({
    * = ₹1499 after rounding
    */
   const discountedPriceAmount =
-    originalPriceAmount > 0 &&
-    discountPercentage > 0
-      ? Math.round(
-          originalPriceAmount *
-            (1 - discountPercentage / 100),
-        )
+    originalPriceAmount > 0 && discountPercentage > 0
+      ? Math.round(originalPriceAmount * (1 - discountPercentage / 100))
       : originalPriceAmount;
 
   /* Quantity controls */
@@ -504,16 +432,12 @@ export function ProductDetails({
   };
 
   const decreaseQuantity = () => {
-    setQuantity((current) =>
-      Math.max(1, current - 1),
-    );
+    setQuantity((current) => Math.max(1, current - 1));
   };
 
   /* Accordion */
   const toggleSection = (section) => {
-    setOpenSection((current) =>
-      current === section ? null : section,
-    );
+    setOpenSection((current) => (current === section ? null : section));
   };
 
   /* Move image backwards.*/
@@ -523,9 +447,7 @@ export function ProductDetails({
     }
 
     setSelectedImage((current) =>
-      current === 0
-        ? galleryImages.length - 1
-        : current - 1,
+      current === 0 ? galleryImages.length - 1 : current - 1,
     );
   };
 
@@ -536,9 +458,7 @@ export function ProductDetails({
     }
 
     setSelectedImage((current) =>
-      current === galleryImages.length - 1
-        ? 0
-        : current + 1,
+      current === galleryImages.length - 1 ? 0 : current + 1,
     );
   };
 
@@ -546,13 +466,11 @@ export function ProductDetails({
     <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
-
           {/* =====================================================
               LEFT SIDE
           ====================================================== */}
 
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[108px_minmax(0,1fr)] md:grid-cols-[136px_minmax(0,1fr)] lg:grid-cols-[140px_minmax(0,1fr)]">
-
             {/* Desktop thumbnails */}
             <div className="relative hidden w-full self-stretch sm:block lg:h-[660px]">
               <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto overflow-x-hidden p-[3px]">
@@ -560,25 +478,17 @@ export function ProductDetails({
                   <button
                     key={`${image.id}-${index}`}
                     type="button"
-                    onClick={() =>
-                      setSelectedImage(index)
-                    }
+                    onClick={() => setSelectedImage(index)}
                     className={`relative w-full shrink-0 overflow-hidden rounded-xl transition ${
-                      selectedImage === index
-                        ? 'ring-2 ring-[#345225]'
-                        : ''
+                      selectedImage === index ? 'ring-2 ring-[#345225]' : ''
                     }`}
                     style={{
-                      height:
-                        'calc((100% - 24px) / 4)',
+                      height: 'calc((100% - 24px) / 4)',
                     }}
                   >
                     <img
                       src={image.url}
-                      alt={
-                        image.altText ||
-                        `${product.title} ${index + 1}`
-                      }
+                      alt={image.altText || `${product.title} ${index + 1}`}
                       className="h-full w-full rounded-xl object-cover"
                     />
                   </button>
@@ -592,21 +502,14 @@ export function ProductDetails({
                 <button
                   key={`${image.id}-${index}`}
                   type="button"
-                  onClick={() =>
-                    setSelectedImage(index)
-                  }
+                  onClick={() => setSelectedImage(index)}
                   className={`h-16 w-14 shrink-0 overflow-hidden rounded-md ${
-                    selectedImage === index
-                      ? 'ring-2 ring-[#345225]'
-                      : ''
+                    selectedImage === index ? 'ring-2 ring-[#345225]' : ''
                   }`}
                 >
                   <img
                     src={image.url}
-                    alt={
-                      image.altText ||
-                      `${product.title} ${index + 1}`
-                    }
+                    alt={image.altText || `${product.title} ${index + 1}`}
                     className="h-full w-full object-cover"
                   />
                 </button>
@@ -616,17 +519,10 @@ export function ProductDetails({
             {/* Main image */}
             <div className="relative min-w-0 flex-1">
               <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8] lg:aspect-auto lg:h-[660px]">
-
                 {galleryImages.length > 0 ? (
                   <img
-                    src={
-                      galleryImages[selectedImage]?.url
-                    }
-                    alt={
-                      galleryImages[selectedImage]
-                        ?.altText ||
-                      product.title
-                    }
+                    src={galleryImages[selectedImage]?.url}
+                    alt={galleryImages[selectedImage]?.altText || product.title}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -634,7 +530,6 @@ export function ProductDetails({
                     No image available
                   </div>
                 )}
-
               </div>
 
               {/* Mobile navigation */}
@@ -667,50 +562,42 @@ export function ProductDetails({
           ====================================================== */}
 
           <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[660px] lg:justify-center lg:pt-0">
-
             {/* Rating - STATIC */}
             <div className="!m-0 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-0.5">
-                        {Array.from({length: 5}).map(
-                            (_, index) => (
-                            <Star
-                                key={index}
-                                className="h-[18px] w-[18px] fill-[#f5b51b] text-[#f5b51b]"
-                                strokeWidth={1}
-                            />
-                            ),
-                        )}
-                    </div>
-
-                    <span className="text-[14px] font-semibold text-[#345225]">
-                        {STATIC_PRODUCT_INFO.rating}/5
-                    </span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0.5">
+                  {Array.from({length: 5}).map((_, index) => (
+                    <Star
+                      key={index}
+                      className="h-[18px] w-[18px] fill-[#f5b51b] text-[#f5b51b]"
+                      strokeWidth={1}
+                    />
+                  ))}
                 </div>
 
-                <button
-                  type="button"
-                  aria-label={
+                <span className="text-[14px] font-semibold text-[#345225]">
+                  {STATIC_PRODUCT_INFO.rating}/5
+                </span>
+              </div>
+
+              <button
+                type="button"
+                aria-label={
+                  isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'
+                }
+                onClick={handleWishlistToggle}
+                disabled={!selectedColorId || wishlistFetcher.state !== 'idle'}
+                className="!m-0 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-white disabled:cursor-not-allowed md:h-8 md:w-8"
+              >
+                <Heart
+                  className={`h-5 w-5 md:h-6 md:w-6 ${
                     isWishlisted
-                      ? 'Remove from wishlist'
-                      : 'Add to wishlist'
-                  }
-                  onClick={handleWishlistToggle}
-                  disabled={
-                    !selectedColorId ||
-                    wishlistFetcher.state !== 'idle'
-                  }
-                  className="!m-0 shrink-0 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <Heart
-                    className={`h-6 w-6 ${
-                      isWishlisted
-                        ? 'fill-red-500 text-red-500'
-                        : 'text-[#345225]'
-                    }`}
-                    strokeWidth={1.5}
-                  />
-                </button>
+                      ? 'fill-red-500 text-red-500'
+                      : 'text-[#345225]'
+                  }`}
+                  strokeWidth={1.8}
+                />
+              </button>
             </div>
 
             <div className="mt-3 flex items-start justify-between gap-4">
@@ -729,20 +616,14 @@ export function ProductDetails({
             <div className="mt-2 flex flex-wrap items-center gap-2.5">
               {/* Discounted / Selling Price */}
               <span className="text-[25px] font-bold leading-none text-black">
-                {formatPrice(
-                  discountedPriceAmount,
-                  price?.currencyCode,
-                )}
+                {formatPrice(discountedPriceAmount, price?.currencyCode)}
               </span>
 
               {/* Original Price */}
               {discountPercentage > 0 &&
                 originalPriceAmount > discountedPriceAmount && (
                   <span className="text-[18px] text-[#e98b8b] line-through">
-                    {formatPrice(
-                      originalPriceAmount,
-                      price?.currencyCode,
-                    )}
+                    {formatPrice(originalPriceAmount, price?.currencyCode)}
                   </span>
                 )}
 
@@ -758,10 +639,7 @@ export function ProductDetails({
             <div
               className="mt-3 max-w-[650px] pr-2 text-[11px] leading-[1.55] text-stone-500"
               dangerouslySetInnerHTML={{
-                __html:
-                  product.descriptionHtml ||
-                  product.description ||
-                  '',
+                __html: product.descriptionHtml || product.description || '',
               }}
             />
 
@@ -773,23 +651,15 @@ export function ProductDetails({
 
             {colors.length > 0 && (
               <div>
-                <p className="mb-2 text-[12px] text-stone-600">
-                  Select Colors
-                </p>
+                <p className="mb-2 text-[12px] text-stone-600">Select Colors</p>
 
                 <div className="mt-1 flex items-center gap-2.5">
-
                   {colors.map((color) => {
-                    const isSelected =
-                      selectedColor === color.name;
+                    const isSelected = selectedColor === color.name;
 
-                    const swatchColor =
-                      color.swatch?.color ||
-                      '#c8c8b0';
+                    const swatchColor = color.swatch?.color || '#c8c8b0';
 
-                    const swatchImage =
-                      color.swatch?.image
-                        ?.previewImage?.url;
+                    const swatchImage = color.swatch?.image?.previewImage?.url;
 
                     return (
                       <button
@@ -800,45 +670,28 @@ export function ProductDetails({
                         onClick={() => {
                           setSelectedColor(color.name);
 
-                          const matchingColor =
-                            colorPatternColors.find(
-                              (item) =>
-                                item.name
-                                  ?.trim()
-                                  .toLowerCase() ===
-                                color.name
-                                  ?.trim()
-                                  .toLowerCase(),
-                            );
-
-                          setSelectedColorId(
-                            matchingColor?.id || null,
+                          const matchingColor = colorPatternColors.find(
+                            (item) =>
+                              item.name?.trim().toLowerCase() ===
+                              color.name?.trim().toLowerCase(),
                           );
+
+                          setSelectedColorId(matchingColor?.id || null);
 
                           setSelectedImage(0);
 
-                          const params =
-                            new URLSearchParams();
+                          const params = new URLSearchParams();
 
                           if (selectedSize) {
-                            params.set(
-                              'Size',
-                              selectedSize,
-                            );
+                            params.set('Size', selectedSize);
                           }
 
-                          params.set(
-                            'Color',
-                            color.name,
-                          );
+                          params.set('Color', color.name);
 
-                          navigate(
-                            `?${params.toString()}`,
-                            {
-                              replace: true,
-                              preventScrollReset: true,
-                            },
-                          );
+                          navigate(`?${params.toString()}`, {
+                            replace: true,
+                            preventScrollReset: true,
+                          });
                         }}
                         className={`flex h-6 w-6 items-center justify-center rounded-full transition ${
                           isSelected
@@ -852,21 +705,17 @@ export function ProductDetails({
                             swatchImage
                               ? {
                                   backgroundImage: `url(${swatchImage})`,
-                                  backgroundSize:
-                                    'cover',
-                                  backgroundPosition:
-                                    'center',
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
                                 }
                               : {
-                                  backgroundColor:
-                                    swatchColor,
+                                  backgroundColor: swatchColor,
                                 }
                           }
                         />
                       </button>
                     );
                   })}
-
                 </div>
               </div>
             )}
@@ -877,18 +726,13 @@ export function ProductDetails({
 
             {sizes.length > 0 && (
               <div className="mt-2">
-
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[12px] text-stone-600">
-                    Choose Size
-                  </p>
+                  <p className="text-[12px] text-stone-600">Choose Size</p>
 
                   {/* SIZE GUIDE */}
                   <button
                     type="button"
-                    onClick={() =>
-                      setOpenSizeGuide(true)
-                    }
+                    onClick={() => setOpenSizeGuide(true)}
                     className="flex items-center gap-1 text-[12px] uppercase text-stone-600 cursor-pointer"
                   >
                     <Ruler className="h-4 w-4" />
@@ -897,28 +741,23 @@ export function ProductDetails({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-
                   {sizes.map((size) => {
-                    const isSelected =
-                      selectedSize === size.name;
+                    const isSelected = selectedSize === size.name;
 
-                    const matchingVariant =
-                      selectedColorVariants.find((variant) => {
-                        const sizeOption =
-                          variant.selectedOptions?.find(
-                            (option) =>
-                              option.name?.toLowerCase() ===
-                              'size',
-                          );
+                    const matchingVariant = selectedColorVariants.find(
+                      (variant) => {
+                        const sizeOption = variant.selectedOptions?.find(
+                          (option) => option.name?.toLowerCase() === 'size',
+                        );
 
                         return (
                           sizeOption?.value?.trim().toLowerCase() ===
                           size.name?.trim().toLowerCase()
                         );
-                      });
+                      },
+                    );
 
-                    const inventory =
-                      matchingVariant?.quantityAvailable ?? 0;
+                    const inventory = matchingVariant?.quantityAvailable ?? 0;
 
                     const unavailable = inventory <= 0;
 
@@ -934,28 +773,18 @@ export function ProductDetails({
 
                           setSelectedSize(size.name);
 
-                          const params =
-                            new URLSearchParams();
+                          const params = new URLSearchParams();
 
-                          params.set(
-                            'Size',
-                            size.name,
-                          );
+                          params.set('Size', size.name);
 
                           if (selectedColor) {
-                            params.set(
-                              'Color',
-                              selectedColor,
-                            );
+                            params.set('Color', selectedColor);
                           }
 
-                          navigate(
-                            `?${params.toString()}`,
-                            {
-                              replace: true,
-                              preventScrollReset: true,
-                            },
-                          );
+                          navigate(`?${params.toString()}`, {
+                            replace: true,
+                            preventScrollReset: true,
+                          });
                         }}
                         className={`flex h-7 min-w-[42px] items-center justify-center rounded-full px-3 text-[10px] transition ${
                           unavailable
@@ -969,13 +798,12 @@ export function ProductDetails({
                       </button>
                     );
                   })}
-
                 </div>
 
                 {product.sizeTip?.value && (
-                  <p 
-                     className="text-[10px] leading-4 text-stone-500"
-                     style={{marginTop: '3px'}}
+                  <p
+                    className="text-[10px] leading-4 text-stone-500"
+                    style={{marginTop: '3px'}}
                   >
                     {product.sizeTip.value}
                   </p>
@@ -1005,7 +833,6 @@ export function ProductDetails({
             ) : (
               <div className="mt-5 flex items-center gap-3">
                 <div className="flex h-10 flex-1 items-center justify-between rounded-full bg-white px-3 font-semibold">
-
                   <button
                     type="button"
                     onClick={decreaseQuantity}
@@ -1015,9 +842,7 @@ export function ProductDetails({
                     <Minus className="h-4 w-4 cursor-pointer" />
                   </button>
 
-                  <span className="text-[13px] text-stone-700">
-                    {quantity}
-                  </span>
+                  <span className="text-[13px] text-stone-700">{quantity}</span>
 
                   <button
                     type="button"
@@ -1027,10 +852,9 @@ export function ProductDetails({
                   >
                     <Plus className="h-4 w-4 cursor-pointer" />
                   </button>
-
                 </div>
 
-                  <div className="flex-[2.5]">
+                <div className="flex-[2.5]">
                   <CartForm
                     route="/cart"
                     action={CartForm.ACTIONS.LinesAdd}
@@ -1049,15 +873,10 @@ export function ProductDetails({
                     {(fetcher) => (
                       <button
                         type="submit"
-                        disabled={
-                          !canAddToCart ||
-                          fetcher.state !== 'idle'
-                        }
+                        disabled={!canAddToCart || fetcher.state !== 'idle'}
                         className="h-10 w-full rounded-full bg-[#ad3d9f] text-[13px] font-medium text-white transition hover:bg-[#96348a] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {fetcher.state !== 'idle'
-                          ? 'Adding...'
-                          : 'Add to Cart'}
+                        {fetcher.state !== 'idle' ? 'Adding...' : 'Add to Cart'}
                       </button>
                     )}
                   </CartForm>
@@ -1070,13 +889,10 @@ export function ProductDetails({
             ================================================== */}
 
             <div className="mt-5 border-t border-[#6c655a]">
-
               {/* Fabric details */}
               <button
                 type="button"
-                onClick={() =>
-                  toggleSection('fabric')
-                }
+                onClick={() => toggleSection('fabric')}
                 className="flex w-full items-center justify-between border-b border-[#6c655a] py-3 text-left"
               >
                 <span className="text-[11px] font-medium text-stone-700">
@@ -1095,8 +911,10 @@ export function ProductDetails({
               {openSection === 'fabric' && (
                 <div className="border-b border-[#6c655a] px-1 py-3 text-[11px] leading-5 text-stone-500">
                   <div className="max-h-[40px] overflow-y-auto pr-2">
-                    {(product.fabricDetails?.value ||
-                      STATIC_PRODUCT_INFO.fabricDetails)
+                    {(
+                      product.fabricDetails?.value ||
+                      STATIC_PRODUCT_INFO.fabricDetails
+                    )
                       .split('\n')
                       .map((line, index) => {
                         const [heading, ...rest] = line.split(':');
@@ -1118,9 +936,7 @@ export function ProductDetails({
               {/* Wash care */}
               <button
                 type="button"
-                onClick={() =>
-                  toggleSection('wash')
-                }
+                onClick={() => toggleSection('wash')}
                 className="flex w-full items-center justify-between border-b border-[#6c655a] py-3 text-left"
               >
                 <span className="text-[11px] font-medium text-stone-700">
@@ -1141,7 +957,6 @@ export function ProductDetails({
                   {STATIC_PRODUCT_INFO.washCare}
                 </div>
               )}
-
             </div>
           </div>
         </div>
@@ -1153,33 +968,25 @@ export function ProductDetails({
 
       <div
         className={`absolute inset-0 z-50 transition-all duration-500 ${
-          openSizeGuide
-            ? 'pointer-events-auto'
-            : 'pointer-events-none'
+          openSizeGuide ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       >
-
         {/* Background overlay */}
         <button
           type="button"
           aria-label="Close size guide"
           onClick={() => setOpenSizeGuide(false)}
           className={`absolute inset-0 h-full w-full bg-black/30 transition-opacity duration-500 ${
-            openSizeGuide
-              ? 'opacity-100'
-              : 'opacity-0'
+            openSizeGuide ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
         {/* Sliding panel */}
         <div
           className={`absolute right-0 top-0 flex h-full w-full max-w-[580px] flex-col bg-[#fff8e9] shadow-2xl transition-transform duration-500 ease-in-out ${
-            openSizeGuide
-              ? 'translate-x-0'
-              : 'translate-x-full'
+            openSizeGuide ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-
           {/* Header */}
           <div className="flex items-center justify-between border-b border-stone-300 px-5 py-5 sm:px-7">
             <h2 className="text-[20px] font-semibold text-[#345225]">
@@ -1198,15 +1005,11 @@ export function ProductDetails({
 
           {/* Table */}
           <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
-
-            {sizeGuideRows.length > 0 &&
-            sizeGuideColumns.length > 0 ? (
+            {sizeGuideRows.length > 0 && sizeGuideColumns.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[500px] border-collapse">
-
                   <thead>
                     <tr className="border-b border-stone-400">
-
                       <th className="px-3 py-3 text-left text-[13px] font-semibold text-[#345225]">
                         Size
                       </th>
@@ -1219,27 +1022,20 @@ export function ProductDetails({
                           {column}
                         </th>
                       ))}
-
                     </tr>
                   </thead>
 
                   <tbody>
                     {sizeGuideRows.map((row) => (
-                      <tr
-                        key={row.size}
-                        className="border-b border-stone-300"
-                      >
-
+                      <tr key={row.size} className="border-b border-stone-300">
                         <td className="px-3 py-4 text-left text-[13px] font-semibold text-stone-700">
                           {row.size}
                         </td>
 
                         {sizeGuideColumns.map((column) => {
-                          const measurement =
-                            row.measurements.find(
-                              (item) =>
-                                item.name === column,
-                            );
+                          const measurement = row.measurements.find(
+                            (item) => item.name === column,
+                          );
 
                           return (
                             <td
@@ -1252,20 +1048,16 @@ export function ProductDetails({
                             </td>
                           );
                         })}
-
                       </tr>
                     ))}
                   </tbody>
-
                 </table>
               </div>
             ) : (
               <div className="flex h-full items-center justify-center text-center text-[13px] text-stone-500">
-                Size guide information is not available
-                for this product.
+                Size guide information is not available for this product.
               </div>
             )}
-
           </div>
         </div>
       </div>

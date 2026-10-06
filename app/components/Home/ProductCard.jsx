@@ -474,20 +474,20 @@ useEffect(() => {
           }
           onClick={handleWishlistToggle}
           disabled={wishlistFetcher.state !== 'idle'}
-          className="absolute bottom-3 right-3 top-auto z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white md:bottom-auto md:right-4 md:top-4 md:h-auto md:w-auto md:rounded-none md:bg-transparent"
+          className="absolute bottom-3 right-3 top-auto z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white"
         >
           <Heart
-            className={`h-5 w-5 md:h-8 md:w-8 ${
+            className={`h-5 w-5 md:h-6 md:w-6 ${
               isWishlisted
                 ? 'fill-red-500 text-red-500'
-                : 'text-[#345225] md:text-[#FFDF9E]'
+                : 'text-[#345225]'
             }`}
             strokeWidth={1.8}
           />
         </button>
 
         {/* Bottom controls */}
-        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pr-12 md:pr-0">
+        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pr-12">
           {showColorPalette && (
             <div className="flex items-center gap-2">
               {colors.map((color) => {

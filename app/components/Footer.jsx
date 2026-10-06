@@ -186,7 +186,7 @@ const css = `
 `;
 
 const STORE_LINKS = [
-  {label: 'Shop', href: '/'},
+  {label: 'Shop', href: '/collections/all'},
   {label: 'Our Story', href: '/our-story'},
   {label: 'FAQs', href: '#faqs'},
   {label: 'Contact Us', href: '/contact'},
@@ -194,8 +194,9 @@ const STORE_LINKS = [
 
 const SUPPORT_LINKS = [
   {label: 'My Account', href: '/account'},
-  {label: 'Delivery & Returns', href: '/delivery-returns'},
+  {label: 'Shipping & Delivery', href: '/shipping-delivery'},
   {label: 'Track your order', href: '/track-order'},
+  {label: 'Return & Exchange', href: '/return-exchange'},
 ];
 
 const POLICY_LINKS = [
@@ -231,7 +232,7 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
 
             <FooterColumn title="SUPPORT" links={SUPPORT_LINKS} />
 
-            <FooterColumn title="Policy" links={POLICY_LINKS} />
+            <FooterColumn title="POLICY" links={POLICY_LINKS} />
           </div>
 
           <div className="ftr__logo-wrap">
