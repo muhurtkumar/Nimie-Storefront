@@ -42,18 +42,20 @@ export async function action({request, context}) {
     case CartForm.ACTIONS.LinesRemove:
       result = await cart.removeLines(inputs.lineIds);
       break;
-    case CartForm.ACTIONS.DiscountCodesUpdate: {
-      const formDiscountCode = inputs.discountCode;
+ case CartForm.ACTIONS.DiscountCodesUpdate: {
+  const formDiscountCode = formData.get('discountCode');
 
-      // User inputted discount code
-      const discountCodes = formDiscountCode ? [formDiscountCode] : [];
+  const discountCodes = formDiscountCode
+    ? [String(formDiscountCode)]
+    : [];
 
-      // Combine discount codes already applied on cart
-      discountCodes.push(...inputs.discountCodes);
+  discountCodes.push(...(inputs.discountCodes || []));
 
-      result = await cart.updateDiscountCodes(discountCodes);
-      break;
-    }
+  result = await cart.updateDiscountCodes(discountCodes);
+
+
+  break;
+}
     case CartForm.ACTIONS.GiftCardCodesAdd: {
       const formGiftCardCode = inputs.giftCardCode;
 

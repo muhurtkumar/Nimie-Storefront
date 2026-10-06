@@ -106,8 +106,7 @@ const instagramReels = import('~/lib/instafeed.server.js')
     return reels;
   })
   .catch((error) => {
-    console.error('Instafeed error:', error);
-    return [];
+    throw error;
   });
   return {
     showcaseProducts,
