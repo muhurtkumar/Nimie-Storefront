@@ -15,12 +15,22 @@ export const CART_QUERY_FRAGMENT = `#graphql
       totalAmount {
         ...Money
       }
+      subtotalAmount {
+        ...Money
+      }
       amountPerQuantity {
         ...Money
       }
       compareAtAmountPerQuantity {
         ...Money
       }
+    }
+
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      targetType
     }
     merchandise {
       ... on ProductVariant {
@@ -114,6 +124,15 @@ export const CART_QUERY_FRAGMENT = `#graphql
     }
   }
   fragment CartApiQuery on Cart {
+    deliveryGroups(first: 10) {
+      nodes {
+        selectedDeliveryOption {
+          estimatedCost {
+            ...Money
+          }
+        }
+      }
+    }
     updatedAt
     id
     appliedGiftCards {

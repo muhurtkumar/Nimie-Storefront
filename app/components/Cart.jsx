@@ -218,6 +218,20 @@ const shopifyTotal = Number(
   cart?.cost?.totalAmount?.amount || 0,
 );
 
+const shippingTotal = (
+  cart?.deliveryGroups?.nodes || []
+).reduce(
+  (sum, group) =>
+    sum +
+    Number(
+      group?.selectedDeliveryOption?.estimatedCost?.amount || 0,
+    ),
+  0,
+);
+
+const shopifyMerchandiseTotalAfterDiscounts =
+  shopifyTotal - shippingTotal;
+
 const hasAppliedCoupon = cart?.discountCodes?.some(
   (discount) => discount.applicable,
 );
@@ -236,11 +250,8 @@ const shopifyCouponDiscountRate =
     : 0;
 
 const cartTotal =
-  hasAppliedCoupon && shopifyCouponDiscountRate > 0
-    ? Math.round(
-        customCartTotal *
-          (1 - shopifyCouponDiscountRate),
-      )
+  hasAppliedCoupon
+    ? shopifyMerchandiseTotalAfterDiscounts
     : customCartTotal;
 
 const currency =
@@ -331,14 +342,14 @@ const currency =
                   </div>
 
                   {/* Checkout */}
-                  <NavLink
-                    to="/checkout"
+                  <a
+                    href={cart?.checkoutUrl}
                     onClick={onClose}
                     style={{color: '#fff'}}
                     className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
                   >
                     CHECKOUT
-                  </NavLink>
+                  </a>
                 </div>
               ) : (
                 <NavLink
