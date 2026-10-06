@@ -53,7 +53,7 @@ const css = `
 .reviews {
   width: 100%;
   font-family: ${FONT};
-  background: #F8F1DF;
+  background: #FFF7E7;
   padding: clamp(40px, 6vw, 72px) 0;
 }
 

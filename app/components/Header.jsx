@@ -68,7 +68,7 @@ const linkStyle = ({isActive}) => ({
 /**
  * @param {HeaderProps}
  */
-export function Header({header, cart, isLoggedIn}) {
+export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   const {shop} = header;
   const {pathname} = useLocation();
   const cartCount = cart?.totalQuantity ?? 0;
@@ -155,7 +155,11 @@ export function Header({header, cart, isLoggedIn}) {
         style={wrapperStyle}
       >
         {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
-        <MobileMenu open={menuOpen} onClose={closeMenu} />
+        <MobileMenu
+          open={menuOpen}
+          onClose={closeMenu}
+          wishlistCount={wishlistCount}
+        />
 
         <div
           className="grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]"
@@ -250,7 +254,9 @@ export function Header({header, cart, isLoggedIn}) {
                     label={
                       link.label === 'Contact' && isLoggedIn
                         ? 'Account'
-                        : link.label
+                        : link.label === 'Wishlist'
+                          ? `Wishlist (${wishlistCount})`
+                          : link.label
                     }
                     to={
                       link.label === 'Contact' && isLoggedIn
@@ -363,13 +369,19 @@ export function Header({header, cart, isLoggedIn}) {
  * all four edges. Always mounted so the open/close can animate.
  * Contains every page that appears in the footer.
  */
-function MobileMenu({open, onClose}) {
+function MobileMenu({open, onClose, wishlistCount = 0}) {
   const itemMotion = (i) => ({
     opacity: open ? 1 : 0,
     transform: open ? 'translateY(0)' : 'translateY(14px)',
     transition: `opacity 450ms ${EASE}, transform 450ms ${EASE}`,
     transitionDelay: open ? `${250 + i * 60}ms` : '0ms',
   });
+
+  // Adds the wishlist count to the Wishlist label
+  const labelFor = (link) =>
+    link.label === 'Wishlist'
+      ? `Wishlist (${wishlistCount})`
+      : link.label;
 
   // "#faqs" style links: close the menu first (which unlocks body scroll),
   // then scroll. Falls back to the home page anchor if not on that page.
@@ -387,8 +399,8 @@ function MobileMenu({open, onClose}) {
     const baseStyle = {
       color: '#000',
       fontSize: small
-      ? 'clamp(13px, 3.6vw, 15px)'   // secondary: unchanged
-      : 'clamp(16px, 5vw, 22px)',    // primary: larger
+        ? 'clamp(13px, 3.6vw, 15px)' // secondary
+        : 'clamp(16px, 5vw, 22px)', // primary: larger
       fontWeight: 400,
       lineHeight: 1.1,
       textTransform: 'uppercase',
@@ -405,7 +417,7 @@ function MobileMenu({open, onClose}) {
           onClick={(e) => handleHashClick(e, link.to)}
           style={{...baseStyle, textDecoration: 'none'}}
         >
-          {link.label}
+          {labelFor(link)}
         </a>
       );
     }
@@ -424,7 +436,7 @@ function MobileMenu({open, onClose}) {
           textUnderlineOffset: 6,
         })}
       >
-        {link.label}
+        {labelFor(link)}
       </NavLink>
     );
   };
@@ -584,6 +596,7 @@ export function HeaderMenu() {
  * @property {HeaderQuery} header
  * @property {Promise<CartApiQueryFragment|null>} cart
  * @property {Promise<boolean>} isLoggedIn
+ * @property {number} [wishlistCount]
  * @property {string} publicStoreDomain
  */
 
