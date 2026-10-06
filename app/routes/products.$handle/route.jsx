@@ -168,6 +168,7 @@ export default function Product() {
   });
   return (
     <>
+    <div className="bg-[#FFF7E7] min-h-screen">
       <ProductDetails
         key={product.id}
         product={product}
@@ -212,6 +213,7 @@ export default function Product() {
           ],
         }}
       />
+      </div>
     </>
   );
 }

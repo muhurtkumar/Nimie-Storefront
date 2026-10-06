@@ -587,11 +587,10 @@ export function ProductDetails({
                 }
                 onClick={handleWishlistToggle}
                 disabled={!selectedColorId || wishlistFetcher.state !== 'idle'}
-                className="relative z-10 !m-0 flex shrink-0 cursor-pointer items-center justify-center rounded-lg bg-white !p-0 disabled:cursor-not-allowed"
-                style={{width: 36, height: 36}}
+                className="!m-0 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-white disabled:cursor-not-allowed md:h-8 md:w-8"
               >
                 <Heart
-                  className={`pointer-events-none h-5 w-5 ${
+                  className={`h-5 w-5 md:h-4 md:w-4 ${
                     isWishlisted
                       ? 'fill-red-500 text-red-500'
                       : 'text-[#345225]'

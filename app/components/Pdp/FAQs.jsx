@@ -52,7 +52,7 @@ export default function FAQs() {
       className="
         w-full
         scroll-mt-2
-        bg-[#FFF8EA]
+        bg-[#FFF7E7]
         px-4
         py-12
         sm:px-6
