@@ -20,6 +20,7 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  wishlist,
 }) {
   return (
     <Aside.Provider>
@@ -32,12 +33,17 @@ export function PageLayout({
             {(resolvedCart) => (
               <Await resolve={isLoggedIn}>
                 {(resolvedIsLoggedIn) => (
-                  <Header
-                    header={header}
-                    cart={resolvedCart}
-                    isLoggedIn={resolvedIsLoggedIn}
-                    publicStoreDomain={publicStoreDomain}
-                  />
+                  <Await resolve={wishlist}>
+                    {(resolvedWishlist) => (
+                      <Header
+                        header={header}
+                        cart={resolvedCart}
+                        isLoggedIn={resolvedIsLoggedIn}
+                        wishlistCount={resolvedWishlist?.length ?? 0}
+                        publicStoreDomain={publicStoreDomain}
+                      />
+                    )}
+                  </Await>
                 )}
               </Await>
             )}
