@@ -271,7 +271,7 @@ export function Header({header, cart, isLoggedIn}) {
               background: '#fff',
               color: '#000',
               borderRadius: 12,
-              overflow: 'hidden',
+              overflow: 'visible',
             }}
           >
             {isLoggedIn ? (
@@ -314,6 +314,7 @@ export function Header({header, cart, isLoggedIn}) {
               aria-label="Open cart"
               onClick={openCart}
               style={{
+                position: 'relative',
                 background: 'none',
                 border: 0,
                 padding: 8,
@@ -323,6 +324,30 @@ export function Header({header, cart, isLoggedIn}) {
               }}
             >
               <ShoppingBag size={24} strokeWidth={2} />
+
+              {cartCount > 0 ? (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -3,
+                    right: -1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    background: '#ff5c63',
+                    color: '#fff',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1,
+                    zIndex: 10,
+                  }}
+                >
+                  {cartCount}
+                </span>
+              ) : null}
             </button>
           </div>
         </div>
