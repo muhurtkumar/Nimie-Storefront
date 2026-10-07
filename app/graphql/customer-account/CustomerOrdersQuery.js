@@ -1,4 +1,5 @@
 // NOTE: https://shopify.dev/docs/api/customer/latest/objects/Order
+// This is for order item number in account order section
 export const ORDER_ITEM_FRAGMENT = `#graphql
   fragment OrderItem on Order {
     totalPrice {
