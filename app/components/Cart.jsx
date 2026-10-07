@@ -1,4 +1,4 @@
-import {Suspense, useEffect} from 'react';
+import {Suspense, useEffect, useState} from 'react';
 import {
   Await,
   Link,
@@ -7,7 +7,7 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
-import {Minus, Plus, X} from 'lucide-react';
+import {Minus, Plus, Trash2, X} from 'lucide-react';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -103,44 +103,15 @@ export function Cart({open, onClose}) {
         {/* Cart items */}
         <Suspense fallback={<EmptyCart />}>
           <Await resolve={rootData?.cart}>
-            {(cart) => <CartBody cart={cart} onClose={onClose} />}
+            {(cart) => (
+              <CartBody
+                cart={cart}
+                onClose={onClose}
+                isLoggedInPromise={rootData?.isLoggedIn}
+              />
+            )}
           </Await>
         </Suspense>
-
-        {/* Login / Proceed to Payment button */}
-        <div className="shrink-0 px-[18px] py-3">
-          <Suspense
-            fallback={
-              <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
-                LOGIN
-              </div>
-            }
-          >
-            <Await resolve={rootData?.isLoggedIn}>
-              {(isLoggedIn) =>
-                isLoggedIn ? (
-                  <NavLink
-                    to="/checkout"
-                    onClick={onClose}
-                    style={{color: '#fff'}}
-                    className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                  >
-                    CHECKOUT
-                  </NavLink>
-                ) : (
-                  <NavLink
-                    to="/account/login"
-                    onClick={onClose}
-                    style={{color: '#fff'}}
-                    className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                  >
-                    LOGIN
-                  </NavLink>
-                )
-              }
-            </Await>
-          </Suspense>
-        </div>
       </div>
     </>
   );
@@ -171,21 +142,229 @@ function EmptyCart() {
   );
 }
 
-function CartBody({cart: originalCart, onClose}) {
+function CartBody({
+  cart: originalCart,
+  onClose,
+  isLoggedInPromise,
+}) {
   const cart = useOptimisticCart(originalCart);
+  console.log('CART BEFORE COUPON:', {
+  discountCodes: cart?.discountCodes,
+  cost: cart?.cost,
+});
+  const [couponCode, setCouponCode] = useState('');
   const lines = cart?.lines?.nodes ?? [];
 
   if (!lines.length) {
-    return <EmptyCart />;
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <EmptyCart />
+
+        <div className="shrink-0 border-t border-stone-200 px-[18px] py-3">
+          <Suspense
+            fallback={
+              <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
+                LOGIN
+              </div>
+            }
+          >
+            <Await resolve={isLoggedInPromise}>
+              {(isLoggedIn) =>
+                !isLoggedIn ? (
+                  <NavLink
+                    to="/account/login"
+                    onClick={onClose}
+                    style={{color: '#fff'}}
+                    className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                  >
+                    LOGIN
+                  </NavLink>
+                ) : null
+              }
+            </Await>
+          </Suspense>
+        </div>
+      </div>
+    );
   }
 
+const customCartTotal = lines.reduce((sum, line) => {
+  const originalUnitPrice = Number(
+    line.merchandise?.price?.amount || 0,
+  );
+
+  const discountPercentage = Number(
+    line.attributes?.find(
+      (attribute) => attribute.key === '_discount_percentage',
+    )?.value || 0,
+  );
+
+  const discountedUnitPrice =
+    discountPercentage > 0
+      ? Math.round(
+          originalUnitPrice *
+            (1 - discountPercentage / 100),
+        )
+      : originalUnitPrice;
+
+  return sum + discountedUnitPrice * line.quantity;
+}, 0);
+
+const shopifySubtotal = Number(
+  cart?.cost?.subtotalAmount?.amount || 0,
+);
+
+const shopifyTotal = Number(
+  cart?.cost?.totalAmount?.amount || 0,
+);
+
+const shippingTotal = (
+  cart?.deliveryGroups?.nodes || []
+).reduce(
+  (sum, group) =>
+    sum +
+    Number(
+      group?.selectedDeliveryOption?.estimatedCost?.amount || 0,
+    ),
+  0,
+);
+
+const shopifyMerchandiseTotalAfterDiscounts =
+  shopifyTotal - shippingTotal;
+
+const hasAppliedCoupon = cart?.discountCodes?.some(
+  (discount) => discount.applicable,
+);
+
+const appliedCoupon = cart?.discountCodes?.find(
+  (discount) => discount.applicable,
+);
+
+const shopifyCouponDiscountRate =
+  hasAppliedCoupon && shopifySubtotal > 0
+    ? Math.max(
+        0,
+        (shopifySubtotal - shopifyTotal) /
+          shopifySubtotal,
+      )
+    : 0;
+
+const cartTotal =
+  hasAppliedCoupon
+    ? shopifyMerchandiseTotalAfterDiscounts
+    : customCartTotal;
+
+const currency =
+  lines[0]?.merchandise?.price?.currencyCode || 'INR';
+
   return (
-    <div className="flex-1 overflow-y-auto px-5">
-      <ul className="m-0 list-none p-0">
-        {lines.map((line) => (
-          <CartLineRow key={line.id} line={line} onClose={onClose} />
-        ))}
-      </ul>
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Cart items */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-5">
+        <ul className="m-0 list-none p-0">
+          {lines.map((line) => (
+            <CartLineRow
+              key={line.id}
+              line={line}
+              onClose={onClose}
+            />
+          ))}
+        </ul>
+      </div>
+
+      {/* Coupon code */}
+      <div className="shrink-0 border-t border-stone-200 px-[18px] py-3 [&_form]:max-w-none!">
+        <CartForm
+          route="/cart"
+          action={CartForm.ACTIONS.DiscountCodesUpdate}
+          inputs={{
+            discountCodes: [],
+          }}
+        >
+          <div className="flex items-stretch gap-2">
+            <input
+              type="text"
+              name="discountCode"
+              placeholder="Coupon code"
+              value={couponCode}
+              onChange={(event) =>
+                setCouponCode(event.target.value)
+              }
+              className="min-h-10 min-w-0 flex-1 rounded-[6px] border border-stone-300 px-3 text-[12px] uppercase outline-none"
+              style={{margin: 0}}
+            />
+
+            <button
+              type="submit"
+              className="min-h-10 w-[calc((100%-8px)/3.5)] cursor-pointer rounded-[6px] bg-[#345225] px-4 text-[12px] font-normal uppercase tracking-[0.02em] text-white"
+            >
+              APPLY
+            </button>
+          </div>
+        </CartForm>
+
+        {appliedCoupon ? (
+          <p className="m-0 mt-2 text-[11px] text-[#345225]">
+            Coupon {appliedCoupon.code} applied successfully.
+          </p>
+        ) : couponCode &&
+          cart?.discountCodes?.some(
+            (discount) => !discount.applicable,
+          ) ? (
+          <p className="m-0 mt-2 text-[11px] text-[#ff5c5c]">
+            Invalid or unavailable coupon code.
+          </p>
+        ) : null}
+      </div>
+
+      {/* Cart footer */}
+      <div className="shrink-0 border-t border-stone-200 px-[18px] py-3">
+        <Suspense
+          fallback={
+            <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
+              LOGIN
+            </div>
+          }
+        >
+          <Await resolve={isLoggedInPromise}>
+            {(isLoggedIn) =>
+              isLoggedIn ? (
+                <div className="flex items-center gap-3">
+                  {/* Total */}
+                  <div className="min-w-0 flex-1">
+                    <span className="block text-[10px] uppercase tracking-[0.04em] text-stone-500">
+                      Total
+                    </span>
+
+                    <span className="block text-[16px] font-bold leading-tight text-black">
+                      {formatPrice(cartTotal, currency)}
+                    </span>
+                  </div>
+
+                  {/* Checkout */}
+                  <a
+                    href={cart?.checkoutUrl}
+                    onClick={onClose}
+                    style={{color: '#fff'}}
+                    className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                  >
+                    CHECKOUT
+                  </a>
+                </div>
+              ) : (
+                <NavLink
+                  to="/account/login"
+                  onClick={onClose}
+                  style={{color: '#fff'}}
+                  className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                >
+                  LOGIN
+                </NavLink>
+              )
+            }
+          </Await>
+        </Suspense>
+      </div>
     </div>
   );
 }
@@ -271,9 +450,9 @@ function CartLineRow({line, onClose}) {
               type="submit"
               disabled={!!isOptimistic}
               aria-label="Remove item"
-              className="cursor-pointer border-0 bg-transparent p-0 text-black disabled:opacity-50"
+              className="cursor-pointer border-0 bg-transparent p-0 text-[#ff5c5c] disabled:opacity-50"
             >
-              <X className="h-5 w-5" strokeWidth={1.5} />
+              <Trash2 className="h-5 w-5" strokeWidth={1.7} />
             </button>
           </CartForm>
         </div>

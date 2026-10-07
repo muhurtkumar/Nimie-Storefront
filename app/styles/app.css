@@ -214,6 +214,10 @@ button.reset > * {
   margin: 0;
 }
 
+.cart-coupon form {
+  max-width: none;
+}
+
 button.reset:not(:has(> *)) {
   height: 1.5rem;
   line-height: 1.5rem;
