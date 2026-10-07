@@ -105,9 +105,19 @@ const css = `
   animation-direction: reverse;
 }
 
-/* Slight gap between the two rows */
+/* Third row: slightly different speed so rows don't move in lockstep */
+.reviews__track--slow {
+  animation-duration: 55s;
+}
+
+/* Gap between rows */
 .reviews__strip + .reviews__strip {
   margin-top: clamp(12px, 1.5vw, 20px);
+}
+
+/* Third row is only shown on mobile */
+.reviews__strip--mobile-only {
+  display: none;
 }
 
 @keyframes reviews-marquee {
@@ -185,35 +195,57 @@ const css = `
   .reviews__card {
     width: 260px;
   }
+
+  .reviews__strip--mobile-only {
+    display: block;
+  }
 }
 `;
 
 export function Reviews({reviews = [], title = "Reviews"}) {
-  // One sticker per review, assigned randomly with no adjacent repeats.
-  // useMemo keeps this stable across re-renders (e.g. pause/resize)
-  // instead of reshuffling every time the component re-renders.
-  const stickerAssignmentRow1 = useMemo(
+  // One sticker per review per row, assigned randomly with no adjacent
+  // repeats. useMemo keeps these stable across re-renders.
+  const stickersRow1 = useMemo(
     () => assignNonRepeatingStickers(reviews.length, STICKERS),
     [reviews.length]
   );
-  // Second row reuses the reviews in reverse order so it doesn't look
-  // like a mirrored copy of row one, with its own independent stickers.
-  const stickerAssignmentRow2 = useMemo(
+  const stickersRow2 = useMemo(
+    () => assignNonRepeatingStickers(reviews.length, STICKERS),
+    [reviews.length]
+  );
+  const stickersRow3 = useMemo(
     () => assignNonRepeatingStickers(reviews.length, STICKERS),
     [reviews.length]
   );
 
   if (!reviews.length) return null;
 
-  const reviewsRow2 = [...reviews].reverse();
-
-  // Duplicate both the reviews and their matching stickers so each
-  // strip can loop seamlessly without a sticker mismatch at the seam.
-  const itemsRow1 = [...reviews, ...reviews];
-  const stickersRow1 = [...stickerAssignmentRow1, ...stickerAssignmentRow1];
-
-  const itemsRow2 = [...reviewsRow2, ...reviewsRow2];
-  const stickersRow2 = [...stickerAssignmentRow2, ...stickerAssignmentRow2];
+  // Row 2 uses the reviews in reverse order; row 3 starts from the middle,
+  // so the three rows never look like copies of each other.
+  const mid = Math.floor(reviews.length / 2);
+  const rows = [
+    {
+      key: "row1",
+      items: reviews,
+      stickers: stickersRow1,
+      trackClass: "",
+      stripClass: "",
+    },
+    {
+      key: "row2",
+      items: [...reviews].reverse(),
+      stickers: stickersRow2,
+      trackClass: "reviews__track--reverse",
+      stripClass: "",
+    },
+    {
+      key: "row3",
+      items: [...reviews.slice(mid), ...reviews.slice(0, mid)],
+      stickers: stickersRow3,
+      trackClass: "reviews__track--slow",
+      stripClass: "reviews__strip--mobile-only",
+    },
+  ];
 
   return (
     <section className="reviews" aria-label={title}>
@@ -222,57 +254,43 @@ export function Reviews({reviews = [], title = "Reviews"}) {
       <h2 className="reviews__title">{title}</h2>
 
       <div className="reviews__strips">
-        <div className="reviews__strip">
-          <div className="reviews__track">
-            {itemsRow1.map((review, index) => (
-              <article
-                key={`row1-${review.id}-${index}`}
-                className="reviews__card"
-              >
-                <div className="reviews__card-header">
-                  <img
-                    className="reviews__avatar"
-                    src={stickersRow1[index]}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <div className="reviews__meta">
-                    <span className="reviews__name">{review.name}</span>
-                    <span className="reviews__date">{review.date}</span>
-                  </div>
-                </div>
+        {rows.map((row) => {
+          // Duplicate both the reviews and their matching stickers so each
+          // strip loops seamlessly without a sticker mismatch at the seam.
+          const items = [...row.items, ...row.items];
+          const stickers = [...row.stickers, ...row.stickers];
 
-                <p className="reviews__text">{review.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+          return (
+            <div
+              key={row.key}
+              className={`reviews__strip ${row.stripClass}`.trim()}
+            >
+              <div className={`reviews__track ${row.trackClass}`.trim()}>
+                {items.map((review, index) => (
+                  <article
+                    key={`${row.key}-${review.id}-${index}`}
+                    className="reviews__card"
+                  >
+                    <div className="reviews__card-header">
+                      <img
+                        className="reviews__avatar"
+                        src={stickers[index]}
+                        alt=""
+                        aria-hidden="true"
+                      />
+                      <div className="reviews__meta">
+                        <span className="reviews__name">{review.name}</span>
+                        <span className="reviews__date">{review.date}</span>
+                      </div>
+                    </div>
 
-        <div className="reviews__strip">
-          <div className="reviews__track reviews__track--reverse">
-            {itemsRow2.map((review, index) => (
-              <article
-                key={`row2-${review.id}-${index}`}
-                className="reviews__card"
-              >
-                <div className="reviews__card-header">
-                  <img
-                    className="reviews__avatar"
-                    src={stickersRow2[index]}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <div className="reviews__meta">
-                    <span className="reviews__name">{review.name}</span>
-                    <span className="reviews__date">{review.date}</span>
-                  </div>
-                </div>
-
-                <p className="reviews__text">{review.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+                    <p className="reviews__text">{review.text}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

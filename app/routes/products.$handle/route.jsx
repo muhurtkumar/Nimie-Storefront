@@ -168,7 +168,7 @@ export default function Product() {
   });
   return (
     <>
-    <div className="bg-[#FFF7E7] min-h-screen">
+    <div className="bg-[#FFF7E7] relative left-1/2 w-screen -translate-x-1/2 ">
       <ProductDetails
         key={product.id}
         product={product}

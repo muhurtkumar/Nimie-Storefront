@@ -179,7 +179,7 @@ const css = `
 
 @media (max-width: 767px) {
   .product-intro__media {
-    border-radius: 12px 12px 0 0;
+    
   }
 
   .product-intro__track {
