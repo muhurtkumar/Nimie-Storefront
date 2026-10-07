@@ -45,32 +45,46 @@ const css = `
 .sfm__nav {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: clamp(16px, 2.5vw, 24px);
 }
 
 .sfm__nav-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid rgba(47, 87, 35, 0.3);
-  background: #fff;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  border: none;
+  background: #F5F5EC;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #2F5723;
-  transition: opacity 0.2s ease;
+  color: #2B22C9;
+  padding: 0;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.sfm__nav-btn:hover:not(:disabled) {
+  background: #ECECDF;
 }
 
 .sfm__nav-btn:disabled {
-  opacity: 0.35;
+  background: #FBF4E6;
+  color: rgba(43, 34, 201, 0.35);
   cursor: default;
 }
 
+.sfm__nav-btn svg {
+  width: 46px;
+  height: 34px;
+  display: block;
+  stroke-width: 1.6;
+}
+
 .sfm__nav-label {
-  font-size: 13px;
-  color: rgba(23, 23, 23, 0.6);
+  margin-left: 24px;
+  font-size: 12px;
+  color: #000;
 }
 `;
 
