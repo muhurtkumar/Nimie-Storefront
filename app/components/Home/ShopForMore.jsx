@@ -10,13 +10,13 @@ const css = `
   width: 100%;
   font-family: ${FONT};
   background: #FFF8EA;
-  padding: clamp(40px, 6vw, 72px) 0;
-  margin-top: clamp(16px, 1vw, 36px);
+  padding: clamp(12px, 2vw, 24px) 0 clamp(24px, 4vw, 48px);
+  margin: 0;
 }
 .sfm *, .sfm *::before, .sfm *::after { box-sizing: border-box; }
 
 .sfm__title {
-  margin: 0 0 clamp(24px, 4vw, 40px);
+  margin: 0 0 clamp(28px, 5vw, 48px);
   text-align: center;
   font-size: clamp(24px, 3vw, 36px);
   font-weight: 700;
@@ -26,18 +26,19 @@ const css = `
 .sfm__inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 40px);
+  padding: 0 clamp(12px, 3vw, 32px);
 }
 
 .sfm__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(16px, 2vw, 24px);
+  gap: 28px;
 }
 
 @media (min-width: 768px) {
   .sfm__grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 }
 
@@ -45,7 +46,7 @@ const css = `
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: clamp(20px, 3vw, 32px);
+  margin-top: clamp(16px, 2.5vw, 24px);
 }
 
 .sfm__nav-btn {

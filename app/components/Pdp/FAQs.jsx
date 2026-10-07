@@ -50,7 +50,8 @@ export default function FAQs() {
     <section
       id="faqs"
       className="
-        w-full
+        w-auto
+        -m-4
         scroll-mt-2
         bg-[#FFF7E7]
         px-4

@@ -25,8 +25,6 @@ const css = `
   width: 100%;
   overflow: hidden;
   background: #000000;
-  border-radius: 16px 16px 0 0;
-
   height: clamp(420px, 58vw, 760px);
 }
 
