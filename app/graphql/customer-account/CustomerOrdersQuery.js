@@ -10,6 +10,21 @@ export const ORDER_ITEM_FRAGMENT = `#graphql
     fulfillments(first: 1) {
       nodes {
         status
+        trackingInformation {
+          url
+          number
+          company
+        }
+      }
+    }
+    lineItems(first: 50) {
+      nodes {
+        title
+        quantity
+        image {
+          url
+          altText
+        }
       }
     }
     id
