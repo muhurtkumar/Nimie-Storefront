@@ -95,13 +95,12 @@ export function ProductCard({
     wishlistFetcher.data,
   ]);
 
-
-useEffect(() => {
-  if (initialColorId) {
-    setSelectedColorId(initialColorId);
-    setActiveImageIndex(0);
-  }
-}, [initialColorId]);
+  useEffect(() => {
+    if (initialColorId) {
+      setSelectedColorId(initialColorId);
+      setActiveImageIndex(0);
+    }
+  }, [initialColorId]);
 
   const images = product.images?.nodes ?? [];
 
@@ -464,7 +463,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Heart icon */}
+        {/* Heart icon (z-30 keeps it above the bottom controls row) */}
         <button
           type="button"
           aria-label={
@@ -474,10 +473,10 @@ useEffect(() => {
           }
           onClick={handleWishlistToggle}
           disabled={wishlistFetcher.state !== 'idle'}
-          className="absolute bottom-3 right-3 top-auto z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white"
+          className="absolute bottom-3 right-3 z-30 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white md:h-8 md:w-8"
         >
           <Heart
-            className={`h-5 w-5 md:h-6 md:w-6 ${
+            className={`pointer-events-none h-5 w-5 md:h-6 md:w-6 ${
               isWishlisted
                 ? 'fill-red-500 text-red-500'
                 : 'text-[#345225]'
@@ -486,10 +485,10 @@ useEffect(() => {
           />
         </button>
 
-        {/* Bottom controls */}
-        <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pr-12">
+        {/* Bottom controls (pointer-events-none so it never blocks the heart) */}
+        <div className="pointer-events-none absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pr-12">
           {showColorPalette && (
-            <div className="flex items-center gap-2">
+            <div className="pointer-events-auto flex items-center gap-2">
               {colors.map((color) => {
                 const colorSoldOut = isColorSoldOut(color.name);
                 const isSelected =
@@ -597,94 +596,90 @@ useEffect(() => {
             )}
           </div>
         </div>
-        ) : (
+      ) : (
         <>
-        {/* Small screens: title on top, then type + discount + prices on one row */}
-        <div className="px-3 py-3 md:hidden">
-          <h3 className="line-clamp-2 text-[14px] font-semibold leading-5 text-[#111]">
-            {product.title}
-          </h3>
+          {/* Small screens: title on top, then type + discount + prices on one row */}
+          <div className="px-3 py-3 md:hidden">
+            <h3 className="line-clamp-2 text-[14px] font-semibold leading-5 text-[#111]">
+              {product.title}
+            </h3>
 
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-[13px] text-stone-600">
-              {product.productType}
-            </span>
-
-            <div className="flex items-center gap-2">
-              {hasDiscount && (
-                <>
-                  <span className="rounded-full bg-[#345225] px-2 py-0.5 text-[11px] font-bold text-[#FFDF9E]">
-                    {discountPercentage}% OFF
-                  </span>
-
-                  <span className="text-[14px] font-bold text-[#e98b8b] line-through">
-                    {formatPrice(
-                      originalPriceAmount,
-                      currentPrice?.currencyCode,
-                    )}
-                  </span>
-                </>
-              )}
-
-              <span className="text-[20px] font-bold leading-5 text-black">
-                {formatPrice(
-                  discountedPriceAmount,
-                  currentPrice?.currencyCode,
-                )}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="hidden h-[88px] px-3 py-3 md:block md:h-[108px] lg:h-[88px]">
-          <div className="flex items-start justify-between gap-3">
-
-            {/* Left: Product information */}
-            <div className="min-w-0 flex-1">
-
-              {/* Fixed-height title area */}
-              <div className="h-[32px] md:h-[40px] lg:h-[32px]">
-                <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
-                  {product.title}
-                </h3>
-              </div>
-
-              {/* Product type always starts at the same vertical position */}
-              <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-[13px] text-stone-600">
                 {product.productType}
-              </div>
-            </div>
+              </span>
 
-            {/* Right: Price information */}
-            <div className="shrink-0 text-right">
-              <div className="flex items-center justify-end gap-3">
-
+              <div className="flex items-center gap-2">
                 {hasDiscount && (
-                  <span className="text-[13px] font-bold text-[#345225]">
-                    {discountPercentage}% OFF
-                  </span>
+                  <>
+                    <span className="rounded-full bg-[#345225] px-2 py-0.5 text-[11px] font-bold text-[#FFDF9E]">
+                      {discountPercentage}% OFF
+                    </span>
+
+                    <span className="text-[14px] font-bold text-[#e98b8b] line-through">
+                      {formatPrice(
+                        originalPriceAmount,
+                        currentPrice?.currencyCode,
+                      )}
+                    </span>
+                  </>
                 )}
 
-                <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
+                <span className="text-[20px] font-bold leading-5 text-black">
                   {formatPrice(
                     discountedPriceAmount,
                     currentPrice?.currencyCode,
                   )}
                 </span>
               </div>
-
-              {hasDiscount && (
-                <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
-                  {formatPrice(
-                    originalPriceAmount,
-                    currentPrice?.currencyCode,
-                  )}
-                </div>
-              )}
             </div>
-
           </div>
-        </div>
+
+          <div className="hidden h-[88px] px-3 py-3 md:block md:h-[108px] lg:h-[88px]">
+            <div className="flex items-start justify-between gap-3">
+              {/* Left: Product information */}
+              <div className="min-w-0 flex-1">
+                {/* Fixed-height title area */}
+                <div className="h-[32px] md:h-[40px] lg:h-[32px]">
+                  <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
+                    {product.title}
+                  </h3>
+                </div>
+
+                {/* Product type always starts at the same vertical position */}
+                <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
+                  {product.productType}
+                </div>
+              </div>
+
+              {/* Right: Price information */}
+              <div className="shrink-0 text-right">
+                <div className="flex items-center justify-end gap-3">
+                  {hasDiscount && (
+                    <span className="text-[13px] font-bold text-[#345225]">
+                      {discountPercentage}% OFF
+                    </span>
+                  )}
+
+                  <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
+                    {formatPrice(
+                      discountedPriceAmount,
+                      currentPrice?.currencyCode,
+                    )}
+                  </span>
+                </div>
+
+                {hasDiscount && (
+                  <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
+                    {formatPrice(
+                      originalPriceAmount,
+                      currentPrice?.currencyCode,
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </>
       )}
     </Link>
