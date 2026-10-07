@@ -13,7 +13,7 @@ export function ProductShowcase({
       <h2
         className="md:hidden"
         style={{
-          margin: '0 0 24px',
+          margin: '20px 0px 24px',
           textAlign: 'center',
           fontFamily: FONT,
           fontSize: 'clamp(28px, 8vw, 36px)',
@@ -35,7 +35,7 @@ export function ProductShowcase({
             }
 
             return (
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-6">
+              <div className="grid grid-cols-1 gap-y-6 md:grid-cols-6 md:gap-x-4 md:gap-y-6">
                 {productList.map((product, index) => (
                   <div
                     key={product.id}
