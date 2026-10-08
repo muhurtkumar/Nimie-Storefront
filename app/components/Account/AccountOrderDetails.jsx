@@ -88,30 +88,31 @@ export function AccountOrderDetails({order}) {
       </Link>
 
       {/* Header */}
-      <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-serif text-[26px] text-[#111111] md:text-[30px]">
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="m-0 font-serif text-[26px] leading-tight text-[#111111] md:text-[30px]">
             Order {order.name ?? `#${order.number}`}
           </h1>
-          <p className="mt-1 text-[13px] text-[#7a746c]">
+          <p className="m-0 mt-1 text-[13px] text-[#7a746c]">
             Placed on {formatDate(order.processedAt)}
             {order.confirmationNumber
               ? ` · Confirmation ${order.confirmationNumber}`
               : ''}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
           {paymentBadge && <Badge {...paymentBadge} />}
           <Badge {...fulfillmentBadge} />
         </div>
       </div>
 
       {/* Items */}
-      <section
+      <div
+        role="region"
         aria-label="Items in this order"
         className="mt-6 rounded-[16px] border border-[#ebe7e1] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:p-6"
       >
-        <h2 className="text-[16px] font-medium text-[#111111]">
+        <h2 className="m-0 text-[16px] font-medium text-[#111111]">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </h2>
 
@@ -147,15 +148,16 @@ export function AccountOrderDetails({order}) {
             );
           })}
         </ul>
-      </section>
+      </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {/* Summary */}
-        <section
+        <div
+          role="region"
           aria-label="Order summary"
           className="rounded-[16px] border border-[#ebe7e1] bg-white p-5 md:p-6"
         >
-          <h2 className="text-[16px] font-medium text-[#111111]">Summary</h2>
+          <h2 className="m-0 text-[16px] font-medium text-[#111111]">Summary</h2>
           <dl className="mt-4 space-y-2 text-[14px] text-[#55504a]">
             <Row label="Subtotal" value={formatMoney(order.subtotal)} />
             {discountTotal > 0 && (
@@ -174,14 +176,15 @@ export function AccountOrderDetails({order}) {
               Includes {formatMoney(order.totalTax)} in taxes
             </p>
           )}
-        </section>
+        </div>
 
         {/* Shipping address */}
-        <section
+        <div
+          role="region"
           aria-label="Shipping address"
           className="rounded-[16px] border border-[#ebe7e1] bg-white p-5 md:p-6"
         >
-          <h2 className="text-[16px] font-medium text-[#111111]">
+          <h2 className="m-0 text-[16px] font-medium text-[#111111]">
             Shipping address
           </h2>
           {addressLines.length > 0 ? (
@@ -197,7 +200,7 @@ export function AccountOrderDetails({order}) {
               No shipping address on this order.
             </p>
           )}
-        </section>
+        </div>
       </div>
 
       {/* Track */}
