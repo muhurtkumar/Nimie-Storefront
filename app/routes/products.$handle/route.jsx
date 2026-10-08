@@ -17,10 +17,7 @@ import {Reviews} from '~/components/Pdp/Reviews.jsx';
 import productIntroImage from '~/assets/layout/ProductIntroImage.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import nimieLogo from '~/assets/home/nimie-logo.png';
-import clip1 from '~/assets/home/clip-1.mp4';
-import clip2 from '~/assets/home/clip-2.mp4';
-import clip3 from '~/assets/home/clip-3.mp4';
-import clip4 from '~/assets/home/clip-4.mp4';
+import homepageBts from '~/assets/home/homepage_bts.webm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ShopForMore} from '~/components/Home/ShopForMore.jsx';
 
@@ -189,7 +186,7 @@ export default function Product() {
       <ShopForMore products={showcaseProducts} />
 
       <BehindTheScenes
-        videos={[clip1, clip2, clip3, clip4]}
+        videos={[homepageBts]}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"
         heading="Embroided with <3"
