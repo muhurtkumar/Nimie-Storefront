@@ -184,7 +184,7 @@ function OrderCard({order}) {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            to={`/account/orders/${encodeURIComponent(order.id)}`}
+            to={`/account/orders/${btoa(order.id)}`}
             className="inline-flex items-center gap-1 rounded-full border border-[#d9d4cc] px-5 py-2.5 text-[14px] text-[#2d2a27] transition-colors hover:bg-[#f1eeea] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]"
           >
             View details
