@@ -77,6 +77,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
   const closeCart = () => setCartOpen(false);
@@ -124,20 +125,31 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
     };
   }, [menuOpen]);
 
-  // Home: transparent, absolutely positioned over the hero card
-  // (same offset as the Hero's outer padding), white text.
-  // Other pages: normal flow, white background, dark text.
+  // Home: switch from transparent to solid green once the page scrolls,
+  // so the white text stays readable over page content.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive: true});
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Home: transparent at the top, fixed over the hero card (same offset as
+  // the Hero's outer padding), turns solid green after scrolling. White text.
+  // Other pages: sticky, solid green, white text.
   const wrapperStyle = isHome
     ? {
-        position: 'absolute',
-        top: `calc(${GAP_Y})`,
+        position: 'fixed',
+        top: GAP_Y,
         zIndex: 30,
-        background: 'transparent',
+        background: scrolled ? '#345225' : 'transparent',
+        transition: 'background 300ms ease',
         color: '#fff',
         borderRadius: HEADER_RADIUS,
       }
     : {
-        position: 'relative',
+        position: 'sticky',
+        top: HEADER_MARGIN,
         zIndex: 30,
         marginTop: HEADER_MARGIN,
         marginLeft: HEADER_MARGIN,
