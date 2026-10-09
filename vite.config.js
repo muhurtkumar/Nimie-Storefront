@@ -40,6 +40,6 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['.tryhydrogen.dev'],
+    allowedHosts: ['.tryhydrogen.dev', 'buys-ranked-respiratory-counting.trycloudflare.com',],
   },
 });
