@@ -7,7 +7,7 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
-import {Minus, Plus, Trash2, X} from 'lucide-react';
+import {Minus, Plus, Trash2, X, Wallet, ChevronDown} from 'lucide-react';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -104,11 +104,18 @@ export function Cart({open, onClose}) {
         <Suspense fallback={<EmptyCart />}>
           <Await resolve={rootData?.cart}>
             {(cart) => (
-              <CartBody
-                cart={cart}
-                onClose={onClose}
-                isLoggedInPromise={rootData?.isLoggedIn}
-              />
+              <Suspense fallback={<EmptyCart />}>
+                <Await resolve={rootData?.storeCreditAccounts}>
+                  {(storeCreditAccounts) => (
+                    <CartBody
+                      cart={cart}
+                      onClose={onClose}
+                      isLoggedInPromise={rootData?.isLoggedIn}
+                      storeCreditAccounts={storeCreditAccounts}
+                    />
+                  )}
+                </Await>
+              </Suspense>
             )}
           </Await>
         </Suspense>
@@ -146,8 +153,11 @@ function CartBody({
   cart: originalCart,
   onClose,
   isLoggedInPromise,
+  storeCreditAccounts = [],
 }) {
   const cart = useOptimisticCart(originalCart);
+  const [showStoreCredit, setShowStoreCredit] = useState(false);
+  const [useStoreCredit, setUseStoreCredit] = useState(false);
   console.log('CART BEFORE COUPON:', {
   discountCodes: cart?.discountCodes,
   cost: cart?.cost,
@@ -249,13 +259,31 @@ const shopifyCouponDiscountRate =
       )
     : 0;
 
-const cartTotal =
-  hasAppliedCoupon
-    ? shopifyMerchandiseTotalAfterDiscounts
-    : customCartTotal;
-
 const currency =
   lines[0]?.merchandise?.price?.currencyCode || 'INR';
+
+const inrBalance = (storeCreditAccounts ?? [])
+  .filter((account) => account.balance?.currencyCode === 'INR')
+  .reduce(
+    (total, account) =>
+      total + Number(account.balance?.amount || 0),
+    0,
+  );
+
+const cartTotal = hasAppliedCoupon
+  ? shopifyMerchandiseTotalAfterDiscounts
+  : customCartTotal;
+
+const storeCreditToApply =
+  useStoreCredit && currency === 'INR'
+    ? Math.min(inrBalance, Math.max(0, cartTotal))
+    : 0;
+
+const displayedCartTotal = Math.max(
+  0,
+  cartTotal - storeCreditToApply,
+);
+
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -270,6 +298,90 @@ const currency =
             />
           ))}
         </ul>
+  
+       <div className="mt-4 mb-5 border-y border-stone-200">
+          <button
+            type="button"
+            onClick={() => setShowStoreCredit((previous) => !previous)}
+            aria-expanded={showStoreCredit}
+            className="flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-1 py-4 text-left"
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <Wallet
+                className="h-5 w-5 shrink-0 text-[#345225]"
+                strokeWidth={1.6}
+              />
+
+              <span className="min-w-0">
+                <span className="block text-[14px] font-medium text-black">
+                  Nimie Points
+                </span>
+                <span className="mt-1 block text-[11px] text-stone-500">
+                  1 point = ₹1
+                </span>
+              </span>
+            </span>
+
+            <span className="flex shrink-0 items-center gap-3">
+              <span className="text-[13px] font-medium text-[#345225]">
+                {formatPrice(inrBalance, 'INR')}
+              </span>
+
+              <ChevronDown
+                className={`h-4 w-4 text-stone-500 transition-transform duration-200 ${
+                  showStoreCredit ? 'rotate-180' : ''
+                }`}
+                strokeWidth={1.6}
+              />
+            </span>
+          </button>
+
+          {showStoreCredit ? (
+            <div className="px-1 pb-4">
+              <div className="rounded-md bg-[#f7f7f4] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-stone-600">
+                    Available points
+                  </span>
+
+                  <span className="text-[13px] font-semibold text-[#345225]">
+                    {inrBalance.toLocaleString('en-IN', {
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    points
+                  </span>
+                </div>
+
+                <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 border-t border-stone-200 pt-3">
+                  <span className="text-[12px] text-stone-700">
+                    Use Nimie Points
+                  </span>
+
+                  <input
+                    type="checkbox"
+                    checked={useStoreCredit}
+                    onChange={(event) =>
+                      setUseStoreCredit(event.target.checked)
+                    }
+                    disabled={inrBalance <= 0 || currency !== 'INR'}
+                    className="h-4 w-4 cursor-pointer accent-[#345225] disabled:cursor-not-allowed"
+                  />
+                </label>
+
+                {useStoreCredit && inrBalance > 0 ? (
+                  <p className="m-0 mt-2 text-[11px] text-[#345225]">
+                    {formatPrice(storeCreditToApply, 'INR')} in points selected.
+                  </p>
+                ) : null}
+
+                <p className="m-0 mt-2 text-[11px] leading-relaxed text-stone-500">
+                  Your points are linked to your Store Credit.
+                  Available credit can be applied at checkout.
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* Coupon code */}
@@ -337,7 +449,7 @@ const currency =
                     </span>
 
                     <span className="block text-[16px] font-bold leading-tight text-black">
-                      {formatPrice(cartTotal, currency)}
+                      {formatPrice(displayedCartTotal, currency)}
                     </span>
                   </div>
 

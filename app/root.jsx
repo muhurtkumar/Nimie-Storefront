@@ -115,6 +115,42 @@ async function loadCriticalData({context}) {
   return {header};
 }
 
+async function getCustomerStoreCredit({context}) {
+  const {customerAccount} = context;
+
+  try {
+    const isLoggedIn = await customerAccount.isLoggedIn();
+
+    if (!isLoggedIn) return [];
+
+    const {data, errors} = await customerAccount.query(`#graphql
+      query NimieStoreCredit {
+        customer {
+          storeCreditAccounts(first: 10) {
+            nodes {
+              id
+              balance {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      }
+    `);
+
+    if (errors?.length) {
+      console.error('Unable to fetch Nimie Points:', errors);
+      return [];
+    }
+
+    return data?.customer?.storeCreditAccounts?.nodes ?? [];
+  } catch (error) {
+    console.error('Unable to fetch Nimie Points:', error);
+    return [];
+  }
+}
+
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
  * fetched after the initial page load. If it's unavailable, the page should still 200.
@@ -143,6 +179,7 @@ function loadDeferredData({context}) {
     isLoggedIn: customerAccount.isLoggedIn(),
     wishlist: getCustomerWishlist({context}),
     footer,
+    storeCreditAccounts: getCustomerStoreCredit({context}),
   };
 }
 

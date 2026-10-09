@@ -154,50 +154,41 @@ export function BehindTheScenes({
  * so there's no loading gap at the cut.
  */
 function VideoCarousel({sources}) {
-  const [active, setActive] = useState(0);
-  const videoRefs = useRef([]);
+  const videoRef = useRef(null);
 
-  const goToNext = () => setActive((i) => (i + 1) % sources.length);
-
-  // Autoplay can be blocked until the tab is visible/focused in some
-  // browsers; nudge playback whenever the active clip changes.
   useEffect(() => {
-    const el = videoRefs.current[active];
+    const el = videoRef.current;
 
-    if (el) {
-      el.currentTime = 0;
-      const playPromise = el.play();
+    if (!el) return;
 
-      if (playPromise) playPromise.catch(() => {});
+    el.currentTime = 0;
+
+    const playPromise = el.play();
+
+    if (playPromise) {
+      playPromise.catch(() => {});
     }
-  }, [active]);
+  }, []);
 
   return (
     <div style={{position: 'relative', width: '100%', minHeight: 520}}>
-      {sources.map((src, i) => (
-        <video
-          key={src}
-          ref={(el) => (videoRefs.current[i] = el)}
-          src={src}
-          muted
-          playsInline
-          preload={i === active ? 'auto' : 'none'}
-          onEnded={i === active ? goToNext : undefined}
-          style={{
-            display: 'block',
-            position: i === active ? 'relative' : 'absolute',
-            inset: 0,
-            width: '100%',
-            height: i === active ? 'auto' : '100%',
-            minHeight: 520,
-            objectFit: 'cover',
-            borderRadius: 0,
-            opacity: i === active ? 1 : 0,
-            transition: `opacity ${FADE_MS}ms ease`,
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
+      <video
+        ref={videoRef}
+        src={sources[0]}
+        muted
+        playsInline
+        autoPlay
+        loop
+        preload="auto"
+        style={{
+          display: 'block',
+          width: '100%',
+          height: 'auto',
+          minHeight: 520,
+          objectFit: 'cover',
+          borderRadius: 0,
+        }}
+      />
     </div>
   );
 }

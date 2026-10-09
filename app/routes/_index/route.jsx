@@ -16,10 +16,7 @@ import knotLikeBeforeSmile from '~/assets/home/KnotLikeBeforeSmile.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import nimieLogo from '~/assets/home/nimie-logo.png';
-import clip1 from '~/assets/home/clip-1.mp4';
-import clip2 from '~/assets/home/clip-2.mp4';
-import clip3 from '~/assets/home/clip-3.mp4';
-import clip4 from '~/assets/home/clip-4.mp4';
+import homepageBts from '~/assets/home/homepage_bts.webm';
 
 import {restoreCustomerCart} from '~/lib/customer-cart';
 
@@ -161,7 +158,7 @@ export default function Homepage() {
       <KnotLikeBefore {...KNOT_LIKE_BEFORE_DATA} />
 
       <BehindTheScenes
-        videos={[clip1, clip2, clip3, clip4]}
+        videos={[homepageBts]}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"
         heading="Embroided with <3"

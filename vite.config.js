@@ -40,6 +40,9 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['.tryhydrogen.dev', 'buys-ranked-respiratory-counting.trycloudflare.com',],
+    allowedHosts: [
+      '.tryhydrogen.dev',
+      'chip-wallpapers-shame-bill.trycloudflare.com',
+    ],
   },
 });
