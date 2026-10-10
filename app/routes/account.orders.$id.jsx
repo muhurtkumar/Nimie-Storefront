@@ -6,7 +6,7 @@ import {AccountOrderDetails} from '~/components/Account/AccountOrderDetails';
  * @type {Route.MetaFunction}
  */
 export const meta = ({data}) => {
-  return [{title: `Order ${data?.order?.name}`}];
+  return [{title: `Nimie | Order ${data?.order?.name}`}];
 };
 
 /**

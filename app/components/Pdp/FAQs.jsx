@@ -51,7 +51,7 @@ export default function FAQs() {
       id="faqs"
       className="
         w-auto
-        -m-4
+        -m-0
         scroll-mt-2
         bg-[#FFF7E7]
         px-4

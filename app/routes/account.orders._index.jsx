@@ -8,7 +8,7 @@ import {CUSTOMER_ORDERS_QUERY} from '~/graphql/customer-account/CustomerOrdersQu
 import {AccountOrders} from '~/components/Account/AccountOrders';
 
 export const meta = () => {
-  return [{title: 'Orders'}];
+  return [{title:`Nimie | Orders`}];
 };
 
 export async function loader({request, context}) {

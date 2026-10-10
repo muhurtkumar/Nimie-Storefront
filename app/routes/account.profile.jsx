@@ -8,7 +8,7 @@ import AccountProfile from '~/components/Account/AccountProfile';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Profile'}];
+  return [{title: `Nimie | Profile`}];
 };
 
 /**

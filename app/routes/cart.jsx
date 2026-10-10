@@ -7,7 +7,7 @@ import {saveCustomerCart} from '~/lib/customer-cart';
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `Nimie | Cart`}];
 };
 
 /**
