@@ -18,12 +18,6 @@ const DEFAULT_ITEMS = [
     href: 'https://www.instagram.com/nimie.in',
     icon: 'instagram',
   },
-  {
-    label: 'Chat with us on WhatsApp',
-    value: '+91-835-397-4975',
-    href: 'https://wa.me/918353974975',
-    icon: 'whatsapp',
-  },
 ];
 
 
