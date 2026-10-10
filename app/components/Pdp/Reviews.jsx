@@ -202,7 +202,7 @@ const css = `
 }
 `;
 
-export function Reviews({reviews = [], title = "Reviews"}) {
+export function Reviews({reviews = [], title ="Reactions"}) {
   // One sticker per review per row, assigned randomly with no adjacent
   // repeats. useMemo keeps these stable across re-renders.
   const stickersRow1 = useMemo(
