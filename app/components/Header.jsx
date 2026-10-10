@@ -143,7 +143,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
     ? {
         position: 'fixed',
         top: GAP_Y,
-        zIndex: 30,
+        zIndex: 100,
         background: scrolled ? '#345225' : 'transparent',
         transition: 'background 300ms ease',
         color: '#fff',
@@ -152,7 +152,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
     : {
         position: 'sticky',
         top: HEADER_MARGIN,
-        zIndex: 30,
+        zIndex: 100,
         marginTop: HEADER_MARGIN,
         marginLeft: HEADER_MARGIN,
         marginRight: HEADER_MARGIN,
