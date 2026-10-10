@@ -188,7 +188,7 @@ const css = `
 const STORE_LINKS = [
   {label: 'Shop', href: '/collections/all'},
   {label: 'Our Story', href: '/our-story'},
-  {label: 'FAQs', href: '#faqs'},
+  {label: 'FAQs', href: '/faqs'},
   {label: 'Contact Us', href: '/contact'},
 ];
 

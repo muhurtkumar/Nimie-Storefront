@@ -52,7 +52,7 @@ const MOBILE_SECONDARY_LINKS = [
   {label: 'My Account', to: '/account'},
   {label: 'Delivery & Returns', to: '/delivery-returns'},
   {label: 'Track your order', to: '/track-order'},
-  {label: 'FAQs', to: '#faqs'},
+  {label: 'FAQs', to: '/faqs'},
   {label: 'Terms & Conditions', to: '/policies/terms-of-service'},
   {label: 'Privacy Policy', to: '/policies/privacy-policy'},
   {label: 'Shipping & Delivery', to: '/policies/shipping-policy'},
@@ -397,8 +397,7 @@ function MobileMenu({open, onClose, wishlistCount = 0}) {
       ? `Wishlist (${wishlistCount})`
       : link.label;
 
-  // "#faqs" style links: close the menu first (which unlocks body scroll),
-  // then scroll. Falls back to the home page anchor if not on that page.
+  // Hash links: close the menu first (which unlocks body scroll), then scroll.
   const handleHashClick = (e, hash) => {
     e.preventDefault();
     onClose();
