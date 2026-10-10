@@ -55,6 +55,8 @@ const MOBILE_SECONDARY_LINKS = [
   {label: 'FAQs', to: '#faqs'},
   {label: 'Terms & Conditions', to: '/policies/terms-of-service'},
   {label: 'Privacy Policy', to: '/policies/privacy-policy'},
+  {label: 'Shipping & Delivery', to: '/policies/shipping-policy'},
+  {label: 'Refund Policy', to: '/policies/refund-policy'},
 ];
 
 // Inline styles on purpose: global `a { color }` rules in app.css would
