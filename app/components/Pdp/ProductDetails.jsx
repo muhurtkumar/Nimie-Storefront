@@ -41,8 +41,14 @@ const STATIC_PRODUCT_INFO = {
   fabricDetails:
     'Pure cotton-linen fabric with traditional Lucknow Chikankari embroidery. Designed with an oversized silhouette for a relaxed fit.',
 
-  washCare:
-    'Gentle hand wash recommended. Wash separately with mild detergent and dry in shade.',
+  washCare: [
+    'Gentle hand wash only — Do not machine wash.',
+    'Use a mild detergent — Avoid bleach and harsh chemicals.',
+    'Do not soak — Prolonged soaking may affect the colour and embroidery.',
+    'For the first 2–3 washes — Dry cleaning is recommended.',
+    'Dark shades may bleed — Slight colour transfer during the first few washes is normal and does not indicate colour fading. Wash separately.',
+    'Dry gently — Do not wring or twist. Dry in shade.',
+  ],
 };
 
 export function ProductDetails({
@@ -64,7 +70,8 @@ export function ProductDetails({
 
   const [quantity, setQuantity] = useState(1);
 
-  const [openSection, setOpenSection] = useState(null);
+  const [isFabricOpen, setIsFabricOpen] = useState(false);
+  const [isWashCareOpen, setIsWashCareOpen] = useState(false);
 
   /* Size Guide */
   const [openSizeGuide, setOpenSizeGuide] = useState(false);
@@ -463,7 +470,7 @@ export function ProductDetails({
   };
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-6">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
           {/* =====================================================
@@ -472,7 +479,7 @@ export function ProductDetails({
 
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[108px_minmax(0,1fr)] md:grid-cols-[136px_minmax(0,1fr)] lg:grid-cols-[140px_minmax(0,1fr)]">
             {/* Desktop thumbnails */}
-            <div className="relative hidden w-full self-stretch sm:block lg:h-[660px]">
+            <div className="relative hidden w-full self-stretch sm:block lg:h-[640px]">
               <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto overflow-x-hidden p-[3px]">
                 {galleryImages.map((image, index) => (
                   <button
@@ -483,7 +490,7 @@ export function ProductDetails({
                       selectedImage === index ? 'ring-2 ring-[#345225]' : ''
                     }`}
                     style={{
-                      height: 'calc((100% - 24px) / 4)',
+                      height: 'clamp(150px, 19vw, 190px)',
                     }}
                   >
                     <img
@@ -517,8 +524,8 @@ export function ProductDetails({
             </div>
 
             {/* Main image */}
-            <div className="relative min-w-0 flex-1">
-              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8] lg:aspect-auto lg:h-[660px]">
+            <div className="relative min-w-0 flex-1 lg:pr-3">
+              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8] lg:aspect-auto lg:h-[640px]">
                 {galleryImages.length > 0 ? (
                   <img
                     src={galleryImages[selectedImage]?.url}
@@ -561,7 +568,7 @@ export function ProductDetails({
               RIGHT SIDE
           ====================================================== */}
 
-          <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[660px] lg:justify-center lg:pt-0">
+          <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[640px] lg:overflow-y-auto lg:justify-center lg:pt-0">
             {/* Rating - STATIC */}
             <div className="!m-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -600,7 +607,7 @@ export function ProductDetails({
               </button>
             </div>
 
-            <div className="mt-3 flex items-start justify-between gap-4">
+            <div className="mt-1 flex items-start justify-between gap-4">
               <div className="!m-0">
                 <h1 className="!m-0 text-[25px] font-bold leading-[0.95] text-[#ad3d9f] sm:text-[29px] lg:text-[30px]">
                   {product.title}
@@ -650,7 +657,7 @@ export function ProductDetails({
             ================================================== */}
 
             {colors.length > 0 && (
-              <div>
+              <div className="border-b border-stone-300 pb-4">
                 <p className="mb-2 text-[12px] text-stone-600">Select Colors</p>
 
                 <div className="mt-1 flex items-center gap-2.5">
@@ -677,7 +684,6 @@ export function ProductDetails({
                           );
 
                           setSelectedColorId(matchingColor?.id || null);
-
                           setSelectedImage(0);
 
                           const params = new URLSearchParams();
@@ -693,26 +699,38 @@ export function ProductDetails({
                             preventScrollReset: true,
                           });
                         }}
-                        className={`flex h-6 w-6 items-center justify-center rounded-full transition ${
-                          isSelected
-                            ? 'border border-[#345225]'
-                            : 'border border-transparent'
-                        }`}
+                        className="flex items-center gap-2.5 rounded-full"
                       >
                         <span
-                          className="h-5 w-5 rounded-full"
-                          style={
-                            swatchImage
-                              ? {
-                                  backgroundImage: `url(${swatchImage})`,
-                                  backgroundSize: 'cover',
-                                  backgroundPosition: 'center',
-                                }
-                              : {
-                                  backgroundColor: swatchColor,
-                                }
-                          }
-                        />
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+                            isSelected
+                              ? 'border border-[#345225]'
+                              : 'border border-transparent'
+                          }`}
+                        >
+                          <span
+                            className="h-8 w-8 rounded-full cursor-pointer"
+                            style={
+                              swatchImage
+                                ? {
+                                    backgroundImage: `url(${swatchImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                  }
+                                : {
+                                    backgroundColor: swatchColor,
+                                  }
+                            }
+                          />
+
+                          {isSelected && (
+                            <span className="sr-only">Selected</span>
+                          )}
+                        </span>
+
+                        <span className="hidden lg:inline text-[13px] lg:text-[15px] text-stone-600">
+                          {color.name}
+                        </span>
                       </button>
                     );
                   })}
@@ -725,7 +743,7 @@ export function ProductDetails({
             ================================================== */}
 
             {sizes.length > 0 && (
-              <div className="mt-2">
+              <div className="mt-2 border-b border-stone-300 pb-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[12px] text-stone-600">Choose Size</p>
 
@@ -786,7 +804,7 @@ export function ProductDetails({
                             preventScrollReset: true,
                           });
                         }}
-                        className={`flex h-7 min-w-[42px] items-center justify-center rounded-full px-3 text-[10px] transition ${
+                        className={`flex h-8 min-w-[46px] items-center justify-center rounded-full px-4 text-[11px] transition ${
                           unavailable
                             ? 'cursor-not-allowed bg-stone-400 text-stone-600'
                             : isSelected
@@ -802,8 +820,8 @@ export function ProductDetails({
 
                 {product.sizeTip?.value && (
                   <p
-                    className="leading-4 text-stone-500"
-                    style={{marginTop: '3px', fontSize: '14px'}}
+                    className="leading-4 font-medium text-stone-600"
+                    style={{marginTop: '7px', fontSize: '14px'}}
                   >
                     {product.sizeTip.value}
                   </p>
@@ -892,7 +910,7 @@ export function ProductDetails({
               {/* Fabric details */}
               <button
                 type="button"
-                onClick={() => toggleSection('fabric')}
+                onClick={() => setIsFabricOpen((prev) => !prev)}
                 className="flex w-full items-center justify-between border-b border-[#6c655a] py-3 text-left"
               >
                 <span className="text-[11px] font-medium text-stone-700">
@@ -900,7 +918,7 @@ export function ProductDetails({
                 </span>
 
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#c5d5a0]">
-                  {openSection === 'fabric' ? (
+                  {isFabricOpen ? (
                     <Minus className="h-3 w-3 text-[#345225]" />
                   ) : (
                     <Plus className="h-3 w-3 text-[#345225]" />
@@ -908,9 +926,9 @@ export function ProductDetails({
                 </span>
               </button>
 
-              {openSection === 'fabric' && (
+              {isFabricOpen && (
                 <div className="border-b border-[#6c655a] px-1 py-3 text-[11px] leading-5 text-stone-500">
-                  <div className="max-h-[40px] overflow-y-auto pr-2">
+                  <div className="pr-2">
                     {(
                       product.fabricDetails?.value ||
                       STATIC_PRODUCT_INFO.fabricDetails
@@ -936,7 +954,7 @@ export function ProductDetails({
               {/* Wash care */}
               <button
                 type="button"
-                onClick={() => toggleSection('wash')}
+                onClick={() => setIsWashCareOpen((prev) => !prev)}
                 className="flex w-full items-center justify-between border-b border-[#6c655a] py-3 text-left"
               >
                 <span className="text-[11px] font-medium text-stone-700">
@@ -944,17 +962,21 @@ export function ProductDetails({
                 </span>
 
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#c5d5a0]">
-                  {openSection === 'wash' ? (
+                  {isWashCareOpen ? (
                     <Minus className="h-3 w-3 text-[#345225]" />
                   ) : (
                     <Plus className="h-3 w-3 text-[#345225]" />
                   )}
                 </span>
               </button>
-
-              {openSection === 'wash' && (
+              
+              {isWashCareOpen && (
                 <div className="border-b border-[#6c655a] px-1 py-3 text-[11px] leading-5 text-stone-500">
-                  {STATIC_PRODUCT_INFO.washCare}
+                  <ul className="list-disc space-y-1 pl-4">
+                    {STATIC_PRODUCT_INFO.washCare.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
