@@ -50,11 +50,14 @@ export function InstagramReels({
             </div>
 
             <div className="mt-0 lg:mt-0">
-              <p className="max-w-[1500px] text-[10px] leading-[1.5] text-[#315329]">
-                A craft passed from one generation to the next.Hands that
-                remember what books cannot teach. Threads that follow the
-                rhythm of the needle. Every stitch taking its own time.
-                Thus, bringing each piece quietly to life.
+              <p className="max-w-[1500px] text-[13px] leading-[1.35] text-[#315329] lg:text-[10px] lg:leading-[1.5]">
+                A craft passed from one generation to the next.
+                <br />
+                Hands that remember what books cannot teach.
+                <br />
+                Threads that follow the rhythm of the needle.
+                <br />
+                Every stitch taking its own time. Thus, bringing each piece quietly to life.
               </p>
 
               {/* Navigation for large screens */}

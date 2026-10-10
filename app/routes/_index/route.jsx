@@ -119,12 +119,21 @@ const KNOT_LIKE_BEFORE_DATA = {
   headingImage: knotLikeBeforeHeading,
   smileImage: knotLikeBeforeSmile,
   introTitle: 'For The Love Of Where We Come From.',
-  description:
-    'Nimie is our little expression of लखनऊ (Lucknow), its craft, its people and the beauty that has always been around us. We’re taking what we love about home and bringing it into the way we dress today. Easy pieces, thoughtful details and a little something unexpected. here are 3 promises from us:',
+  description: (
+    <>
+      Nimie is our little expression of <strong>लखनऊ (Lucknow)</strong>, its craft, its people and the beauty that has always been around us. We’re taking what we love about home and bringing it into the way we dress today. Easy pieces, thoughtful details and a little something unexpected. here are 3 promises from us:
+    </>
+  ),
   points: [
-    'Handcrafted, always. Made with intention, never mass-produced.',
-    'People before products. Respecting the hands behind each piece.',
-    'Made for today. For the way you dress now.',
+    <>
+      <strong>Handcrafted, always.</strong> Made with intention, never mass-produced.
+    </>,
+    <>
+      <strong>People before products.</strong> Respecting the hands behind each piece.
+    </>,
+    <>
+      <strong>Made for today.</strong> For the way you dress now.
+    </>,
   ],
 };
 

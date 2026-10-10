@@ -106,7 +106,6 @@ export function ProductCard({
 
   const colors =
     product.colorPattern?.references?.nodes
-      ?.slice(0, 3)
       .map((color) => {
         const labelField = color.fields?.find(
           (field) => field.key === 'label',
@@ -599,12 +598,12 @@ export function ProductCard({
       ) : (
         <>
           {/* Small screens: title on top, then type + discount + prices on one row */}
-          <div className="px-3 py-3 md:hidden">
+          <div className="px-3 pt-3 pb-1 md:hidden">
             <h3 className="line-clamp-2 text-[14px] font-semibold leading-5 text-[#111]">
               {product.title}
             </h3>
 
-            <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="mt-0 flex items-center justify-between gap-3">
               <span className="text-[13px] text-stone-600">
                 {product.productType}
               </span>
@@ -635,7 +634,7 @@ export function ProductCard({
             </div>
           </div>
 
-          <div className="hidden h-[88px] px-3 py-3 md:block md:h-[108px] lg:h-[88px]">
+          <div className="hidden h-[88px] px-3 py-2 md:block md:h-[108px] lg:h-[78px]">
             <div className="flex items-start justify-between gap-3">
               {/* Left: Product information */}
               <div className="min-w-0 flex-1">
@@ -647,7 +646,7 @@ export function ProductCard({
                 </div>
 
                 {/* Product type always starts at the same vertical position */}
-                <div className="mt-3 text-[13px] text-stone-600 md:mt-5 lg:mt-3">
+                <div className="mt-0 text-[13px] text-stone-600 md:mt-2 lg:mt-0">
                   {product.productType}
                 </div>
               </div>
