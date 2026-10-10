@@ -471,15 +471,15 @@ export function ProductDetails({
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-6">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+      <div className="w-full mr-auto">
+        <div className="grid w-full grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
           {/* =====================================================
               LEFT SIDE
           ====================================================== */}
 
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[108px_minmax(0,1fr)] md:grid-cols-[136px_minmax(0,1fr)] lg:grid-cols-[140px_minmax(0,1fr)]">
             {/* Desktop thumbnails */}
-            <div className="relative hidden w-full self-stretch sm:block lg:h-[640px]">
+            <div className="relative hidden w-full self-stretch sm:block lg:h-[680px]">
               <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto overflow-x-hidden p-[3px]">
                 {galleryImages.map((image, index) => (
                   <button
@@ -525,7 +525,7 @@ export function ProductDetails({
 
             {/* Main image */}
             <div className="relative min-w-0 flex-1 lg:pr-3">
-              <div className="aspect-[4/5.2] w-full overflow-hidden rounded-2xl bg-[#e8e0c8] lg:aspect-auto lg:h-[640px]">
+              <div className="aspect-[4/5.2] w-full overflow-hidden rounded-2xl bg-[#e8e0c8] lg:aspect-auto lg:h-[680px]">
                 {galleryImages.length > 0 ? (
                   <img
                     src={galleryImages[selectedImage]?.url}
@@ -568,7 +568,7 @@ export function ProductDetails({
               RIGHT SIDE
           ====================================================== */}
 
-          <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[640px] lg:overflow-y-auto lg:justify-center lg:pt-0">
+          <div className="flex h-full min-h-0 flex-col pt-1 lg:h-[680px] lg:overflow-y-auto lg:pt-0">
             {/* Rating - STATIC */}
             <div className="!m-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -804,7 +804,7 @@ export function ProductDetails({
                             preventScrollReset: true,
                           });
                         }}
-                        className={`flex h-8 min-w-[46px] items-center justify-center rounded-full px-4 text-[11px] transition ${
+                        className={`flex h-10 min-w-[50px] items-center justify-center rounded-full px-5 text-[13px] transition ${
                           unavailable
                             ? 'cursor-not-allowed bg-stone-400 text-stone-600'
                             : isSelected
