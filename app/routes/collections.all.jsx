@@ -1,6 +1,6 @@
-import {useLoaderData} from 'react-router';
+import {Link, useLoaderData, useSearchParams} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {ProductCard} from '~/components/Home/ProductCard';
 import {getCustomerWishlist} from '~/lib/customer-wishlist';
 
@@ -32,7 +32,7 @@ async function loadCriticalData({context, request}) {
   const {storefront} = context;
 
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
+    pageBy: 12, // divisible by 2 and 3 so the grid rows stay full
   });
 
   const [wishlist, {products}] = await Promise.all([
@@ -69,20 +69,100 @@ export default function Collection() {
         </h1>
       </div>
 
-      <PaginatedResourceSection
-        connection={products}
-        resourcesClassName="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2 lg:grid-cols-3"
-      >
-        {({node: product, index}) => (
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
+        {products.nodes.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
             index={index}
             wishlist={wishlist}
           />
-        )}
-      </PaginatedResourceSection>
+        ))}
+      </div>
+
+      <ShopPagination pageInfo={products.pageInfo} />
     </div>
+  );
+}
+
+/**
+ * Previous / Next pagination driven by URL params.
+ * `cursor` + `direction` are read by getPaginationVariables in the loader;
+ * `page` is only used for the "Page N" label.
+ */
+const GREEN = '#345225';
+
+function ShopPagination({pageInfo}) {
+  const [searchParams] = useSearchParams();
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+  const {hasPreviousPage, hasNextPage, startCursor, endCursor} = pageInfo;
+
+  if (!hasPreviousPage && !hasNextPage) return null;
+
+  // Going back to page 1 just uses the clean URL
+  const prevTo =
+    page <= 2
+      ? '?'
+      : `?direction=previous&cursor=${encodeURIComponent(startCursor)}&page=${page - 1}`;
+  const nextTo = `?direction=next&cursor=${encodeURIComponent(endCursor)}&page=${page + 1}`;
+
+  const btn =
+    'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors';
+  const btnActive = `${btn} hover:bg-[#345225]/10`;
+  const btnDisabled = `${btn} cursor-not-allowed opacity-40`;
+  // inline color: global `a { color }` rules would otherwise override classes
+  const colorStyle = {color: GREEN, textDecoration: 'none'};
+
+  return (
+    <nav
+      aria-label="Pagination"
+      className="mt-14 flex items-center justify-center border-t border-[#345225]/15 pt-6"
+    >
+      {/* Center: Previous | Page N | Next */}
+      <div className="flex items-center gap-3 sm:gap-5">
+        {hasPreviousPage ? (
+          <Link
+            to={prevTo}
+            prefetch="intent"
+            className={btnActive}
+            style={colorStyle}
+          >
+            <ChevronLeft size={16} strokeWidth={2.5} />
+            Previous
+          </Link>
+        ) : (
+          <span className={btnDisabled} style={colorStyle}>
+            <ChevronLeft size={16} strokeWidth={2.5} />
+            Previous
+          </span>
+        )}
+
+        <span
+          className="min-w-[64px] text-center text-sm"
+          style={{color: GREEN}}
+        >
+          Page {page}
+        </span>
+
+        {hasNextPage ? (
+          <Link
+            to={nextTo}
+            prefetch="intent"
+            className={btnActive}
+            style={colorStyle}
+          >
+            Next
+            <ChevronRight size={16} strokeWidth={2.5} />
+          </Link>
+        ) : (
+          <span className={btnDisabled} style={colorStyle}>
+            Next
+            <ChevronRight size={16} strokeWidth={2.5} />
+          </span>
+        )}
+      </div>
+
+    </nav>
   );
 }
 
