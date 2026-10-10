@@ -4,7 +4,7 @@ import {Link} from 'react-router';
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
 const GAP_Y = '16px';
-const GAP_X = '0px';
+const GAP_X = '10px';
 // Text inset inside the card (matches Hero.jsx)
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 // Gold used for the heading + logo mark in the Figma file
