@@ -293,6 +293,21 @@ const displayedCartTotal = Math.max(
   cartTotal - storeCreditToApply,
 );
 
+const originalCartTotal = lines.reduce((sum, line) => {
+  const unitPrice = Number(line.merchandise?.price?.amount || 0);
+  return sum + unitPrice * line.quantity;
+}, 0);
+
+const nimiePointsDiscount = storeCreditToApply;
+
+const couponDiscount = hasAppliedCoupon
+  ? Math.max(0, shopifySubtotal - shopifyMerchandiseTotalAfterDiscounts)
+  : 0;
+
+const totalSavings = Math.max(
+  0,
+  originalCartTotal - customCartTotal,
+) + couponDiscount + nimiePointsDiscount;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -472,6 +487,63 @@ const displayedCartTotal = Math.max(
               ) : null}
             </div>
           )}
+
+          {/* Price Details */}
+          <div className="mb-5 border-t border-stone-200 pt-4">
+            <h3 className="mb-4 text-[14px] font-semibold text-stone-800">
+              Price Details ({lines.length} {lines.length === 1 ? 'item' : 'items'})
+            </h3>
+
+            <div className="space-y-3 text-[12px]">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-stone-600">Original Total</span>
+                <span className="text-stone-800">
+                  {formatPrice(originalCartTotal, currency)}
+                </span>
+              </div>
+
+              {totalSavings > 0 && (
+                <div className="flex items-center justify-between gap-3 rounded-sm bg-gradient-to-r from-[#e8d9f2] to-[#dce8fa] px-2 py-1.5">
+                  <span className="font-semibold text-stone-800">
+                    Total Savings
+                  </span>
+                  <span className="font-semibold text-stone-800">
+                    - {formatPrice(totalSavings, currency)}
+                  </span>
+                </div>
+              )}
+
+              {nimiePointsDiscount > 0 && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-stone-600">Nimie Points Discount</span>
+                  <span className="text-[#345225]">
+                    - {formatPrice(nimiePointsDiscount, currency)}
+                  </span>
+                </div>
+              )}
+
+              {couponDiscount > 0 && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-stone-600">
+                    Coupon Discount
+                    {appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
+                  </span>
+                  <span className="text-[#345225]">
+                    - {formatPrice(couponDiscount, currency)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-3 border-t border-stone-200 pt-3 text-[13px] font-semibold">
+                <span className="text-stone-800">
+                  Total Amount (incl. of taxes)
+                </span>
+                <span className="text-stone-900">
+                  {formatPrice(displayedCartTotal, currency)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
