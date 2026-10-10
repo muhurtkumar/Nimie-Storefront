@@ -194,8 +194,9 @@ const STORE_LINKS = [
 
 const SUPPORT_LINKS = [
   {label: 'My Account', href: '/account'},
-  {label: 'Delivery & Returns', href: '/delivery'},
-  {label: 'Track your order', href: '/track-order'},
+  {label: 'Shipping & Delivery', href: '/policies/shipping-policy'},
+  {label: 'Return & Exchange', href: '/policies/refund-policy'},
+  {label: 'Track your order', href: '/account/orders'},
 ];
 
 const POLICY_LINKS = [
@@ -207,8 +208,6 @@ const POLICY_LINKS = [
     label: 'Terms & Conditions',
     href: '/policies/terms-of-service',
   },
-  {label: 'Shipping & Delivery', href: '/policies/shipping-policy'},
-  {label: 'Refund Policy', href: '/policies/refund-policy'},
 ];
 
 export function Footer({footer: footerPromise, header, publicStoreDomain}) {
