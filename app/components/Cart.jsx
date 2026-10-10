@@ -7,7 +7,15 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
-import {Minus, Plus, Trash2, X, Wallet, ChevronDown} from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  X,
+  Wallet,
+  ChevronDown,
+  Tag,
+} from 'lucide-react';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -158,6 +166,7 @@ function CartBody({
   const cart = useOptimisticCart(originalCart);
   const [showStoreCredit, setShowStoreCredit] = useState(false);
   const [useStoreCredit, setUseStoreCredit] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(true);
   console.log('CART BEFORE COUPON:', {
   discountCodes: cart?.discountCodes,
   cost: cart?.cost,
@@ -382,51 +391,88 @@ const displayedCartTotal = Math.max(
             </div>
           ) : null}
         </div>
-      </div>
 
-      {/* Coupon code */}
-      <div className="shrink-0 border-t border-stone-200 px-[18px] py-3 [&_form]:max-w-none!">
-        <CartForm
-          route="/cart"
-          action={CartForm.ACTIONS.DiscountCodesUpdate}
-          inputs={{
-            discountCodes: [],
-          }}
-        >
-          <div className="flex items-stretch gap-2">
-            <input
-              type="text"
-              name="discountCode"
-              placeholder="Coupon code"
-              value={couponCode}
-              onChange={(event) =>
-                setCouponCode(event.target.value)
-              }
-              className="min-h-10 min-w-0 flex-1 rounded-[6px] border border-stone-300 px-3 text-[12px] uppercase outline-none"
-              style={{margin: 0}}
-            />
+        {/* Coupon code */}
+        <div className="mt-4 mb-5 border-y border-stone-200 [&_form]:max-w-none!">
+          <button
+            type="button"
+            onClick={() => setShowCoupon((previous) => !previous)}
+            aria-expanded={showCoupon}
+            className="flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-1 py-4 text-left"
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <Tag
+                className="h-5 w-5 shrink-0 text-[#345225]"
+                strokeWidth={1.6}
+              />
 
-            <button
-              type="submit"
-              className="min-h-10 w-[calc((100%-8px)/3.5)] cursor-pointer rounded-[6px] bg-[#345225] px-4 text-[12px] font-normal uppercase tracking-[0.02em] text-white"
-            >
-              APPLY
-            </button>
-          </div>
-        </CartForm>
+              <span className="min-w-0">
+                <span className="block text-[14px] font-medium text-black">
+                  Apply Coupon
+                </span>
+                <span className="mt-1 block text-[11px] text-stone-500">
+                  Have a code? Enter it below
+                </span>
+              </span>
+            </span>
 
-        {appliedCoupon ? (
-          <p className="m-0 mt-2 text-[11px] text-[#345225]">
-            Coupon {appliedCoupon.code} applied successfully.
-          </p>
-        ) : couponCode &&
-          cart?.discountCodes?.some(
-            (discount) => !discount.applicable,
-          ) ? (
-          <p className="m-0 mt-2 text-[11px] text-[#ff5c5c]">
-            Invalid or unavailable coupon code.
-          </p>
-        ) : null}
+            <span className="flex shrink-0 items-center gap-3">
+              <ChevronDown
+                className={`h-4 w-4 text-stone-500 transition-transform duration-200 ${
+                  showCoupon ? 'rotate-180' : ''
+                }`}
+                strokeWidth={1.6}
+              />
+            </span>
+          </button>
+
+          {showCoupon && (
+            <div className="px-1 pb-4">
+              <CartForm
+                route="/cart"
+                action={CartForm.ACTIONS.DiscountCodesUpdate}
+                inputs={{
+                  discountCodes: [],
+                }}
+              >
+                <div className="flex min-h-10 items-center rounded-[5px] border border-stone-300 px-3">
+                  <input
+                    type="text"
+                    name="discountCode"
+                    placeholder="Enter Coupon Code"
+                    value={couponCode}
+                    onChange={(event) => setCouponCode(event.target.value)}
+                    className="h-9 min-w-0 flex-1 !border-0 !bg-transparent p-0 text-[11px] uppercase !outline-none !ring-0 focus:!border-0 focus:!outline-none focus:!ring-0"
+                    style={{
+                      margin: 0,
+                      boxShadow: 'none',
+                    }}
+                  />
+
+                  <button
+                    type="submit"
+                    className="shrink-0 cursor-pointer border-0 bg-transparent pl-3 text-[15px] font-medium text-[#168b8b] cursor-pointer"
+                  >
+                    APPLY
+                  </button>
+                </div>
+              </CartForm>
+
+              {appliedCoupon ? (
+                <p className="m-0 mt-2 text-[11px] text-[#345225]">
+                  Coupon {appliedCoupon.code} applied successfully.
+                </p>
+              ) : couponCode &&
+                cart?.discountCodes?.some(
+                  (discount) => !discount.applicable,
+                ) ? (
+                <p className="m-0 mt-2 text-[11px] text-[#ff5c5c]">
+                  Invalid or unavailable coupon code.
+                </p>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Cart footer */}

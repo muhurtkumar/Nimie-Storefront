@@ -525,12 +525,12 @@ export function ProductDetails({
 
             {/* Main image */}
             <div className="relative min-w-0 flex-1 lg:pr-3">
-              <div className="aspect-[4/4.7] w-full overflow-hidden rounded-xl bg-[#e8e0c8] lg:aspect-auto lg:h-[640px]">
+              <div className="aspect-[4/5.2] w-full overflow-hidden rounded-2xl bg-[#e8e0c8] lg:aspect-auto lg:h-[640px]">
                 {galleryImages.length > 0 ? (
                   <img
                     src={galleryImages[selectedImage]?.url}
                     alt={galleryImages[selectedImage]?.altText || product.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full rounded-2xl object-cover"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-stone-400">
