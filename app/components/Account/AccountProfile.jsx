@@ -10,7 +10,7 @@ import {
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Profile'}];
+  return [{title: `Nimie | Profile`}];
 };
 
 export default function AccountProfile() {
@@ -64,7 +64,7 @@ export default function AccountProfile() {
           className="text-[15px] text-[#66615b] sm:text-[16px]"
           style={{marginTop: '8px'}}
         >
-          Manage your profile, orders, addresses and more.
+          Manage your profile, , addresses and more.
         </p>
       </div>
 
