@@ -4,8 +4,9 @@ import { AboutNimie } from "~/components/OurStory/AboutNimie";
 import ourStoryHeroImage from "~/assets/OurStory/OurStoryHero.png";
 import nimieLogoGreen from "~/assets/OurStory/nimi-logo-green.gif";
 import nimieLogoWhite from "~/assets/OurStory/nimi-logo-white.gif";
+import {Await, useLoaderData} from 'react-router';
+import {Suspense} from 'react';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
-import {dummyInstagramReels} from '~/components/InstagramReels/getInstagramReels.js';
 import { AboutCurator } from "~/components/OurStory/AboutCurator";
 
 import { OurStoryQuote } from "~/components/OurStory/OurStoryQuote";
@@ -64,23 +65,68 @@ const ABOUT_CURATOR_DATA = {
   lineImage: aboutCuratorLine,
 };
 
+/**
+ * @param {Route.LoaderArgs} args
+ */
+export async function loader({context}) {
+  const instagramReels = import('~/lib/instafeed.server.js')
+    .then(({getInstagramFeed}) => getInstagramFeed(context.env))
+    .then((data) => {
+      return (data?.data || [])
+        .filter(
+          (item) =>
+            item.type === 'video' &&
+            item.videos?.standard_resolution?.url,
+        )
+        .map((item) => ({
+          id: item.id,
+          media_type: 'VIDEO',
+          media_url: `/api/instagram-media?url=${encodeURIComponent(
+            item.videos.standard_resolution.url,
+          )}`,
+          thumbnail_url: item.images?.standard_resolution?.url
+            ? `/api/instagram-media?url=${encodeURIComponent(
+                item.images.standard_resolution.url,
+              )}`
+            : '',
+          permalink: item.link,
+          caption: item.caption?.text || '',
+        }));
+    })
+    .catch((error) => {
+      console.error(
+        'Failed to load Instagram reels on Our Story page:',
+        error,
+      );
+      return [];
+    });
+
+  return {instagramReels};
+}
+
 export default function PreviewOurStory() {
+  const {instagramReels} = useLoaderData();
+
   return (
     <main className="our-story-page">
-      {/* Our Story Hero */}
       <OurStoryHero {...OUR_STORY_HERO_DATA} />
 
-      {/* About Nimie */}
       <AboutNimie {...ABOUT_NIMIE_DATA} />
 
       <OurStoryQuote {...OUR_STORY_QUOTE_DATA} />
 
       <AboutCurator {...ABOUT_CURATOR_DATA} />
 
-      <InstagramReels
-              reels={dummyInstagramReels}
+      <Suspense fallback={null}>
+        <Await resolve={instagramReels}>
+          {(reels) => (
+            <InstagramReels
+              reels={reels}
               instagramHandle="@NIMIE.IN"
             />
+          )}
+        </Await>
+      </Suspense>
     </main>
   );
 }

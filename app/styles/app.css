@@ -12,6 +12,11 @@ body {
   overflow-x: clip;
   background-color: #FFF7E7;
 }
+
+body:has(.Home) {
+  background-color: #fff;
+}
+
 img {
   border-radius: 4px;
 }
