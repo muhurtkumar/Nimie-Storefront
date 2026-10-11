@@ -3,6 +3,7 @@ import {ShoppingBag, User} from 'lucide-react';
 import {NavLink, useLocation} from 'react-router';
 
 import LOGO_SRC from '~/assets/logo.png';
+import MOBILE_LOGO_SRC from '~/assets/Logo_mobile.webm';
 
 import {Cart} from '~/components/Cart';
 
@@ -79,6 +80,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileScrolled, setMobileScrolled] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
   const closeCart = () => setCartOpen(false);
@@ -157,9 +159,17 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   // Home: switch from transparent to solid green once the page scrolls,
   // so the white text stays readable over page content.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      setMobileScrolled(
+        window.matchMedia('(max-width: 767px)').matches &&
+          window.scrollY > 40,
+      );
+    };
+
     onScroll();
     window.addEventListener('scroll', onScroll, {passive: true});
+
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -181,13 +191,35 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
         top: HEADER_MARGIN,
         zIndex: 100,
         marginTop: HEADER_MARGIN,
-        marginLeft: HEADER_MARGIN,
-        marginRight: HEADER_MARGIN,
         background: '#345225',
         color: '#fff',
         borderRadius: HEADER_RADIUS,
         border: 'none',
       };
+
+  useEffect(() => {
+    const styleId = 'nimie-mobile-header-background';
+    let style = document.getElementById(styleId);
+
+    if (!style) {
+      style = document.createElement('style');
+      style.id = styleId;
+      document.head.appendChild(style);
+    }
+
+    style.textContent = `
+      @media (max-width: 767px) {
+        header.left-0.right-0,
+        header[style*="position: sticky"],
+        header[style*="position: fixed"] {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+      }
+    `;
+
+    return () => style?.remove();
+  }, []);
 
   return (
     <>
@@ -203,13 +235,14 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
         />
 
         <div
-          className="grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]"
+          className={`grid grid-cols-[1fr_auto] items-center px-[clamp(16px,2.5vw,32px)] md:grid-cols-[1fr_auto_1fr] ${
+            isHome ? '' : 'md:px-[clamp(32px,3vw,52px)]'
+          }`}
           style={{
             position: 'relative',
             zIndex: 2,
-            padding: `${NAV_PAD_Y} ${
-              isHome ? HOME_NAV_PAD_X : NAV_PAD_X
-            }`,
+            paddingTop: NAV_PAD_Y,
+            paddingBottom: NAV_PAD_Y,
             fontSize: 'clamp(12px, 1.3vw, 14px)',
             fontFamily: FONT,
             fontWeight: 400,
@@ -238,28 +271,47 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
             end
             aria-label={shop?.name}
             onClick={closeMenu}
-            className="justify-start md:justify-center"
+            className={`justify-start md:justify-center ${
+              mobileScrolled && !menuOpen ? 'invisible md:visible' : ''
+            }`}
             style={{
               display: 'flex',
               alignItems: 'center',
               lineHeight: 0,
+              transition: 'opacity 200ms ease',
             }}
-          >
-            <img
-              src={LOGO_SRC}
-              alt={shop?.name || 'Home'}
-              style={{
-                display: 'block',
-                height: 'clamp(28px, 3vw, 40px)',
-                width: 'auto',
-                borderRadius: 0,
-                // turns the logo black while the white menu panel is open
-                filter: menuOpen ? 'brightness(0)' : 'none',
-                transition: `filter ${DURATION / 2}ms ${EASE}`,
-                // If your logo is dark and should be white on the hero, use:
-                // filter: menuOpen ? 'none' : isHome ? 'brightness(0) invert(1)' : 'none',
-              }}
-            />
+          >                      
+            <>
+              <img
+                className="hidden md:block"
+                src={LOGO_SRC}
+                alt={shop?.name || 'Home'}
+                style={{
+                  height: 'clamp(28px, 3vw, 40px)',
+                  width: 'auto',
+                  borderRadius: 0,
+                  filter: menuOpen ? 'brightness(0)' : 'none',
+                }}
+              />
+
+              <video
+                className="block md:hidden"
+                src={MOBILE_LOGO_SRC}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label={shop?.name || 'Home'}
+                style={{
+                  height: 'clamp(28px, 3vw, 40px)',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: 0,
+                  filter: menuOpen ? 'brightness(0)' : 'none',
+                }}
+              />
+            </>
           </NavLink>
 
           {/* Right: links on desktop */}
