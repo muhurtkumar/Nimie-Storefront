@@ -176,26 +176,21 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   // Home: transparent at the top, fixed over the hero card (same offset as
   // the Hero's outer padding), turns solid green after scrolling. White text.
   // Other pages: sticky, solid green, white text.
-  const wrapperStyle = isHome
-    ? {
-        position: 'fixed',
-        top: GAP_Y,
-        zIndex: 100,
-        background: scrolled ? '#345225' : 'transparent',
-        transition: 'background 300ms ease',
-        color: '#fff',
-        borderRadius: HEADER_RADIUS,
-      }
-    : {
-        position: 'sticky',
-        top: HEADER_MARGIN,
-        zIndex: 100,
-        marginTop: HEADER_MARGIN,
-        background: '#345225',
-        color: '#fff',
-        borderRadius: HEADER_RADIUS,
-        border: 'none',
-      };
+ const wrapperStyle = {
+    position: 'fixed',
+    top: GAP_Y,
+    left: '16px',
+    right: '16px',
+    zIndex: 100,
+    background: isHome
+      ? scrolled
+        ? '#345225'
+        : 'transparent'
+      : '#345225',
+    transition: 'background 300ms ease',
+    color: '#fff',
+    borderRadius: HEADER_RADIUS,
+  };
 
   useEffect(() => {
     const styleId = 'nimie-mobile-header-background';
@@ -212,8 +207,11 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
         header.left-0.right-0,
         header[style*="position: sticky"],
         header[style*="position: fixed"] {
+          left: 0 !important;
+          right: 0 !important;
           background: transparent !important;
           background-color: transparent !important;
+          border-radius: 0 !important;
         }
       }
     `;
