@@ -93,6 +93,37 @@ img {
   }
 }
 
+.instagram-marquee {
+  overflow: hidden;
+  width: 100%;
+}
+
+.instagram-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: instagram-marquee-scroll 35s linear infinite;
+}
+
+.instagram-marquee:hover .instagram-marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes instagram-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instagram-marquee__track {
+    animation-play-state: paused;
+  }
+}
+
 aside {
   background: var(--color-light);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
