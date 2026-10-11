@@ -97,12 +97,13 @@ const css = `
 
 .ftr__link:hover {
   color: #A83B96;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .ftr__link--active {
   color: #A83B96;
   font-weight: 700;
+  text-decoration: none;
 }
 
 /* ---------- logo: centered in the remaining space below the card ---------- */

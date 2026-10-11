@@ -3,7 +3,7 @@ import {ArrowLeft, ArrowRight, ExternalLink} from 'lucide-react';
 
 export function InstagramReels({
   reels = [],
-  instagramHandle = '@NIMIE.IN',
+  instagramHandle = '@nimie.in',
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -35,7 +35,7 @@ export function InstagramReels({
           <div className="flex min-h-0 flex-col justify-start p-2 sm:p-3 md:col-span-2 lg:min-h-[340px] lg:justify-between lg:col-span-1">
             <div>
               <p className="text-[13px] font-medium tracking-wide text-[#315329]">
-                {instagramHandle} + YOU
+                {instagramHandle} + you
               </p>
 
               <h2

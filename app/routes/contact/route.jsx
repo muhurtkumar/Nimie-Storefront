@@ -63,7 +63,7 @@ export default function ContactPage() {
           {(reels) => (
             <InstagramReels
               reels={reels}
-              instagramHandle="@NIMIE.IN"
+              instagramHandle="@nimie.in"
             />
           )}
         </Await>

@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'chip-wallpapers-shame-bill.trycloudflare.com',
+      'piano-gen-murray-waiver.trycloudflare.com',
     ],
   },
 });

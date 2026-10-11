@@ -122,7 +122,7 @@ export default function PreviewOurStory() {
           {(reels) => (
             <InstagramReels
               reels={reels}
-              instagramHandle="@NIMIE.IN"
+              instagramHandle="@nimie.in"
             />
           )}
         </Await>

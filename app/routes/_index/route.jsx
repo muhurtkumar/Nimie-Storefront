@@ -179,7 +179,7 @@ export default function Homepage() {
           {(instagramReels) => (
             <InstagramReels
               reels={instagramReels}
-              instagramHandle="@NIMIE.IN"
+              instagramHandle="@nimie.in"
             />
           )}
         </Await>
