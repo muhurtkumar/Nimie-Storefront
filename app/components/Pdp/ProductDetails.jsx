@@ -32,7 +32,7 @@ function formatPrice(amount, currencyCode = 'INR') {
  * These can later come from Shopify metafields.
  */
 const STATIC_PRODUCT_INFO = {
-  type: 'Kurti',
+  
 
   rating: 4.5,
 
@@ -614,7 +614,7 @@ export function ProductDetails({
                 </h1>
 
                 <p className="!mt-1 !mb-0 text-[16px] leading-none text-stone-600">
-                  {STATIC_PRODUCT_INFO.type}
+                  {product.productType || ''}
                 </p>
               </div>
             </div>
