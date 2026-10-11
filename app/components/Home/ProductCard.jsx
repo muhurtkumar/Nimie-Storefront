@@ -655,43 +655,45 @@ export function ProductCard({
               {/* Left: Product information */}
               <div className="min-w-0 flex-1">
                 {/* Fixed-height title area */}
-                <div className="h-[32px] md:h-[40px] lg:h-[32px]">
-                  <h3 className="line-clamp-2 text-[14px] font-semibold leading-4 text-[#345225] md:leading-5 lg:leading-4">
+                <div className="min-h-[32px] md:min-h-[40px] lg:min-h-[32px]">
+                  <h3 className="line-clamp-2 text-[16px] font-semibold leading-6 text-[#345225]">
                     {product.title}
                   </h3>
                 </div>
 
-                {/* Product type always starts at the same vertical position */}
-                <div className="mt-0 text-[13px] text-stone-600 md:mt-2 lg:mt-0">
+                {/* Product type only */}
+                <div className="mt-0 pb-1 text-[15px] leading-6 text-stone-600 md:mt-2 lg:mt-0">
                   {product.productType}
                 </div>
               </div>
 
               {/* Right: Price information */}
               <div className="shrink-0 text-right">
-                <div className="flex items-center justify-end gap-3">
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center justify-end gap-3">
+                    {hasDiscount && (
+                      <span className="text-[14px] font-bold text-[#345225]">
+                        {discountPercentage}% OFF
+                      </span>
+                    )}
+
+                    <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
+                      {formatPrice(
+                        discountedPriceAmount,
+                        currentPrice?.currencyCode,
+                      )}
+                    </span>
+                  </div>
+
                   {hasDiscount && (
-                    <span className="text-[13px] font-bold text-[#345225]">
-                      {discountPercentage}% OFF
+                    <span className="mt-4 text-[15px] leading-5 text-[#e98b8b] line-through">
+                      {formatPrice(
+                        originalPriceAmount,
+                        currentPrice?.currencyCode,
+                      )}
                     </span>
                   )}
-
-                  <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
-                    {formatPrice(
-                      discountedPriceAmount,
-                      currentPrice?.currencyCode,
-                    )}
-                  </span>
                 </div>
-
-                {hasDiscount && (
-                  <div className="mt-6 text-[14px] text-[#e98b8b] line-through md:mt-9 lg:mt-6">
-                    {formatPrice(
-                      originalPriceAmount,
-                      currentPrice?.currencyCode,
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -176,11 +176,13 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   // Home: transparent at the top, fixed over the hero card (same offset as
   // the Hero's outer padding), turns solid green after scrolling. White text.
   // Other pages: sticky, solid green, white text.
- const wrapperStyle = {
-    position: 'fixed',
+  const wrapperStyle = {
+    position: isHome ? 'fixed' : 'sticky',
     top: GAP_Y,
     left: '16px',
     right: '16px',
+    width: 'auto',
+    boxSizing: 'border-box',
     zIndex: 100,
     background: isHome
       ? scrolled
@@ -222,7 +224,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   return (
     <>
       <header
-        className={isHome ? 'left-0 right-0 md:left-4 md:right-4' : undefined}
+        className="md:mx-4"
         style={wrapperStyle}
       >
         {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
@@ -269,9 +271,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
             end
             aria-label={shop?.name}
             onClick={closeMenu}
-            className={`justify-start md:justify-center ${
-              mobileScrolled && !menuOpen ? 'invisible md:visible' : ''
-            }`}
+            className="justify-start md:justify-center"
             style={{
               display: 'flex',
               alignItems: 'center',
