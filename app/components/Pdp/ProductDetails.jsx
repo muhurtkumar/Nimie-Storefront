@@ -484,7 +484,8 @@ export function ProductDetails({
   };
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#fff8e9] px-4 py-4 sm:px-6 lg:px-6">
+    <>
+    <main className="relative min-h-screen overflow-x-clip bg-[#fff8e9] px-4 pt-4 pb-24 sm:px-6 lg:px-6">
       <div className="w-full mr-auto">
         <div className="grid w-full grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
           {/* =====================================================
@@ -1098,5 +1099,64 @@ export function ProductDetails({
         </div>
       </div>
     </main>
+
+    {/* Sticky Bottom Action Bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white px-4 py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+        <div className="mx-auto flex w-full max-w-3xl gap-3">
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            disabled={!selectedColorId || wishlistFetcher.state !== 'idle'}
+            className="flex h-[54px] flex-1 items-center justify-center gap-2 rounded-md border-2 border-stone-600 bg-white text-[15px] font-semibold text-stone-700 transition hover:bg-stone-50 disabled:opacity-50 cursor-pointer"
+          >
+            WISHLIST
+            <Heart
+              className={`h-6 w-6 ${
+                isWishlisted ? 'fill-red-500 text-red-500' : ''
+              }`}
+              strokeWidth={1.8}
+            />
+          </button>
+
+          <div className="flex-[1.15]">
+            {isColorSoldOut ? (
+              <button
+                type="button"
+                disabled
+                className="h-[54px] w-full rounded-md bg-[#f23825] text-[15px] font-semibold text-white opacity-60"
+              >
+                SOLD OUT
+              </button>
+            ) : (
+              <CartForm
+                route="/cart"
+                action={CartForm.ACTIONS.LinesAdd}
+                inputs={{
+                  lines: cartVariant
+                    ? [
+                        {
+                          merchandiseId: cartVariant.id,
+                          quantity,
+                          attributes: cartLineAttributes,
+                        },
+                      ]
+                    : [],
+                }}
+              >
+                {(fetcher) => (
+                  <button
+                    type="submit"
+                    disabled={!canAddToCart || fetcher.state !== 'idle'}
+                    className="h-[54px] w-full rounded-md bg-[#345225] text-[15px] font-semibold text-white transition hover:bg-[#2a421e] disabled:opacity-50 cursor-pointer"
+                  >
+                    {fetcher.state !== 'idle' ? 'ADDING...' : 'ADD TO CART'}
+                  </button>
+                )}
+              </CartForm>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
