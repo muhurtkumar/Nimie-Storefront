@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
-import {Link, useFetcher} from 'react-router';
+import {Link, useFetcher, useNavigate} from 'react-router';
+import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {Image} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
 
@@ -28,7 +29,10 @@ export function ProductCard({
   wishlist = [],
   onWishlistRemoved,
 }) {
-  const wishlistFetcher = useFetcher();
+    const wishlistFetcher = useFetcher();
+    const navigate = useNavigate();
+
+    const isLoggedIn = useIsLoggedIn();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -316,15 +320,21 @@ export function ProductCard({
     setActiveImageIndex(0);
   };
 
-  const handleWishlistToggle = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+    const handleWishlistToggle = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    if (!selectedColorId) {
-      return;
-    }
+      if (!selectedColorId) {
+        return;
+      }
 
-    wishlistFetcher.submit(
+      // Not logged in: go to login instead of toggling the heart
+      if (isLoggedIn === false) {
+        navigate('/account/login');
+        return;
+      }
+
+      wishlistFetcher.submit(
       {
         intent: 'toggle',
         productId: product.id,
@@ -356,6 +366,12 @@ export function ProductCard({
     product.id,
     selectedColorId,
   ]);
+
+  useEffect(() => {
+    if (wishlistFetcher.data?.isLoggedIn === false) {
+      navigate('/account/login');
+    }
+  }, [wishlistFetcher.data, navigate]);
 
   /*
    * When we reach the duplicated first image,
