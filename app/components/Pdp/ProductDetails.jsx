@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {useFetcher, useNavigate} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
+import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {
   ChevronLeft,
   ChevronRight,
@@ -78,9 +79,16 @@ export function ProductDetails({
 
   const navigate = useNavigate();
   const wishlistFetcher = useFetcher();
+  const isLoggedIn = useIsLoggedIn();
 
   const handleWishlistToggle = () => {
     if (!selectedColorId) {
+      return;
+    }
+
+    // Not logged in: go to login instead of toggling the heart
+    if (isLoggedIn === false) {
+      navigate('/account/login');
       return;
     }
 
@@ -106,6 +114,12 @@ export function ProductDetails({
       setIsWishlisted(Boolean(wishlistFetcher.data.added));
     }
   }, [wishlistFetcher.data]);
+
+  useEffect(() => {
+    if (wishlistFetcher.data?.isLoggedIn === false) {
+      navigate('/account/login');
+    }
+  }, [wishlistFetcher.data, navigate]);
 
   /* Shopify product images */
   const images = product.images?.nodes ?? [];
