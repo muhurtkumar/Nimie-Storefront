@@ -76,6 +76,47 @@ export function ProductDetails({
 
   /* Size Guide */
   const [openSizeGuide, setOpenSizeGuide] = useState(false);
+  
+  useEffect(() => {
+    if (!openSizeGuide) return undefined;
+
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    const previousHtmlOverflow = html.style.overflow;
+
+    html.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpenSizeGuide(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      Object.assign(body.style, previousBodyStyles);
+      html.style.overflow = previousHtmlOverflow;
+      window.scrollTo(0, scrollY);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openSizeGuide]);
 
   const navigate = useNavigate();
   const wishlistFetcher = useFetcher();
@@ -1004,8 +1045,10 @@ export function ProductDetails({
       ================================================== */}
 
       <div
-        className={`absolute inset-0 z-50 transition-all duration-500 ${
-          openSizeGuide ? 'pointer-events-auto' : 'pointer-events-none'
+        className={`fixed inset-0 z-[9999] transition-all duration-500 ${
+          openSizeGuide
+            ? 'visible pointer-events-auto'
+            : 'invisible pointer-events-none'
         }`}
       >
         {/* Background overlay */}
@@ -1020,7 +1063,7 @@ export function ProductDetails({
 
         {/* Sliding panel */}
         <div
-          className={`absolute right-0 top-0 flex h-full w-full max-w-[580px] flex-col bg-[#fff8e9] shadow-2xl transition-transform duration-500 ease-in-out ${
+          className={`absolute right-0 top-0 flex h-full w-full max-w-[580px] flex-col overflow-hidden bg-[#fff8e9] shadow-2xl transition-transform duration-500 ease-in-out ${
             openSizeGuide ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

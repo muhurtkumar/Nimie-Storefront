@@ -107,21 +107,49 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  // Escape to close + lock page scroll while open
+  
+  // Escape to close + prevent background scrolling while the menu is open
   useEffect(() => {
     if (!menuOpen) return undefined;
+
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+
+    // Save existing styles so they can be restored exactly
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    const previousHtmlOverflow = html.style.overflow;
+
+    // Lock the page in its current position
+    html.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
 
     const onKey = (e) => {
       if (e.key === 'Escape') setMenuOpen(false);
     };
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
     window.addEventListener('keydown', onKey);
 
     return () => {
-      document.body.style.overflow = prevOverflow;
+      // Restore all original styles
+      Object.assign(body.style, previousBodyStyles);
+      html.style.overflow = previousHtmlOverflow;
+
+      // Return to the exact scroll position from before opening
+      window.scrollTo(0, scrollY);
+
       window.removeEventListener('keydown', onKey);
     };
   }, [menuOpen]);

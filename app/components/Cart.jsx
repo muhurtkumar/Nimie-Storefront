@@ -26,30 +26,54 @@ export function Cart({open, onClose}) {
   const rootData = useRouteLoaderData('root');
   const revalidator = useRevalidator();
 
-  useEffect(() => {
-    if (!open) return undefined;
+  
+useEffect(() => {
+  if (!open) return undefined;
 
-    if (revalidator.state === 'idle') {
-      revalidator.revalidate();
+  if (revalidator.state === 'idle') {
+    revalidator.revalidate();
+  }
+
+  const body = document.body;
+  const html = document.documentElement;
+  const scrollY = window.scrollY;
+
+  const previousBodyStyles = {
+    position: body.style.position,
+    top: body.style.top,
+    left: body.style.left,
+    right: body.style.right,
+    width: body.style.width,
+    overflow: body.style.overflow,
+  };
+  const previousHtmlOverflow = html.style.overflow;
+
+  // Prevent the page behind the cart drawer from scrolling
+  html.style.overflow = 'hidden';
+  body.style.position = 'fixed';
+  body.style.top = `-${scrollY}px`;
+  body.style.left = '0';
+  body.style.right = '0';
+  body.style.width = '100%';
+  body.style.overflow = 'hidden';
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onClose();
     }
+  };
 
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
+  window.addEventListener('keydown', handleKeyDown);
 
-    const previousOverflow = document.body.style.overflow;
+  return () => {
+    Object.assign(body.style, previousBodyStyles);
+    html.style.overflow = previousHtmlOverflow;
 
-    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, scrollY);
 
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, onClose, revalidator]);
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [open, onClose, revalidator]);
 
   return (
     <>
