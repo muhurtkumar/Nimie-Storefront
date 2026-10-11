@@ -274,9 +274,9 @@ export function Reviews({reviews = [], title ="Reactions"}) {
                     <div className="reviews__card-header">
                       <img
                         className="reviews__avatar"
-                        src={stickers[index]}
-                        alt=""
-                        aria-hidden="true"
+                        src={review.image || stickers[index]}
+                        alt={review.image ? `${review.name}'s avatar` : ''}
+                        aria-hidden={!review.image}
                       />
                       <div className="reviews__meta">
                         <span className="reviews__name">{review.name}</span>

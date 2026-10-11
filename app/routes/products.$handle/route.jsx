@@ -35,9 +35,25 @@ const REVIEWS_QUERY = `#graphql
     metaobjects(type: "review", first: 20) {
       nodes {
         id
-        reviewer_name: field(key: "reviewer_name") { value }
-        review_date: field(key: "review_date") { value }
-        review_text: field(key: "review_text") { value }
+        reviewer_name: field(key: "reviewer_name") {
+          value
+        }
+        review_date: field(key: "review_date") {
+          value
+        }
+        review_text: field(key: "review_text") {
+          value
+        }
+        reviewer_image: field(key: "reviewer_image") {
+          reference {
+            ... on MediaImage {
+              image {
+                url
+                altText
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -111,6 +127,7 @@ async function loadCriticalData({context, params, request}) {
     name: node.reviewer_name?.value ?? 'Anonymous',
     date: node.review_date?.value ?? '',
     text: node.review_text?.value ?? '',
+    image: node.reviewer_image?.reference?.image?.url ?? '',
   }));
 
   return {
