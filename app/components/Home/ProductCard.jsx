@@ -298,6 +298,20 @@ export function ProductCard({
       )
     : originalPriceAmount;
 
+    const quickAddCartLineAttributes = [
+  ...(activeImages[0]?.url
+    ? [{key: '_image', value: activeImages[0].url}]
+    : []),
+  ...(discountPercentage > 0
+    ? [
+        {
+          key: '_discount_percentage',
+          value: String(discountPercentage),
+        },
+      ]
+    : []),
+];
+
   /*
    * Automatically move to the next image while hovering.
    */
@@ -502,7 +516,11 @@ export function ProductCard({
                     colorOption?.value?.trim().toLowerCase() ===
                       selectedColorName.trim().toLowerCase();
 
-                  return matchesColor && variant.availableForSale;
+                  return (
+                    matchesColor &&
+                    variant.availableForSale &&
+                    (variant.quantityAvailable ?? 0) > 0
+                  );
                 })
                 .map((variant) =>
                   variant.selectedOptions?.find(
@@ -766,40 +784,45 @@ export function ProductCard({
             <X size={20} />
           </button>
 
-          <div className="flex gap-3 border-b border-stone-200 pb-4 pr-5">
-            {product.featuredImage && (
-              <Image
-                data={product.featuredImage}
-                className="h-20 w-16 rounded object-cover"
-                sizes="64px"
-              />
+          <div className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 border-b border-stone-200 pb-4 pr-2">
+            {(activeImages[0] || product.featuredImage) && (
+              <div className="h-[110px] w-[88px] overflow-hidden rounded-md">
+                <Image
+                  data={activeImages[0] || product.featuredImage}
+                  sizes="88px"
+                  className="block h-full w-full object-cover"
+                />
+              </div>
             )}
 
-            <div className="min-w-0">
-              <h3 className="text-sm font-medium text-stone-900">
+            <div className="min-w-0 pr-0">
+              <h3 className="break-words text-sm font-medium leading-5 text-stone-900">
                 {product.title}
               </h3>
 
-              <p className="mt-1 font-semibold text-stone-900">
-                {formatPrice(
-                  discountedPriceAmount,
-                  currentPrice?.currencyCode,
-                )}
-                {hasDiscount && (
-                  <span className="ml-2 text-xs text-stone-400 line-through">
-                    {formatPrice(
-                      originalPriceAmount,
-                      currentPrice?.currencyCode,
-                    )}
-                  </span>
-                )}
-              </p>
-
-              {hasDiscount && (
-                <p className="text-xs font-semibold text-[#e98b8b]">
-                  ({discountPercentage}% OFF)
+              <div className="mt-3 flex flex-nowrap items-center gap-2 whitespace-nowrap">
+                <p className="shrink-0 font-semibold leading-5 text-stone-900">
+                  {formatPrice(
+                    discountedPriceAmount,
+                    currentPrice?.currencyCode,
+                  )}
                 </p>
-              )}
+
+                {hasDiscount && (
+                  <>
+                    <p className="shrink-0 text-xs text-stone-400 line-through">
+                      {formatPrice(
+                        originalPriceAmount,
+                        currentPrice?.currencyCode,
+                      )}
+                    </p>
+
+                    <p className="shrink-0 text-xs font-semibold text-[#e98b8b]">
+                      ({discountPercentage}% OFF)
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
@@ -831,7 +854,9 @@ export function ProductCard({
                   (option) => option.name.toLowerCase() === 'size',
                 )?.value;
 
-                const available = variant.availableForSale;
+                const available =
+                variant.availableForSale &&
+                (variant.quantityAvailable ?? 0) > 0;
                 const selected = selectedQuickAddSize === size;
 
                 return (
@@ -889,6 +914,7 @@ export function ProductCard({
                         {
                           merchandiseId: variant.id,
                           quantity: 1,
+                          attributes: quickAddCartLineAttributes,
                         },
                       ],
                     },
@@ -900,11 +926,10 @@ export function ProductCard({
                 },
               );
 
-              setIsQuickAddOpen(false);
             }}
             className="mt-6 w-full rounded-md bg-[#345225] py-3 text-sm font-semibold text-white transition hover:bg-[#293f1d] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {cartFetcher.state !== 'idle' ? 'Adding...' : 'Done'}
+            {cartFetcher.state !== 'idle' ? 'Adding...' : 'ADD TO CART'}
           </button>
         </div>
       </div>
