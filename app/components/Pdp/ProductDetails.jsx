@@ -322,7 +322,7 @@ export function ProductDetails({
           .filter((measurement) => measurement.name && measurement.value);
 
         return {
-          size: sizeField?.value?.trim() || '',
+          size: sizeField?.value?.trim().split(' - ').pop() || '',
           measurements,
         };
       })
@@ -1123,7 +1123,7 @@ export function ProductDetails({
                               className="px-3 py-4 text-center text-[13px] text-stone-600"
                             >
                               {measurement?.value
-                                ? `${measurement.value}"`
+                                ? measurement.value
                                 : '—'}
                             </td>
                           );

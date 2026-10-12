@@ -35,7 +35,7 @@ const FAQ_DATA = [
   {
     question: 'Can I return my order?',
     answer:
-      'Unworn, unused, unwashed, unaltered and undamaged items with original tags can be returned within 7 days of delivery. Please refer to our Return & Exchange Policy for details.',
+      'Unworn, unused, unwashed, unaltered and undamaged items with original tags can be returned within 24 hours of delivery. Please refer to our Return & Exchange Policy for details.',
   },
 ];
 
