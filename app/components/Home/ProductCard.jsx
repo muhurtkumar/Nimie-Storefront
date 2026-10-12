@@ -478,6 +478,32 @@ export function ProductCard({
           </div>
         )}
 
+        {/* Add to cart icon — Wishlist cards only */}
+        {wishlistLayout && (
+          <button
+            type="button"
+            aria-label={`View ${product.title}`}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              navigate(
+                `/products/${product.handle}?Size=XS${
+                  selectedColorName
+                    ? `&Color=${encodeURIComponent(selectedColorName)}`
+                    : ''
+                }`,
+              );
+            }}
+            className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm transition hover:bg-[#f8f1df] cursor-pointer"
+          >
+            <ShoppingCart
+              className="h-5 w-5 text-[#345225]"
+              strokeWidth={1.8}
+            />
+          </button>
+        )}
+
         {/* Heart icon (z-30 keeps it above the bottom controls row) */}
         <button
           type="button"
@@ -668,16 +694,16 @@ export function ProductCard({
               </div>
 
               {/* Right: Price information */}
-              <div className="shrink-0 text-right">
+                            <div className="shrink-0 text-right">
                 <div className="flex flex-col items-end">
-                  <div className="flex items-center justify-end gap-3">
+                  <div className="flex min-h-[32px] items-start justify-end gap-3 md:min-h-[40px] lg:min-h-[32px]">
                     {hasDiscount && (
-                      <span className="text-[14px] font-bold text-[#345225]">
+                      <span className="relative top-[2px] text-[14px] font-bold leading-6 text-[#345225]">
                         {discountPercentage}% OFF
                       </span>
                     )}
 
-                    <span className="text-[20px] font-bold leading-5 text-black md:leading-6 lg:leading-5">
+                    <span className="text-[20px] font-bold leading-6 text-black">
                       {formatPrice(
                         discountedPriceAmount,
                         currentPrice?.currencyCode,
@@ -686,7 +712,7 @@ export function ProductCard({
                   </div>
 
                   {hasDiscount && (
-                    <span className="mt-4 text-[15px] leading-5 text-[#e98b8b] line-through">
+                    <span className="mt-0 pb-1 text-[15px] leading-6 text-[#e98b8b] line-through md:mt-2 lg:mt-0">
                       {formatPrice(
                         originalPriceAmount,
                         currentPrice?.currencyCode,

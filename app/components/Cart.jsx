@@ -347,12 +347,12 @@ const totalSavings = Math.max(
           ))}
         </ul>
   
-       <div className="mt-4 mb-5 border-y border-stone-200">
+       <div className="mt-0 mb-0 border-b border-stone-200">
           <button
             type="button"
             onClick={() => setShowStoreCredit((previous) => !previous)}
             aria-expanded={showStoreCredit}
-            className="flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-1 py-4 text-left"
+            className="flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-1 pb-4 pt-2 text-left"
           >
             <span className="flex min-w-0 items-center gap-3">
               <Wallet
@@ -432,7 +432,7 @@ const totalSavings = Math.max(
         </div>
 
         {/* Coupon code */}
-        <div className="mt-4 mb-5 border-y border-stone-200 [&_form]:max-w-none!">
+        <div className="mt-0 mb-5 border-b border-stone-200 [&_form]:max-w-none!">
           <button
             type="button"
             onClick={() => setShowCoupon((previous) => !previous)}
