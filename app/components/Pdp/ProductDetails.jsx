@@ -526,7 +526,7 @@ export function ProductDetails({
 
   return (
     <>
-    <main className="relative min-h-screen overflow-x-clip bg-[#fff8e9] px-4 pt-4 pb-24 sm:px-6 lg:px-6">
+    <main className="relative min-h-screen overflow-x-clip bg-[#fff8e9] px-4 pt-4 pb-24 sm:px-6 lg:px-6 md:pt-8">
       <div className="w-full mr-auto">
         <div className="grid w-full grid-cols-1 items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
           {/* =====================================================
@@ -1144,7 +1144,7 @@ export function ProductDetails({
     </main>
 
     {/* Sticky Bottom Action Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white px-4 py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white px-4 py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.08)] lg:hidden">
         <div className="mx-auto flex w-full max-w-3xl gap-3">
           <button
             type="button"
