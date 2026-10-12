@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Link, useFetcher, useNavigate} from 'react-router';
 import {useIsLoggedIn} from '~/lib/use-is-logged-in';
-import {Image} from '@shopify/hydrogen';
+import {Image, CartForm} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
 
 function formatPrice(amount, currencyCode) {
@@ -31,6 +31,9 @@ export function ProductCard({
 }) {
     const wishlistFetcher = useFetcher();
     const navigate = useNavigate();
+    const cartFetcher = useFetcher();
+    const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+    const [selectedQuickAddSize, setSelectedQuickAddSize] = useState('');
 
     const isLoggedIn = useIsLoggedIn();
 
@@ -405,6 +408,7 @@ export function ProductCard({
       : activeImages;
 
   return (
+    <>
     <Link
       to={
         selectedColorName
@@ -478,24 +482,39 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Add to cart icon — Wishlist cards only */}
+        {/* Quick-add cart icon — Wishlist cards only */}
         {wishlistLayout && (
           <button
             type="button"
-            aria-label={`View ${product.title}`}
+            aria-label={`Choose size for ${product.title}`}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
 
-              navigate(
-                `/products/${product.handle}?Size=XS${
-                  selectedColorName
-                    ? `&Color=${encodeURIComponent(selectedColorName)}`
-                    : ''
-                }`,
-              );
+              const availableSizes = product.variants?.nodes
+                ?.filter((variant) => {
+                  const colorOption = variant.selectedOptions?.find(
+                    (option) => option.name.toLowerCase() === 'color',
+                  );
+
+                  const matchesColor =
+                    !selectedColorName ||
+                    colorOption?.value?.trim().toLowerCase() ===
+                      selectedColorName.trim().toLowerCase();
+
+                  return matchesColor && variant.availableForSale;
+                })
+                .map((variant) =>
+                  variant.selectedOptions?.find(
+                    (option) => option.name.toLowerCase() === 'size',
+                  )?.value,
+                )
+                .filter(Boolean);
+
+              setSelectedQuickAddSize(availableSizes?.[0] || '');
+              setIsQuickAddOpen(true);
             }}
-            className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm transition hover:bg-[#f8f1df] cursor-pointer"
+            className="absolute right-3 top-3 z-30 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white shadow-sm transition hover:bg-[#f8f1df]"
           >
             <ShoppingCart
               className="h-5 w-5 text-[#345225]"
@@ -726,5 +745,170 @@ export function ProductCard({
         </>
       )}
     </Link>
+    {isQuickAddOpen && (
+      <div
+        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4"
+        onClick={() => setIsQuickAddOpen(false)}
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Choose size for ${product.title}`}
+          className="relative w-full max-w-[360px] rounded-xl bg-white p-5 shadow-xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setIsQuickAddOpen(false)}
+            className="absolute right-3 top-3 text-stone-500 hover:text-black"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="flex gap-3 border-b border-stone-200 pb-4 pr-5">
+            {product.featuredImage && (
+              <Image
+                data={product.featuredImage}
+                className="h-20 w-16 rounded object-cover"
+                sizes="64px"
+              />
+            )}
+
+            <div className="min-w-0">
+              <h3 className="text-sm font-medium text-stone-900">
+                {product.title}
+              </h3>
+
+              <p className="mt-1 font-semibold text-stone-900">
+                {formatPrice(
+                  discountedPriceAmount,
+                  currentPrice?.currencyCode,
+                )}
+                {hasDiscount && (
+                  <span className="ml-2 text-xs text-stone-400 line-through">
+                    {formatPrice(
+                      originalPriceAmount,
+                      currentPrice?.currencyCode,
+                    )}
+                  </span>
+                )}
+              </p>
+
+              {hasDiscount && (
+                <p className="text-xs font-semibold text-[#e98b8b]">
+                  ({discountPercentage}% OFF)
+                </p>
+              )}
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm font-semibold text-stone-900">
+            Select Size
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {product.variants?.nodes
+              ?.filter((variant) => {
+                const colorOption = variant.selectedOptions?.find(
+                  (option) => option.name.toLowerCase() === 'color',
+                );
+
+                const matchesColor =
+                  !selectedColorName ||
+                  colorOption?.value?.trim().toLowerCase() ===
+                    selectedColorName.trim().toLowerCase();
+
+                return (
+                  matchesColor &&
+                  variant.selectedOptions?.some(
+                    (option) => option.name.toLowerCase() === 'size',
+                  )
+                );
+              })
+              .map((variant) => {
+                const size = variant.selectedOptions.find(
+                  (option) => option.name.toLowerCase() === 'size',
+                )?.value;
+
+                const available = variant.availableForSale;
+                const selected = selectedQuickAddSize === size;
+
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    disabled={!available}
+                    onClick={() => setSelectedQuickAddSize(size)}
+                    className={`flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm transition ${
+                      selected
+                        ? 'border-[#345225] bg-[#345225] text-white'
+                        : 'border-stone-200 text-stone-800'
+                    } ${
+                      !available
+                        ? 'cursor-not-allowed opacity-30 line-through'
+                        : 'cursor-pointer'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+          </div>
+
+          <button
+            type="button"
+            disabled={!selectedQuickAddSize || cartFetcher.state !== 'idle'}
+            onClick={() => {
+              const variant = product.variants?.nodes?.find((item) => {
+                const size = item.selectedOptions?.find(
+                  (option) => option.name.toLowerCase() === 'size',
+                )?.value;
+
+                const color = item.selectedOptions?.find(
+                  (option) => option.name.toLowerCase() === 'color',
+                )?.value;
+
+                return (
+                  size === selectedQuickAddSize &&
+                  (!selectedColorName ||
+                    color?.trim().toLowerCase() ===
+                      selectedColorName.trim().toLowerCase()) &&
+                  item.availableForSale
+                );
+              });
+
+              if (!variant) return;
+
+              cartFetcher.submit(
+                {
+                  [CartForm.INPUT_NAME]: JSON.stringify({
+                    action: CartForm.ACTIONS.LinesAdd,
+                    inputs: {
+                      lines: [
+                        {
+                          merchandiseId: variant.id,
+                          quantity: 1,
+                        },
+                      ],
+                    },
+                  }),
+                },
+                {
+                  method: 'POST',
+                  action: '/cart',
+                },
+              );
+
+              setIsQuickAddOpen(false);
+            }}
+            className="mt-6 w-full rounded-md bg-[#345225] py-3 text-sm font-semibold text-white transition hover:bg-[#293f1d] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {cartFetcher.state !== 'idle' ? 'Adding...' : 'Done'}
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
