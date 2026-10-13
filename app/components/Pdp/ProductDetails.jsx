@@ -1070,7 +1070,7 @@ export function ProductDetails({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-stone-300 px-5 py-5 sm:px-7">
             <h2 className="text-[20px] font-semibold text-[#345225]">
-              Size Guide
+              Size Guide (in inches)
             </h2>
 
             <button

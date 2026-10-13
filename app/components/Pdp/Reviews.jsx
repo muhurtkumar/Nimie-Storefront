@@ -93,7 +93,7 @@ const css = `
   gap: clamp(16px, 2vw, 24px);
   padding: 0 clamp(16px, 2vw, 24px);
 
-  animation: reviews-marquee 75s linear infinite;
+  animation: reviews-marquee 95s linear infinite;
   will-change: transform;
 }
 
@@ -107,7 +107,7 @@ const css = `
 
 /* Third row: slightly different speed so rows don't move in lockstep */
 .reviews__track--slow {
-  animation-duration: 90s;
+  animation-duration: 110s;
 }
 
 /* Gap between rows */
