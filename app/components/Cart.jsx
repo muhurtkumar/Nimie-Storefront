@@ -497,17 +497,49 @@ const totalSavings = Math.max(
                 </div>
               </CartForm>
 
-              {appliedCoupon ? (
-                <p className="m-0 mt-2 text-[11px] text-[#345225]">
-                  Coupon {appliedCoupon.code} applied successfully.
-                </p>
+                {appliedCoupon ? (
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <p className="m-0 text-[11px] text-[#345225]">
+                    Coupon {appliedCoupon.code} applied successfully.
+                  </p>
+
+                  <CartForm
+                    route="/cart"
+                    action={CartForm.ACTIONS.DiscountCodesUpdate}
+                    inputs={{discountCodes: []}}
+                  >
+                    <button
+                      type="submit"
+                      onClick={() => setCouponCode('')}
+                      className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium text-[#ff5c5c]"
+                    >
+                      Remove
+                    </button>
+                  </CartForm>
+                </div>
               ) : couponCode &&
                 cart?.discountCodes?.some(
                   (discount) => !discount.applicable,
                 ) ? (
-                <p className="m-0 mt-2 text-[11px] text-[#ff5c5c]">
-                  Invalid or unavailable coupon code.
-                </p>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <p className="m-0 text-[11px] text-[#ff5c5c]">
+                    Invalid or unavailable coupon code.
+                  </p>
+
+                  <CartForm
+                    route="/cart"
+                    action={CartForm.ACTIONS.DiscountCodesUpdate}
+                    inputs={{discountCodes: []}}
+                  >
+                    <button
+                      type="submit"
+                      onClick={() => setCouponCode('')}
+                      className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium text-[#ff5c5c]"
+                    >
+                      Remove
+                    </button>
+                  </CartForm>
+                </div>
               ) : null}
             </div>
           )}
