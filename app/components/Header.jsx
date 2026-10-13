@@ -3,7 +3,7 @@ import {ShoppingBag, User} from 'lucide-react';
 import {NavLink, useLocation} from 'react-router';
 
 import LOGO_SRC from '~/assets/logo.png';
-import MOBILE_LOGO_SRC from '~/assets/Logo_mobile.webm';
+import MOBILE_LOGO_SRC from '~/assets/Logo_mobile.png';
 
 import {Cart} from '~/components/Cart';
 
@@ -292,15 +292,10 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
                 }}
               />
 
-              <video
+              <img
                 className="block md:hidden"
                 src={MOBILE_LOGO_SRC}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-label={shop?.name || 'Home'}
+                alt={shop?.name || 'Home'}
                 style={{
                   height: 'clamp(28px, 3vw, 40px)',
                   width: 'auto',

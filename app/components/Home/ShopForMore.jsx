@@ -88,7 +88,11 @@ const css = `
 }
 `;
 
-export function ShopForMore({products, title = 'Shop for More'}) {
+export function ShopForMore({
+  products,
+  title = 'Shop for More',
+  excludeProductId,
+}) {
   return (
     <section className="sfm">
       <style>{css}</style>
@@ -98,9 +102,16 @@ export function ShopForMore({products, title = 'Shop for More'}) {
         <Suspense fallback={<div>Loading products...</div>}>
           <Await resolve={products}>
             {(response) => {
-              const productList = response?.products?.nodes ?? [];
+              const productList = (response?.products?.nodes ?? []).filter(
+                (product) => product.id !== excludeProductId,
+              );
               if (productList.length === 0) return null;
-              return <ShopForMoreGrid productList={productList} />;
+              return (
+                <ShopForMoreGrid
+                  key={excludeProductId}
+                  productList={productList}
+                />
+              );
             }}
           </Await>
         </Suspense>

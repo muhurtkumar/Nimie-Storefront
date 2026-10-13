@@ -200,7 +200,10 @@ export default function Product() {
 
       <Reviews reviews={reviews} />
 
-      <ShopForMore products={showcaseProducts} />
+            <ShopForMore
+              products={showcaseProducts}
+              excludeProductId={product.id}
+            />
 
       <BehindTheScenes
         videos={[homepageBts]}
