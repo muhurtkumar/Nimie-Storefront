@@ -1,3 +1,4 @@
+// ShopForMore.jsx
 import {Await} from 'react-router';
 import {Suspense, useMemo, useState} from 'react';
 import {ProductCard} from './ProductCard.jsx';
@@ -52,41 +53,71 @@ const css = `
 .sfm__nav-btn {
   width: 54px;
   height: 54px;
-  border-radius: 14px;
-  border: none;
-  background: #F5F5EC;
+  border-radius: 50%;
+  border: 1px solid rgba(47, 87, 35, 0.3);
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #2B22C9;
+  color: #2F5723;
   padding: 0;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .sfm__nav-btn:hover:not(:disabled) {
-  background: #ECECDF;
+  background: #FFFFFF;
+  border-color: #2F5723;
 }
 
 .sfm__nav-btn:disabled {
-  background: #FBF4E6;
-  color: rgba(43, 34, 201, 0.35);
+  background: transparent;
+  border-color: rgba(47, 87, 35, 0.12);
+  color: rgba(47, 87, 35, 0.3);
   cursor: default;
 }
 
 .sfm__nav-btn svg {
-  width: 46px;
-  height: 34px;
+  width: 30px;
+  height: 14px;
   display: block;
-  stroke-width: 1.6;
 }
 
 .sfm__nav-label {
-  margin-left: 24px;
-  font-size: 12px;
-  color: #000;
+  margin-left: 12px;
+  font-size: 18px;
+  color: #555;
+  letter-spacing: 0.02em;
 }
 `;
+
+function ArrowLeft() {
+  return (
+    <svg viewBox="0 0 30 14" fill="none" aria-hidden="true">
+      <path
+        d="M29 7H1M1 7L7 1M1 7L7 13"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg viewBox="0 0 30 14" fill="none" aria-hidden="true">
+      <path
+        d="M1 7H29M29 7L23 1M29 7L23 13"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function ShopForMore({
   products,
@@ -154,7 +185,7 @@ function ShopForMoreGrid({productList}) {
             disabled={page === 0}
             aria-label="Previous products"
           >
-            ←
+            <ArrowLeft />
           </button>
           <button
             type="button"
@@ -163,7 +194,7 @@ function ShopForMoreGrid({productList}) {
             disabled={page === pageCount - 1}
             aria-label="Next products"
           >
-            →
+            <ArrowRight />
           </button>
           <span className="sfm__nav-label">
             {page + 1} / {pageCount}

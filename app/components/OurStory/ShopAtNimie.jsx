@@ -54,33 +54,41 @@ const css = `
 .san__nav-btn {
   width: 54px;
   height: 54px;
-  border-radius: 14px;
-  border: none;
-  background: #F5F5EC;
+  border-radius: 50%;
+  border: 1px solid rgba(47, 87, 35, 0.3);
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #2B22C9;
-  font-size: 24px;
+  color: #2F5723;
   padding: 0;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .san__nav-btn:hover:not(:disabled) {
-  background: #ECECDF;
+  background: #FFFFFF;
+  border-color: #2F5723;
 }
 
 .san__nav-btn:disabled {
-  background: #FBF4E6;
-  color: rgba(43, 34, 201, 0.35);
+  background: transparent;
+  border-color: rgba(47, 87, 35, 0.12);
+  color: rgba(47, 87, 35, 0.3);
   cursor: default;
 }
 
+.san__nav-btn svg {
+  width: 30px;
+  height: 14px;
+  display: block;
+}
+
 .san__nav-label {
-  margin-left: 24px;
-  font-size: 12px;
-  color: #000;
+  margin-left: 12px;
+  font-size: 18px;
+  color: #555;
+  letter-spacing: 0.02em;
 }
 
 .san__empty {
@@ -89,6 +97,34 @@ const css = `
   font-size: 14px;
 }
 `;
+
+function ArrowLeft() {
+  return (
+    <svg viewBox="0 0 30 14" fill="none" aria-hidden="true">
+      <path
+        d="M29 7H1M1 7L7 1M1 7L7 13"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg viewBox="0 0 30 14" fill="none" aria-hidden="true">
+      <path
+        d="M1 7H29M29 7L23 1M29 7L23 13"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function ShopAtNimie({
   products,
@@ -159,7 +195,7 @@ function ShopAtNimieGrid({productList, wishlist}) {
             disabled={page === 0}
             aria-label="Previous products"
           >
-            ←
+            <ArrowLeft />
           </button>
           <button
             type="button"
@@ -168,7 +204,7 @@ function ShopAtNimieGrid({productList, wishlist}) {
             disabled={page === pageCount - 1}
             aria-label="Next products"
           >
-            →
+            <ArrowRight />
           </button>
           <span className="san__nav-label">
             {page + 1} / {pageCount}

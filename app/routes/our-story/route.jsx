@@ -153,7 +153,7 @@ export default function PreviewOurStory() {
       <ShopAtNimie
         products={data.allProducts}
         wishlist={data.wishlist}
-        title="Shop at Nimie"
+        title="Shop At Nimie"
       />
 
       <Suspense fallback={null}>
