@@ -24,77 +24,78 @@ export function PageLayout({
   publicStoreDomain,
   wishlist,
 }) {
-  
-return (
-  <Aside.Provider>
-    <CartAside cart={cart} />
-    <SearchAside />
-    <MobileMenuAside
-      header={header}
-      publicStoreDomain={publicStoreDomain}
-    />
+  return (
+    <Aside.Provider>
+      <CartAside cart={cart} />
+      <SearchAside />
+      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
 
-    <Suspense fallback={null}>
-      <Await resolve={announcement}>
-        {(resolvedAnnouncement) => {
-          const announcementEnabled = Boolean(
-            resolvedAnnouncement?.enabled &&
-            resolvedAnnouncement?.message?.trim()
-          );
+      <Suspense fallback={null}>
+        <Await resolve={announcement}>
+          {(resolvedAnnouncement) => {
+            const announcementEnabled = Boolean(
+              resolvedAnnouncement?.enabled &&
+              resolvedAnnouncement?.message?.trim(),
+            );
 
-          return (
-            <>
-              <AnnouncementBar announcement={resolvedAnnouncement} />
+            return (
+              <>
+                <AnnouncementBar announcement={resolvedAnnouncement} />
 
-              {header && (
-                <Suspense fallback={null}>
-                  <Await resolve={cart}>
-                    {(resolvedCart) => (
-                      <Await resolve={isLoggedIn}>
-                        {(resolvedIsLoggedIn) => (
-                          <Await resolve={wishlist}>
-                            {(resolvedWishlist) => (
-                              <Header
-                                header={header}
-                                cart={resolvedCart}
-                                isLoggedIn={resolvedIsLoggedIn}
-                                wishlistCount={
-                                  resolvedWishlist?.length ?? 0
-                                }
-                                publicStoreDomain={publicStoreDomain}
-                                announcementEnabled={announcementEnabled}
-                              />
-                            )}
-                          </Await>
-                        )}
-                      </Await>
-                    )}
-                  </Await>
-                </Suspense>
-              )}
+                {header && (
+                  <Suspense fallback={null}>
+                    <Await resolve={cart}>
+                      {(resolvedCart) => (
+                        <Await resolve={isLoggedIn}>
+                          {(resolvedIsLoggedIn) => (
+                            <Await resolve={wishlist}>
+                              {(resolvedWishlist) => (
+                                <Header
+                                  header={header}
+                                  cart={resolvedCart}
+                                  isLoggedIn={resolvedIsLoggedIn}
+                                  wishlistCount={resolvedWishlist?.length ?? 0}
+                                  publicStoreDomain={publicStoreDomain}
+                                  announcementEnabled={announcementEnabled}
+                                />
+                              )}
+                            </Await>
+                          )}
+                        </Await>
+                      )}
+                    </Await>
+                  </Suspense>
+                )}
 
-              <main
-                style={{
-                  '--announcement-height': announcementEnabled
-                    ? '48px'
-                    : '0px',
-                }}
-              >
-                {children}
-              </main>
-            </>
-          );
-        }}
-      </Await>
-    </Suspense>
+                <main
+                  style={{
+                    '--announcement-height': announcementEnabled
+                      ? '48px'
+                      : '0px',
+                  }}
+                >
+                  {children}
+                </main>
+              </>
+            );
+          }}
+        </Await>
+      </Suspense>
 
-    <Footer
-      footer={footer}
-      header={header}
-      publicStoreDomain={publicStoreDomain}
-    />
-  </Aside.Provider>
-);
+      <Suspense fallback={null}>
+        <Await resolve={isLoggedIn}>
+          {(resolvedIsLoggedIn) => (
+            <Footer
+              footer={footer}
+              header={header}
+              publicStoreDomain={publicStoreDomain}
+              isLoggedIn={resolvedIsLoggedIn}
+            />
+          )}
+        </Await>
+      </Suspense>
+    </Aside.Provider>
+  );
 }
 
 /**

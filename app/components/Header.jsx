@@ -115,7 +115,6 @@ export function Header({
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  
   // Escape to close + prevent background scrolling while the menu is open
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -202,11 +201,7 @@ export function Header({
     width: 'auto',
     boxSizing: 'border-box',
     zIndex: 100,
-    background: isHome
-      ? scrolled
-        ? '#345225'
-        : 'transparent'
-      : '#345225',
+    background: isHome ? (scrolled ? '#345225' : 'transparent') : '#345225',
     transition: 'background 300ms ease, top 300ms ease',
     color: '#fff',
     borderRadius: HEADER_RADIUS,
@@ -241,15 +236,13 @@ export function Header({
 
   return (
     <>
-      <header
-        className="md:mx-4"
-        style={wrapperStyle}
-      >
+      <header className="md:mx-4" style={wrapperStyle}>
         {/* Mobile / tablet menu (sits under the nav row so the icon stays on top) */}
         <MobileMenu
           open={menuOpen}
           onClose={closeMenu}
           wishlistCount={wishlistCount}
+          isLoggedIn={isLoggedIn}
         />
 
         <div
@@ -304,7 +297,7 @@ export function Header({
               lineHeight: 0,
               transition: 'opacity 200ms ease',
             }}
-          >                      
+          >
             <>
               <img
                 className="hidden md:block"
@@ -364,15 +357,19 @@ export function Header({
                 ) : (
                   <HeaderLink
                     label={
-                      link.label === 'Contact' && isLoggedIn
-                        ? 'Account'
+                      link.label === 'Contact'
+                        ? isLoggedIn
+                          ? 'Account'
+                          : 'Login'
                         : link.label === 'Wishlist'
                           ? `Wishlist (${wishlistCount})`
                           : link.label
                     }
                     to={
-                      link.label === 'Contact' && isLoggedIn
-                        ? '/account'
+                      link.label === 'Contact'
+                        ? isLoggedIn
+                          ? '/account'
+                          : '/account/login'
                         : link.to
                     }
                   />
@@ -481,7 +478,14 @@ export function Header({
  * all four edges. Always mounted so the open/close can animate.
  * Contains every page that appears in the footer.
  */
-function MobileMenu({open, onClose, wishlistCount = 0}) {
+function MobileMenu({open, onClose, wishlistCount = 0, isLoggedIn = false}) {
+  // Guests see "Login" instead of "My Account"
+  const secondaryLinks = MOBILE_SECONDARY_LINKS.map((link) =>
+    link.label === 'My Account' && !isLoggedIn
+      ? {label: 'Login', to: '/account/login'}
+      : link,
+  );
+
   const itemMotion = (i) => ({
     opacity: open ? 1 : 0,
     transform: open ? 'translateY(0)' : 'translateY(14px)',
@@ -491,9 +495,7 @@ function MobileMenu({open, onClose, wishlistCount = 0}) {
 
   // Adds the wishlist count to the Wishlist label
   const labelFor = (link) =>
-    link.label === 'Wishlist'
-      ? `Wishlist (${wishlistCount})`
-      : link.label;
+    link.label === 'Wishlist' ? `Wishlist (${wishlistCount})` : link.label;
 
   // Hash links: close the menu first (which unlocks body scroll), then scroll.
   const handleHashClick = (e, hash) => {
@@ -615,7 +617,7 @@ function MobileMenu({open, onClose, wishlistCount = 0}) {
             }}
           />
 
-          {MOBILE_SECONDARY_LINKS.map((link, i) =>
+          {secondaryLinks.map((link, i) =>
             renderLink(link, MOBILE_PRIMARY_LINKS.length + 1 + i, true),
           )}
         </nav>

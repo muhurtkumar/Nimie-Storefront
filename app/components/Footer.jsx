@@ -211,7 +211,19 @@ const POLICY_LINKS = [
   },
 ];
 
-export function Footer({footer: footerPromise, header, publicStoreDomain}) {
+export function Footer({
+  footer: footerPromise,
+  header,
+  publicStoreDomain,
+  isLoggedIn = false,
+}) {
+  // Guests see "Login" instead of "My Account"
+  const supportLinks = SUPPORT_LINKS.map((link) =>
+    link.label === 'My Account' && !isLoggedIn
+      ? {label: 'Login', href: '/account/login'}
+      : link,
+  );
+
   return (
     <footer className="ftr">
       <style>{css}</style>
@@ -231,7 +243,7 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
           <div className="ftr__info">
             <FooterColumn title="STORE" links={STORE_LINKS} />
 
-            <FooterColumn title="SUPPORT" links={SUPPORT_LINKS} />
+           <FooterColumn title="SUPPORT" links={supportLinks} />
 
             <FooterColumn title="POLICY" links={POLICY_LINKS} />
           </div>
