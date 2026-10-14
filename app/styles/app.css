@@ -21,6 +21,29 @@ img {
   border-radius: 4px;
 }
 
+.hero-media {
+  display: block;
+  width: 100%;
+  height: calc(100dvh - var(--announcement-height, 0px));
+  object-fit: cover;
+}
+
+@media (min-width: 1024px) {
+  .hero-media {
+    height: calc(100dvh - 32px - var(--announcement-height, 0px));
+    max-height: calc(100dvh - 32px - var(--announcement-height, 0px));
+  }
+}
+
+@media (max-width: 767px) {
+  .announcement-bar {
+    margin: 0 !important;
+    width: 100%;
+    border-radius: 0 !important;
+    box-sizing: border-box;
+  }
+}
+
 /*
 * --------------------------------------------------
 * Non anchor links

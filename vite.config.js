@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'piano-gen-murray-waiver.trycloudflare.com',
+      'tvs-tab-dramatically-organizations.trycloudflare.com',
     ],
   },
 });

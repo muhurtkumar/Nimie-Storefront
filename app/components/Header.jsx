@@ -184,11 +184,19 @@ export function Header({
   // Other pages: sticky, solid green, white text.
   const wrapperStyle = {
     position: isHome ? 'fixed' : 'sticky',
-    top: scrolled
-  ? GAP_Y
-  : announcementEnabled
-    ? '60px'
-    : GAP_Y,
+    top:
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px)').matches
+        ? scrolled
+          ? '0px'
+          : announcementEnabled
+            ? '45px'
+            : '0px'
+        : scrolled
+          ? GAP_Y
+          : announcementEnabled
+            ? '60px'
+            : GAP_Y,
     left: '16px',
     right: '16px',
     width: 'auto',
@@ -251,8 +259,16 @@ export function Header({
           style={{
             position: 'relative',
             zIndex: 2,
-            paddingTop: NAV_PAD_Y,
-            paddingBottom: NAV_PAD_Y,
+            paddingTop: menuOpen
+              ? announcementEnabled
+                ? '0px'
+                : '12px'
+              : NAV_PAD_Y,
+            paddingBottom: menuOpen
+              ? announcementEnabled
+                ? '4px'
+                : '12px'
+              : NAV_PAD_Y,
             fontSize: 'clamp(12px, 1.3vw, 14px)',
             fontFamily: FONT,
             fontWeight: 400,

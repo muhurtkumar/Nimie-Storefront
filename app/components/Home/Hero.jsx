@@ -7,6 +7,7 @@ const FONT =
 const GAP_Y = '16px'; // top and bottom
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2 - var(--announcement-height, 0px))`;
+const MOBILE_HEIGHT = `calc(100dvh - var(--announcement-height, 0px))`;
 
 export function Hero({
   image,
@@ -18,10 +19,10 @@ export function Hero({
 }) {
   return (
     <section
-      className="hero -mx-4 w-[calc(100%+2rem)] py-0! lg:mx-0 lg:w-full lg:py-4!"
+      className="hero -mx-4 w-[calc(100%+2rem)] p-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-2xl bg-[#11170d]">
+      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
         {video ? (
           <video
             src={video}
@@ -31,13 +32,13 @@ export function Hero({
             muted
             playsInline
             preload="auto"
-            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            className="hero-media"
               style={{
                 display: 'block',
                 width: '100%',
-                height: MAX_HEIGHT,
-                maxHeight: MAX_HEIGHT,
-                minHeight: `min(520px, ${MAX_HEIGHT})`,
+                height: undefined,
+                maxHeight: undefined,
+                minHeight: undefined,
                 objectFit: 'cover',
                 borderRadius: 0,
               }}
@@ -47,13 +48,13 @@ export function Hero({
           <img
             src={image}
             alt={imageAlt}
-            className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
+            className="hero-media"
             style={{
               display: 'block',
               width: '100%',
-              height: MAX_HEIGHT,
-              maxHeight: MAX_HEIGHT,
-              minHeight: `min(520px, ${MAX_HEIGHT})`,
+              height: undefined,
+              maxHeight: undefined,
+              minHeight: undefined,
               objectFit: 'cover',
               borderRadius: 0,
             }}
