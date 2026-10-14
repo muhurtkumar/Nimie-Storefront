@@ -12,7 +12,6 @@ import {
 export const meta = () => {
   return [{title: `Nimie | Profile`}];
 };
-publicStoreDomain
 export default function AccountProfile() {
   const account = useOutletContext();
   const navigation = useNavigation();
