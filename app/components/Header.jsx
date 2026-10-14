@@ -70,7 +70,13 @@ const linkStyle = ({isActive}) => ({
 /**
  * @param {HeaderProps}
  */
-export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
+export function Header({
+  header,
+  cart,
+  isLoggedIn,
+  wishlistCount = 0,
+  announcementEnabled = false,
+}) {
   const {shop} = header;
   const {pathname} = useLocation();
   const cartCount = cart?.totalQuantity ?? 0;
@@ -160,10 +166,10 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
   // so the white text stays readable over page content.
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 40);
+      const isScrolled = window.scrollY > 40;
+      setScrolled(isScrolled);
       setMobileScrolled(
-        window.matchMedia('(max-width: 767px)').matches &&
-          window.scrollY > 40,
+        window.matchMedia('(max-width: 767px)').matches && isScrolled,
       );
     };
 
@@ -171,14 +177,18 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
     window.addEventListener('scroll', onScroll, {passive: true});
 
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [pathname]);
 
   // Home: transparent at the top, fixed over the hero card (same offset as
   // the Hero's outer padding), turns solid green after scrolling. White text.
   // Other pages: sticky, solid green, white text.
   const wrapperStyle = {
     position: isHome ? 'fixed' : 'sticky',
-    top: GAP_Y,
+    top: scrolled
+  ? GAP_Y
+  : announcementEnabled
+    ? '60px'
+    : GAP_Y,
     left: '16px',
     right: '16px',
     width: 'auto',
@@ -189,7 +199,7 @@ export function Header({header, cart, isLoggedIn, wishlistCount = 0}) {
         ? '#345225'
         : 'transparent'
       : '#345225',
-    transition: 'background 300ms ease',
+    transition: 'background 300ms ease, top 300ms ease',
     color: '#fff',
     borderRadius: HEADER_RADIUS,
   };
@@ -683,6 +693,7 @@ export function HeaderMenu() {
  * @property {Promise<boolean>} isLoggedIn
  * @property {number} [wishlistCount]
  * @property {string} publicStoreDomain
+ * @property {boolean} [announcementEnabled]
  */
 
 /** @typedef {import('storefrontapi.generated').HeaderQuery} HeaderQuery */

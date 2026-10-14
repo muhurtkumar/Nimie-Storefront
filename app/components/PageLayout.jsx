@@ -4,6 +4,7 @@ import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
+import {AnnouncementBar} from '~/components/AnnouncementBar';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -14,6 +15,7 @@ import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
  * @param {PageLayoutProps}
  */
 export function PageLayout({
+  announcement,
   cart,
   children = null,
   footer,
@@ -27,29 +29,43 @@ export function PageLayout({
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && (
-        <Suspense fallback={null}>
-          <Await resolve={cart}>
-            {(resolvedCart) => (
-              <Await resolve={isLoggedIn}>
-                {(resolvedIsLoggedIn) => (
-                  <Await resolve={wishlist}>
-                    {(resolvedWishlist) => (
-                      <Header
-                        header={header}
-                        cart={resolvedCart}
-                        isLoggedIn={resolvedIsLoggedIn}
-                        wishlistCount={resolvedWishlist?.length ?? 0}
-                        publicStoreDomain={publicStoreDomain}
-                      />
+      <Suspense fallback={null}>
+        <Await resolve={announcement}>
+          {(resolvedAnnouncement) => (
+            <>
+              <AnnouncementBar announcement={resolvedAnnouncement} />
+
+              {header && (
+                <Suspense fallback={null}>
+                  <Await resolve={cart}>
+                    {(resolvedCart) => (
+                      <Await resolve={isLoggedIn}>
+                        {(resolvedIsLoggedIn) => (
+                          <Await resolve={wishlist}>
+                            {(resolvedWishlist) => (
+                              <Header
+                                header={header}
+                                cart={resolvedCart}
+                                isLoggedIn={resolvedIsLoggedIn}
+                                wishlistCount={resolvedWishlist?.length ?? 0}
+                                publicStoreDomain={publicStoreDomain}
+                                announcementEnabled={Boolean(
+                                  resolvedAnnouncement?.enabled &&
+                                  resolvedAnnouncement?.message?.trim()
+                                )}
+                              />
+                            )}
+                          </Await>
+                        )}
+                      </Await>
                     )}
                   </Await>
-                )}
-              </Await>
-            )}
-          </Await>
-        </Suspense>
-      )}
+                </Suspense>
+              )}
+            </>
+          )}
+        </Await>
+      </Suspense>
       <main>{children}</main>
       <Footer
         footer={footer}
@@ -183,6 +199,7 @@ function MobileMenuAside({header, publicStoreDomain}) {
 
 /**
  * @typedef {Object} PageLayoutProps
+ * @property {Promise<{enabled: boolean, message: string}|null>} announcement
  * @property {Promise<CartApiQueryFragment|null>} cart
  * @property {Promise<FooterQuery|null>} footer
  * @property {HeaderQuery} header

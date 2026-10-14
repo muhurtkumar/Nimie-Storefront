@@ -159,7 +159,42 @@ async function getCustomerStoreCredit({context}) {
  */
 function loadDeferredData({context}) {
   const {storefront, customerAccount, cart} = context;
+   const announcement = storefront
+    .query(
+      `#graphql
+        query AnnouncementBar {
+          metaobject(
+            handle: {
+              type: "announcement_bar"
+              handle: "main-announcement"
+            }
+          ) {
+            fields {
+              key
+              value
+            }
+          }
+        }
+      `,
+      {
+        cache: storefront.CacheNone(),
+      },
+    )
+    .then((result) => {
+      const fields = result?.metaobject?.fields ?? [];
+      const values = Object.fromEntries(
+        fields.map(({key, value}) => [key, value]),
+      );
 
+      return {
+        enabled: String(values.enabled).toLowerCase() === 'true',
+        message: values.message ?? '',
+      };
+    })
+    .catch((error) => {
+      console.error('Unable to fetch announcement bar:', error);
+      return null;
+    });
   // defer the footer query (below the fold)
   const footer = storefront
     .query(FOOTER_QUERY, {
@@ -180,6 +215,7 @@ function loadDeferredData({context}) {
     wishlist: getCustomerWishlist({context}),
     footer,
     storeCreditAccounts: getCustomerStoreCredit({context}),
+    announcement,
   };
 }
 
