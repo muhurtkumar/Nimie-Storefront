@@ -156,7 +156,7 @@ export default function Homepage() {
         imageAlt="Nimie new collection"
         eyebrow="Meet Lucknow chikankari, the Nimie way."
         heading="The classics got a makeover."
-        cta={{label: 'SHOP NOW', to: '/collections/all'}}
+        cta={{label: 'SHOP NOW', to: '#product-showcase'}}
       />
 
       <ProductShowcase

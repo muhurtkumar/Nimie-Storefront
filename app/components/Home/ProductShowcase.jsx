@@ -9,7 +9,7 @@ export function ProductShowcase({
   wishlist = [],
 }) {
   return (
-    <section className="px-4 py-8">
+    <section id="product-showcase" className="px-4 py-8">
       <h2
         className="md:hidden"
         style={{
