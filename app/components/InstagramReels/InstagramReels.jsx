@@ -1,18 +1,16 @@
-import {ExternalLink} from 'lucide-react';
+import {ArrowUpRight, ExternalLink} from 'lucide-react';
 
-export function InstagramReels({
-  reels = [],
-  instagramHandle = '@nimie.in',
-}) {
+export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
   if (!reels.length) {
     return null;
   }
+  
+  const profileUrl = `https://www.instagram.com/${instagramHandle.replace('@', '')}/`;
 
   return (
     <section className="px-4 py-5">
       <div className="rounded-xl bg-[#fff8e9] p-3">
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 lg:grid-cols-[1fr_1.35fr_1.35fr]">
-
           {/* Left content */}
           <div className="flex min-h-0 flex-col justify-start p-2 sm:p-3 md:col-span-2 lg:min-h-[340px] lg:justify-between lg:col-span-1">
             <div>
@@ -39,8 +37,23 @@ export function InstagramReels({
                 <br />
                 Threads that follow the rhythm of the needle.
                 <br />
-                Every stitch taking its own time. Thus, bringing each piece quietly to life.
+                Every stitch taking its own time. Thus, bringing each piece
+                quietly to life.
               </p>
+
+              <a
+                href={profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{color: '#FFFFFF'}}
+                className="group mt-4 inline-flex items-center gap-2 rounded-full bg-[#315329] px-5 py-2.5 text-[13px] font-medium no-underline transition-colors duration-300 hover:bg-[#264220]"
+              >
+                Check Out Page
+                <ArrowUpRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </a>
             </div>
           </div>
 
@@ -59,7 +72,7 @@ export function InstagramReels({
                       rel="noreferrer"
                       className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-stone-200"
                     >
-                      {reel.media_type === 'VIDEO' && reel.media_url && (                       
+                      {reel.media_type === 'VIDEO' && reel.media_url && (
                         <video
                           src={reel.media_url}
                           poster={reel.thumbnail_url}
