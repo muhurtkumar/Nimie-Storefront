@@ -5,18 +5,23 @@ const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the hero card. Keep in sync with Header.jsx
 const GAP_Y = '16px'; // top and bottom
-const GAP_X = '0px'; // left and right
-// Text inset inside the card (Figma: 32px)
 const INSET = 'clamp(16px, 2.5vw, 32px)';
-const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
+const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2 - var(--announcement-height, 0px))`;
 
-export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
+export function Hero({
+  image,
+  video,
+  imageAlt = '',
+  eyebrow,
+  heading,
+  cta,
+}) {
   return (
     <section
       className="hero -mx-4 w-[calc(100%+2rem)] py-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
+      <div className="relative w-full overflow-hidden rounded-2xl bg-[#11170d]">
         {video ? (
           <video
             src={video}
@@ -27,13 +32,15 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
             playsInline
             preload="auto"
             className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
-            style={{
-              display: 'block',
-              width: '100%',
-              minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
-              objectFit: 'cover',
-              borderRadius: 0,
-            }}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: MAX_HEIGHT,
+                maxHeight: MAX_HEIGHT,
+                minHeight: `min(520px, ${MAX_HEIGHT})`,
+                objectFit: 'cover',
+                borderRadius: 0,
+              }}
           />
         ) : image ? (
           // In normal flow: the image sets the card's height, so it is never cropped
@@ -44,7 +51,9 @@ export function Hero({image, video, imageAlt = '', eyebrow, heading, cta}) {
             style={{
               display: 'block',
               width: '100%',
-              minHeight: `min(520px, ${MAX_HEIGHT})`, // only kicks in on narrow phones
+              height: MAX_HEIGHT,
+              maxHeight: MAX_HEIGHT,
+              minHeight: `min(520px, ${MAX_HEIGHT})`,
               objectFit: 'cover',
               borderRadius: 0,
             }}

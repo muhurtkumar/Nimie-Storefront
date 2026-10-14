@@ -1,9 +1,8 @@
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
 const GAP_Y = '16px';
-const GAP_X = '0px';
-// Card can never be taller than the screen minus the top and bottom gap
-const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2)`;
+// Card height accounts for the announcement bar when enabled
+const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2 - var(--announcement-height, 0px))`;
 
 const DEFAULT_ITEMS = [
   {
@@ -33,7 +32,7 @@ export function ContactMethod({
       style={{boxSizing: 'border-box'}}
     >
       <div
-        className="relative w-full overflow-hidden rounded-none lg:rounded-2xl"
+        className="relative w-full overflow-hidden rounded-2xl"
         style={{lineHeight: 0}}
       >
         {video ? (
@@ -50,6 +49,8 @@ export function ContactMethod({
             style={{
               display: 'block',
               width: '100%',
+              height: MAX_HEIGHT,
+              maxHeight: MAX_HEIGHT,
               minHeight: `min(520px, ${MAX_HEIGHT})`,
               objectFit: 'cover',
             }}
@@ -62,6 +63,8 @@ export function ContactMethod({
             style={{
               display: 'block',
               width: '100%',
+              height: MAX_HEIGHT,
+              maxHeight: MAX_HEIGHT,
               minHeight: `min(520px, ${MAX_HEIGHT})`,
               objectFit: 'cover',
             }}

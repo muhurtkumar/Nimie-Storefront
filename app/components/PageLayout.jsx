@@ -24,14 +24,25 @@ export function PageLayout({
   publicStoreDomain,
   wishlist,
 }) {
-  return (
-    <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      <Suspense fallback={null}>
-        <Await resolve={announcement}>
-          {(resolvedAnnouncement) => (
+  
+return (
+  <Aside.Provider>
+    <CartAside cart={cart} />
+    <SearchAside />
+    <MobileMenuAside
+      header={header}
+      publicStoreDomain={publicStoreDomain}
+    />
+
+    <Suspense fallback={null}>
+      <Await resolve={announcement}>
+        {(resolvedAnnouncement) => {
+          const announcementEnabled = Boolean(
+            resolvedAnnouncement?.enabled &&
+            resolvedAnnouncement?.message?.trim()
+          );
+
+          return (
             <>
               <AnnouncementBar announcement={resolvedAnnouncement} />
 
@@ -47,12 +58,11 @@ export function PageLayout({
                                 header={header}
                                 cart={resolvedCart}
                                 isLoggedIn={resolvedIsLoggedIn}
-                                wishlistCount={resolvedWishlist?.length ?? 0}
+                                wishlistCount={
+                                  resolvedWishlist?.length ?? 0
+                                }
                                 publicStoreDomain={publicStoreDomain}
-                                announcementEnabled={Boolean(
-                                  resolvedAnnouncement?.enabled &&
-                                  resolvedAnnouncement?.message?.trim()
-                                )}
+                                announcementEnabled={announcementEnabled}
                               />
                             )}
                           </Await>
@@ -62,18 +72,29 @@ export function PageLayout({
                   </Await>
                 </Suspense>
               )}
+
+              <main
+                style={{
+                  '--announcement-height': announcementEnabled
+                    ? '48px'
+                    : '0px',
+                }}
+              >
+                {children}
+              </main>
             </>
-          )}
-        </Await>
-      </Suspense>
-      <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
-    </Aside.Provider>
-  );
+          );
+        }}
+      </Await>
+    </Suspense>
+
+    <Footer
+      footer={footer}
+      header={header}
+      publicStoreDomain={publicStoreDomain}
+    />
+  </Aside.Provider>
+);
 }
 
 /**
