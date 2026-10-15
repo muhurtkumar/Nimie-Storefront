@@ -669,16 +669,16 @@ const totalSavings = Math.max(
                       className="flex min-h-10 flex-[2.5] cursor-not-allowed items-center justify-center rounded-[6px] border-0 bg-stone-300 text-[12px] font-normal uppercase tracking-[0.02em] text-stone-600"
                     >
                       REMOVE OUT OF STOCK ITEMS
-                    </button>
-                  ) : (
-                    <a
-                      href={cart?.checkoutUrl}
-                      onClick={onClose}
-                      style={{color: '#fff'}}
-                      className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                    >
-                      CHECKOUT
-                    </a>
+                    </button>                
+                    ) : (
+                      <a
+                        href={cart?.checkoutUrl}
+                        onClick={onClose}
+                        style={{color: '#fff'}}
+                        className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                      >
+                        CHECKOUT
+                      </a>
                   )}
                 </div>
               ) : (

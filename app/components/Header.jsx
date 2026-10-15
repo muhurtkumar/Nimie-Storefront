@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
-import {ShoppingBag, User} from 'lucide-react';
-import {NavLink, useLocation} from 'react-router';
+import {ShoppingBag, User, Globe2} from 'lucide-react';
+import {NavLink, useLocation, useFetcher} from 'react-router';
 
 import LOGO_SRC from '~/assets/logo.png';
 import MOBILE_LOGO_SRC from '~/assets/Logo_mobile.png';
@@ -269,7 +269,7 @@ export function Header({
             letterSpacing: '0.025em',
           }}
         >
-          {/* Left: links on desktop only */}
+          {/* Left: links and country selector on desktop */}
           <div className="hidden items-center md:flex">
             <ul
               className="hidden items-center gap-5 md:flex lg:gap-8"
@@ -280,6 +280,10 @@ export function Header({
                   <HeaderLink {...link} />
                 </li>
               ))}
+
+              <li style={{margin: 0}}>
+                <CountrySelector />
+              </li>
             </ul>
           </div>
 
@@ -601,11 +605,22 @@ function MobileMenu({open, onClose, wishlistCount = 0, isLoggedIn = false}) {
             display: 'flex',
             flexDirection: 'column',
             gap: 22,
-            // clears the nav row (icon + logo) and lines links up with the icon
             padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 28px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
-          {MOBILE_PRIMARY_LINKS.map((link, i) => renderLink(link, i, false))}
+          {/* NEW: Country selector */}
+          <div
+            style={{
+              ...itemMotion(0),
+              marginBottom: 8,
+            }}
+          >
+            <CountrySelector mobile />
+          </div>
+
+          {MOBILE_PRIMARY_LINKS.map((link, i) =>
+            renderLink(link, i, false),
+          )}
 
           <div
             aria-hidden="true"
@@ -692,6 +707,170 @@ function HeaderLink({label, to}) {
     >
       {label}
     </NavLink>
+  );
+}
+
+function CountrySelector({mobile = false}) {
+  const fetcher = useFetcher();
+  const [isUpdatingCountry, setIsUpdatingCountry] = useState(false);
+  const [country, setCountry] = useState('IN');
+
+  const countries = [
+    ['IN', 'India'],
+    ['US', 'United States'],
+    ['CA', 'Canada'],
+    ['GB', 'United Kingdom'],
+    ['AU', 'Australia'],
+    ['NZ', 'New Zealand'],
+    ['SG', 'Singapore'],
+    ['AE', 'United Arab Emirates'],
+    ['QA', 'Qatar'],
+    ['KW', 'Kuwait'],
+    ['DE', 'Germany'],
+    ['FR', 'France'],
+    ['NL', 'Netherlands'],
+    ['IE', 'Ireland'],
+    ['BE', 'Belgium'],
+    ['CH', 'Switzerland'],
+    ['AT', 'Austria'],
+    ['DK', 'Denmark'],
+    ['NO', 'Norway'],
+    ['SE', 'Sweden'],
+    ['FI', 'Finland'],
+    ['IT', 'Italy'],
+    ['ES', 'Spain'],
+    ['JP', 'Japan'],
+    ['KR', 'South Korea'],
+    ['MY', 'Malaysia'],
+    ['IL', 'Israel'],
+    ['SA', 'Saudi Arabia'],
+    ['OM', 'Oman'],
+    ['BH', 'Bahrain'],
+    ['ZA', 'South Africa'],
+    ['PT', 'Portugal'],
+    ['PL', 'Poland'],
+    ['CZ', 'Czechia'],
+    ['GR', 'Greece'],
+    ['TH', 'Thailand'],
+    ['ID', 'Indonesia'],
+    ['PH', 'Philippines'],
+    ['VN', 'Vietnam'],
+    ['BR', 'Brazil'],
+    ['MX', 'Mexico'],
+    ['TR', 'Türkiye'],
+    ['CL', 'Chile'],
+    ['CO', 'Colombia'],
+    ['LK', 'Sri Lanka'],
+    ['NP', 'Nepal'],
+    ['BD', 'Bangladesh'],
+    ['EG', 'Egypt'],
+    ['KE', 'Kenya'],
+    ['NG', 'Nigeria'],
+    ['GH', 'Ghana'],
+    ['PK', 'Pakistan'],
+  ];
+
+  useEffect(() => {
+    const match = document.cookie.match(
+      /(?:^|;\s*)nimie_country=([A-Z]{2})(?:;|$)/,
+    );
+
+    const savedCountry = match?.[1];
+
+    if (
+      savedCountry &&
+      countries.some(([code]) => code === savedCountry)
+    ) {
+      setCountry(savedCountry);
+    }
+  }, []);
+
+  // Reload after the Shopify cart country update finishes.
+  useEffect(() => {
+    if (
+      isUpdatingCountry &&
+      fetcher.state === 'idle' &&
+      fetcher.data
+    ) {
+      window.location.reload();
+    }
+  }, [isUpdatingCountry, fetcher.state, fetcher.data]);
+
+  
+  function handleCountryChange(event) {
+    const nextCountry = event.target.value;
+
+    if (nextCountry === country) return;
+
+    // Save the selected country.
+    document.cookie =
+      `nimie_country=${nextCountry}; Path=/; Max-Age=2592000; SameSite=Lax`;
+
+    setCountry(nextCountry);
+    setIsUpdatingCountry(true);
+
+    // Use the existing Hydrogen cart action.
+    const formData = new FormData();
+
+    formData.set(
+      'cartFormInput',
+      JSON.stringify({
+        action: 'BuyerIdentityUpdate',
+        inputs: {
+          buyerIdentity: {
+            countryCode: nextCountry,
+          },
+        },
+      }),
+    );
+
+    fetcher.submit(formData, {
+      method: 'POST',
+      action: '/cart',
+    });
+  }
+
+  return (
+    <label
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        color: mobile ? '#000' : 'inherit',
+        fontSize: mobile ? 13 : 'inherit',
+        maxWidth: '100%',
+      }}
+    >
+      <Globe2 size={16} aria-hidden="true" />
+
+      <select
+        aria-label="Select shopping country"
+        value={country}
+        onChange={handleCountryChange}
+        style={{
+          width: mobile ? 'auto' : 145,
+          maxWidth: '100%',
+          padding: '6px 2px',
+          border: 0,
+          outline: 'none',
+          background: 'transparent',
+          color: 'inherit',
+          font: 'inherit',
+          textTransform: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        {countries.map(([code, name]) => (
+          <option
+            key={code}
+            value={code}
+            style={{color: '#222', background: '#fff'}}
+          >
+            {name}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

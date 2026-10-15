@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'tvs-tab-dramatically-organizations.trycloudflare.com',
+      'lot-commands-listings-offered.trycloudflare.com',
     ],
   },
 });

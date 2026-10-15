@@ -113,9 +113,12 @@ export async function action({request, context}) {
 /**
  * @param {Route.LoaderArgs}
  */
+
 export async function loader({context}) {
   const {cart} = context;
-  return await cart.get();
+  const cartData = await cart.get();
+
+  return cartData;
 }
 
 export default function Cart() {

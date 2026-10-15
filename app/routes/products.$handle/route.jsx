@@ -107,6 +107,8 @@ async function loadCriticalData({context, params, request}) {
       variables: {
         handle,
         selectedOptions: getSelectedProductOptions(request),
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       },
     }),
     storefront.query(REVIEWS_QUERY),
