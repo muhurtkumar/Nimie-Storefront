@@ -34,6 +34,11 @@ export function ProductCard({
     const cartFetcher = useFetcher();
     const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [selectedQuickAddSize, setSelectedQuickAddSize] = useState('');
+    useEffect(() => {
+      if (cartFetcher.state === 'idle' && cartFetcher.data?.cart) {
+        setIsQuickAddOpen(false);
+      }
+    }, [cartFetcher.state, cartFetcher.data]);
 
     const isLoggedIn = useIsLoggedIn();
 
