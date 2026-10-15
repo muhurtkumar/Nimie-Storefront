@@ -195,8 +195,17 @@ function CartBody({
   discountCodes: cart?.discountCodes,
   cost: cart?.cost,
 });
-  const [couponCode, setCouponCode] = useState('');
-  const lines = cart?.lines?.nodes ?? [];
+const [couponCode, setCouponCode] = useState('');
+
+const lines = cart?.lines?.nodes ?? [];
+
+const availableLines = lines.filter(
+  (line) => line.merchandise?.availableForSale !== false,
+);
+
+const outOfStockLines = lines.filter(
+  (line) => line.merchandise?.availableForSale === false,
+);
 
   if (!lines.length) {
     return (
@@ -231,7 +240,7 @@ function CartBody({
     );
   }
 
-const customCartTotal = lines.reduce((sum, line) => {
+const customCartTotal = availableLines.reduce((sum, line) => {
   const originalUnitPrice = Number(
     line.merchandise?.price?.amount || 0,
   );
@@ -253,27 +262,17 @@ const customCartTotal = lines.reduce((sum, line) => {
   return sum + discountedUnitPrice * line.quantity;
 }, 0);
 
-const shopifySubtotal = Number(
-  cart?.cost?.subtotalAmount?.amount || 0,
-);
-
-const shopifyTotal = Number(
-  cart?.cost?.totalAmount?.amount || 0,
-);
-
-const shippingTotal = (
-  cart?.deliveryGroups?.nodes || []
-).reduce(
-  (sum, group) =>
-    sum +
-    Number(
-      group?.selectedDeliveryOption?.estimatedCost?.amount || 0,
-    ),
+const shopifySubtotal = availableLines.reduce(
+  (sum, line) =>
+    sum + Number(line.cost?.subtotalAmount?.amount || 0),
   0,
 );
 
-const shopifyMerchandiseTotalAfterDiscounts =
-  shopifyTotal - shippingTotal;
+const shopifyMerchandiseTotalAfterDiscounts = availableLines.reduce(
+  (sum, line) =>
+    sum + Number(line.cost?.totalAmount?.amount || 0),
+  0,
+);
 
 const hasAppliedCoupon = cart?.discountCodes?.some(
   (discount) => discount.applicable,
@@ -287,13 +286,19 @@ const shopifyCouponDiscountRate =
   hasAppliedCoupon && shopifySubtotal > 0
     ? Math.max(
         0,
-        (shopifySubtotal - shopifyTotal) /
-          shopifySubtotal,
+        Math.min(
+          1,
+          (shopifySubtotal -
+            shopifyMerchandiseTotalAfterDiscounts) /
+            shopifySubtotal,
+        ),
       )
     : 0;
 
 const currency =
-  lines[0]?.merchandise?.price?.currencyCode || 'INR';
+  availableLines[0]?.merchandise?.price?.currencyCode ||
+  lines[0]?.merchandise?.price?.currencyCode ||
+  'INR';
 
 const inrBalance = (storeCreditAccounts ?? [])
   .filter((account) => account.balance?.currencyCode === 'INR')
@@ -303,9 +308,12 @@ const inrBalance = (storeCreditAccounts ?? [])
     0,
   );
 
-const cartTotal = hasAppliedCoupon
-  ? shopifyMerchandiseTotalAfterDiscounts
-  : customCartTotal;
+const cartTotal =
+  hasAppliedCoupon && shopifyCouponDiscountRate > 0
+    ? Math.round(
+        customCartTotal * (1 - shopifyCouponDiscountRate),
+      )
+    : customCartTotal;
 
 const storeCreditToApply =
   useStoreCredit && currency === 'INR'
@@ -317,7 +325,7 @@ const displayedCartTotal = Math.max(
   cartTotal - storeCreditToApply,
 );
 
-const originalCartTotal = lines.reduce((sum, line) => {
+const originalCartTotal = availableLines.reduce((sum, line) => {
   const unitPrice = Number(line.merchandise?.price?.amount || 0);
   return sum + unitPrice * line.quantity;
 }, 0);
@@ -325,7 +333,7 @@ const originalCartTotal = lines.reduce((sum, line) => {
 const nimiePointsDiscount = storeCreditToApply;
 
 const couponDiscount = hasAppliedCoupon
-  ? Math.max(0, shopifySubtotal - shopifyMerchandiseTotalAfterDiscounts)
+  ? Math.max(0, customCartTotal - cartTotal)
   : 0;
 
 const totalSavings = Math.max(
@@ -337,8 +345,9 @@ const totalSavings = Math.max(
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Cart items */}
       <div className="min-h-0 flex-1 overflow-y-auto px-5">
+        
         <ul className="m-0 list-none p-0">
-          {lines.map((line) => (
+          {availableLines.map((line) => (
             <CartLineRow
               key={line.id}
               line={line}
@@ -346,7 +355,30 @@ const totalSavings = Math.max(
             />
           ))}
         </ul>
-  
+
+        {outOfStockLines.length > 0 && (
+          <div className="mt-4 border-t border-stone-200 pt-4">
+            <h3 className="mb-1 text-[14px] font-semibold text-stone-800">
+              Out of Stock ({outOfStockLines.length})
+            </h3>
+
+            <p className="mb-2 text-[11px] text-stone-500">
+              These items are unavailable and are not included in your total.
+            </p>
+
+            <ul className="m-0 list-none p-0">
+              {outOfStockLines.map((line) => (
+                <CartLineRow
+                  key={line.id}
+                  line={line}
+                  onClose={onClose}
+                  outOfStock
+                />
+              ))}
+            </ul>
+          </div>
+        )}
+
        <div className="mt-0 mb-0 border-b border-stone-200">
           <button
             type="button"
@@ -547,7 +579,8 @@ const totalSavings = Math.max(
           {/* Price Details */}
           <div className="mb-5 border-t border-stone-200 pt-4">
             <h3 className="mb-4 text-[14px] font-semibold text-stone-800">
-              Price Details ({lines.length} {lines.length === 1 ? 'item' : 'items'})
+              Price Details ({availableLines.length}{' '}
+              {availableLines.length === 1 ? 'item' : 'items'})
             </h3>
 
             <div className="space-y-3 text-[12px]">
@@ -628,14 +661,25 @@ const totalSavings = Math.max(
                   </div>
 
                   {/* Checkout */}
-                  <a
-                    href={cart?.checkoutUrl}
-                    onClick={onClose}
-                    style={{color: '#fff'}}
-                    className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
-                  >
-                    CHECKOUT
-                  </a>
+                  {outOfStockLines.length > 0 ? (
+                    <button
+                      type="button"
+                      disabled
+                      title="Remove out-of-stock items to continue"
+                      className="flex min-h-10 flex-[2.5] cursor-not-allowed items-center justify-center rounded-[6px] border-0 bg-stone-300 text-[12px] font-normal uppercase tracking-[0.02em] text-stone-600"
+                    >
+                      REMOVE OUT OF STOCK ITEMS
+                    </button>
+                  ) : (
+                    <a
+                      href={cart?.checkoutUrl}
+                      onClick={onClose}
+                      style={{color: '#fff'}}
+                      className="flex min-h-10 flex-[2.5] items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
+                    >
+                      CHECKOUT
+                    </a>
+                  )}
                 </div>
               ) : (
                 <NavLink
@@ -655,7 +699,7 @@ const totalSavings = Math.max(
   );
 }
 
-function CartLineRow({line, onClose}) {
+function CartLineRow({line, onClose, outOfStock = false}) {
   const {id, quantity, merchandise, isOptimistic} = line;
 
   const options = merchandise?.selectedOptions ?? [];
@@ -756,6 +800,7 @@ function CartLineRow({line, onClose}) {
             </span>
           ) : null}
 
+          {!outOfStock && (
           <div className="flex items-center gap-2 rounded bg-[#f4f4f5] px-2 py-1 text-[12px] font-semibold text-black">
             <CartForm
               route="/cart"
@@ -789,23 +834,31 @@ function CartLineRow({line, onClose}) {
               </button>
             </CartForm>
           </div>
-        </div>
-
+          )}
+        </div>       
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-[15px] font-bold text-black">
-            {formatPrice(total, currency)}
-          </span>
-
-          {hasDiscount ? (
+          {outOfStock ? (
+            <span className="text-[12px] font-semibold text-[#ff5c5c]">
+              Out of Stock
+            </span>
+          ) : (
             <>
-              <span className="text-[13px] text-stone-400 line-through">
-                {formatPrice(totalCompareAt, currency)}
+              <span className="text-[15px] font-bold text-black">
+                {formatPrice(total, currency)}
               </span>
-              <span className="text-[13px] text-[#ff5c5c]">
-                {formatPrice(totalCompareAt - total, currency)} OFF
-              </span>
+
+              {hasDiscount ? (
+                <>
+                  <span className="text-[13px] text-stone-400 line-through">
+                    {formatPrice(totalCompareAt, currency)}
+                  </span>
+                  <span className="text-[13px] text-[#ff5c5c]">
+                    {formatPrice(totalCompareAt - total, currency)} OFF
+                  </span>
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </div>
       </div>
     </li>
