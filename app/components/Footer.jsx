@@ -197,7 +197,7 @@ const SUPPORT_LINKS = [
   {label: 'My Account', href: '/account'},
   {label: 'Shipping & Delivery', href: '/policies/shipping-policy'},
   {label: 'Return & Exchange', href: '/policies/refund-policy'},
-  {label: 'Track your order', href: '/account/orders'},
+  {label: 'Track your order', href: 'https://nimie.shiprocket.co/tracking'},
 ];
 
 const POLICY_LINKS = [
