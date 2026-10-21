@@ -12,6 +12,10 @@ import {
   Heart,
   X,
 } from 'lucide-react';
+import {
+  getSavedCurrency,
+  getExchangeRates,
+} from '~/lib/currency';
 
 function formatPrice(amount, currencyCode = 'INR') {
   if (amount == null) {
@@ -22,7 +26,7 @@ function formatPrice(amount, currencyCode = 'INR') {
     style: 'currency',
     currency: currencyCode,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   })
     .format(Number(amount))
     .replace(/\s/g, '');
@@ -121,6 +125,33 @@ export function ProductDetails({
   const navigate = useNavigate();
   const wishlistFetcher = useFetcher();
   const isLoggedIn = useIsLoggedIn();
+  const [displayCurrency, setDisplayCurrency] = useState('INR');
+  const [exchangeRates, setExchangeRates] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const syncCurrency = () => {
+      setDisplayCurrency(getSavedCurrency());
+    };
+
+    syncCurrency();
+
+    window.addEventListener('nimie:currency-change', syncCurrency);
+    window.addEventListener('storage', syncCurrency);
+
+    getExchangeRates().then((rates) => {
+      if (active) {
+        setExchangeRates(rates);
+      }
+    });
+
+    return () => {
+      active = false;
+      window.removeEventListener('nimie:currency-change', syncCurrency);
+      window.removeEventListener('storage', syncCurrency);
+    };
+  }, []);
 
   const handleWishlistToggle = () => {
     if (!selectedColorId) {
@@ -483,10 +514,27 @@ export function ProductDetails({
    * = ₹1499.4
    * = ₹1499 after rounding
    */
-  const discountedPriceAmount =
-    originalPriceAmount > 0 && discountPercentage > 0
-      ? Math.round(originalPriceAmount * (1 - discountPercentage / 100))
-      : originalPriceAmount;
+
+const discountedPriceAmount =
+  originalPriceAmount > 0 && discountPercentage > 0
+    ? originalPriceAmount * (1 - discountPercentage / 100)
+    : originalPriceAmount;
+  
+  const formatDisplayPrice = (amount) => {
+    const numericAmount = Number(amount || 0);
+
+    if (displayCurrency === 'INR') {
+      return formatPrice(numericAmount, 'INR');
+    }
+
+    const rate = exchangeRates?.[displayCurrency];
+
+    if (!rate) {
+      return 'Price unavailable';
+    }
+
+    return formatPrice(numericAmount * rate, displayCurrency);
+  };
 
   /* Quantity controls */
   const increaseQuantity = () => {
@@ -675,18 +723,18 @@ export function ProductDetails({
               </div>
             </div>
 
-            {/* Price - CALCULATED FROM SHOPIFY PRICE + DISCOUNT */}
+            {/* Price - CALCULATED FROM SHOPIFY PRICE + DISCOUNT */}           
             <div className="mt-2 flex flex-wrap items-center gap-2.5">
               {/* Discounted / Selling Price */}
               <span className="text-[25px] font-bold leading-none text-black">
-                {formatPrice(discountedPriceAmount, price?.currencyCode)}
+                {formatDisplayPrice(discountedPriceAmount)}
               </span>
 
               {/* Original Price */}
               {discountPercentage > 0 &&
                 originalPriceAmount > discountedPriceAmount && (
                   <span className="text-[18px] text-[#e98b8b] line-through">
-                    {formatPrice(originalPriceAmount, price?.currencyCode)}
+                    {formatDisplayPrice(originalPriceAmount)}
                   </span>
                 )}
 
