@@ -214,30 +214,24 @@ export function AccountOrderDetails({order}) {
 /* =========================================================
    SMALL PIECES
 ========================================================= */
+
 function TrackButton({url}) {
   const className =
     'inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#35522a] px-6 py-3 text-[14px] font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]';
 
-  if (url) {
-    return (
-      <a href={url} target="_blank" rel="noreferrer" className={className}>
-        <Truck size={17} strokeWidth={1.6} />
-        Track your order
-      </a>
-    );
-  }
-
-  const handleTrack = () => {
-    // TODO: open your custom tracking page / link here
-  };
-
   return (
-    <button type="button" onClick={handleTrack} className={className}>
+    <a
+      href="https://nimie.shiprocket.co/tracking"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+    >
       <Truck size={17} strokeWidth={1.6} />
       Track your order
-    </button>
+    </a>
   );
 }
+
 
 function Row({label, value}) {
   return (

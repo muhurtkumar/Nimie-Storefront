@@ -216,7 +216,7 @@ const outOfStockLines = lines.filter(
           <Suspense
             fallback={
               <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
-                LOGIN
+                LOGIN TO CONTINUE TO CHECKOUT
               </div>
             }
           >
@@ -229,7 +229,7 @@ const outOfStockLines = lines.filter(
                     style={{color: '#fff'}}
                     className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
                   >
-                    LOGIN
+                    LOGIN TO CONTINUE TO CHECKOUT
                   </NavLink>
                 ) : null
               }
@@ -641,7 +641,7 @@ const totalSavings = Math.max(
         <Suspense
           fallback={
             <div className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white">
-              LOGIN
+              LOGIN TO CONTINUE TO CHECKOUT
             </div>
           }
         >
@@ -688,7 +688,7 @@ const totalSavings = Math.max(
                   style={{color: '#fff'}}
                   className="flex min-h-10 w-full items-center justify-center rounded-[6px] bg-[#345225] text-[12px] font-normal uppercase tracking-[0.02em] text-white no-underline"
                 >
-                  LOGIN
+                  LOGIN TO CONTINUE TO CHECKOUT
                 </NavLink>
               )
             }
