@@ -1,5 +1,7 @@
 import footerBg from '~/assets/layout/footer-bg.mp4';
 import nimiLogo from '~/assets/layout/nimi-logo-white.png';
+import {useEffect, useState} from 'react';
+import {getSavedCurrency, saveCurrency} from '~/lib/currency';
 
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -123,6 +125,87 @@ const css = `
   filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
 }
 
+/* ---------- footer bottom details ---------- */
+.ftr__bottom {
+  width: 100%;
+  margin-top: auto;
+  padding: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.4;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+}
+
+.ftr__country {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.ftr__country-label {
+  white-space: nowrap;
+}
+
+.ftr__country-select {
+  max-width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 18px 4px 2px;
+  color-scheme: dark;
+}
+
+.ftr__country-select option {
+  background: #222;
+  color: #fff;
+}
+
+.ftr__bottom-line {
+  margin: 0;
+}
+
+.ftr__bottom a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ftr__bottom a:hover {
+  text-decoration: underline;
+}
+
+/* Tablet */
+@media (min-width: 600px) {
+  .ftr__bottom {
+    gap: 18px;
+    padding-bottom: 16px;
+    font-size: 14px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .ftr__bottom {
+    gap: 20px;
+    padding-bottom: 20px;
+    font-size: 15px;
+  }
+
+  .ftr__country {
+    gap: 16px;
+  }
+}
+
 /* ---------- tablet: 3 columns ---------- */
 @media (min-width: 600px) {
   .ftr__overlay {
@@ -217,6 +300,18 @@ export function Footer({
   publicStoreDomain,
   isLoggedIn = false,
 }) {
+  const [displayCurrency, setDisplayCurrency] = useState('INR');
+
+  useEffect(() => {
+    setDisplayCurrency(getSavedCurrency());
+  }, []);
+
+  const handleCurrencyChange = (event) => {
+    const currency = event.target.value;
+    saveCurrency(currency);
+    setDisplayCurrency(currency);
+  };
+
   // Guests see "Login" instead of "My Account"
   const supportLinks = SUPPORT_LINKS.map((link) =>
     link.label === 'My Account' && !isLoggedIn
@@ -251,6 +346,50 @@ export function Footer({
           <div className="ftr__logo-wrap">
             <img className="ftr__logo" src={nimiLogo} alt="Nimi" />
           </div>
+          
+          <div className="ftr__bottom">
+            <div className="ftr__country">
+              <label htmlFor="footer-country" className="ftr__country-label">
+                Country/region:
+              </label>
+
+              <select
+                id="footer-country"
+                className="ftr__country-select"
+                value={displayCurrency}
+                onChange={handleCurrencyChange}
+                aria-label="Select display currency"
+              >
+                <option value="INR">India (INR ₹)</option>
+                <option value="USD">United States (USD $)</option>
+                <option value="GBP">United Kingdom (GBP £)</option>
+                <option value="AED">United Arab Emirates (AED د.إ)</option>
+                <option value="AUD">Australia (AUD $)</option>
+              </select>
+            </div>
+            <p className="ftr__bottom-line">
+              © nimie 2026
+            </p>
+
+            <p className="ftr__bottom-line">
+              Support at{' '}
+              <a href="mailto:teamnimie@gmail.com">
+                teamnimie@gmail.com
+              </a>
+            </p>
+
+            <p className="ftr__bottom-line">
+              Designed by{' '}
+              <a
+                href="https://uxhardik.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                uxhardik.com
+              </a>
+            </p>
+          </div>
+
         </div>
       </div>
     </footer>

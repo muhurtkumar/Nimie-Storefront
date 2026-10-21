@@ -3,20 +3,20 @@ import {Link, useFetcher, useNavigate} from 'react-router';
 import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {Image, CartForm} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
+import {
+  getSavedCurrency,
+  getExchangeRates,
+} from '~/lib/currency';
 
 function formatPrice(amount, currencyCode) {
-  if (!amount) {
-    return '';
-  }
+  if (amount == null || amount === '') return '';
 
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currencyCode || 'INR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-    .format(Number(amount))
-    .replace(/\s/g, '');
+    maximumFractionDigits: 2,
+  }).format(Number(amount)).replace(/\s/g, '');
 }
 
 export function ProductCard({
@@ -41,6 +41,54 @@ export function ProductCard({
     }, [cartFetcher.state, cartFetcher.data]);
 
     const isLoggedIn = useIsLoggedIn();
+  
+    const [displayCurrency, setDisplayCurrency] = useState('INR');
+    const [exchangeRates, setExchangeRates] = useState(null);
+
+    useEffect(() => {
+      let active = true;
+
+      const syncCurrency = () => {
+        setDisplayCurrency(getSavedCurrency());
+      };
+
+      syncCurrency();
+
+      window.addEventListener('nimie:currency-change', syncCurrency);
+      window.addEventListener('storage', syncCurrency);
+
+      getExchangeRates().then((rates) => {
+        console.log('ProductCard received rates:', rates);
+        if (active) setExchangeRates(rates);
+      });
+
+      return () => {
+        active = false;
+        window.removeEventListener('nimie:currency-change', syncCurrency);
+        window.removeEventListener('storage', syncCurrency);
+      };
+    }, []);
+
+    const convertDisplayPrice = (amount) => {
+      const numericAmount = Number(amount || 0);
+
+      if (displayCurrency === 'INR') return numericAmount;
+
+      const rate = exchangeRates?.[displayCurrency];
+
+      // Do not show a misleading conversion if rates aren't available.
+      if (!rate) return null;
+
+      return numericAmount * rate;
+    };
+
+    const formatDisplayPrice = (amount) => {
+      const convertedAmount = convertDisplayPrice(amount);
+
+      if (convertedAmount == null) return 'Price unavailable';
+
+      return formatPrice(convertedAmount, displayCurrency);
+    };
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -657,10 +705,7 @@ export function ProductCard({
           {/* Price row */}
           <div className="mt-2 flex items-center gap-2">
             <span className="text-[16px] font-bold leading-5 text-black">
-              {formatPrice(
-                discountedPriceAmount,
-                currentPrice?.currencyCode,
-              )}
+              {formatDisplayPrice(originalPriceAmount)}
             </span>
 
             {hasDiscount && (
@@ -670,10 +715,7 @@ export function ProductCard({
                 </span>
 
                 <span className="self-center text-[12px] text-[#e98b8b] line-through">
-                  {formatPrice(
-                    originalPriceAmount,
-                    currentPrice?.currencyCode,
-                  )}
+                  {formatDisplayPrice(originalPriceAmount)}
                 </span>
               </>
             )}
@@ -700,19 +742,13 @@ export function ProductCard({
                     </span>
 
                     <span className="text-[14px] font-bold text-[#e98b8b] line-through">
-                      {formatPrice(
-                        originalPriceAmount,
-                        currentPrice?.currencyCode,
-                      )}
+                      {formatDisplayPrice(originalPriceAmount)}
                     </span>
                   </>
                 )}
 
                 <span className="text-[20px] font-bold leading-5 text-black">
-                  {formatPrice(
-                    discountedPriceAmount,
-                    currentPrice?.currencyCode,
-                  )}
+                  {formatDisplayPrice(originalPriceAmount)}
                 </span>
               </div>
             </div>
@@ -746,19 +782,13 @@ export function ProductCard({
                     )}
 
                     <span className="text-[20px] font-bold leading-6 text-black">
-                      {formatPrice(
-                        discountedPriceAmount,
-                        currentPrice?.currencyCode,
-                      )}
+                      {formatDisplayPrice(originalPriceAmount)}
                     </span>
                   </div>
 
                   {hasDiscount && (
                     <span className="mt-0 pb-1 text-[15px] leading-6 text-[#e98b8b] line-through md:mt-2 lg:mt-0">
-                      {formatPrice(
-                        originalPriceAmount,
-                        currentPrice?.currencyCode,
-                      )}
+                      {formatDisplayPrice(originalPriceAmount)}
                     </span>
                   )}
                 </div>
@@ -807,19 +837,13 @@ export function ProductCard({
 
               <div className="mt-3 flex flex-nowrap items-center gap-2 whitespace-nowrap">
                 <p className="shrink-0 font-semibold leading-5 text-stone-900">
-                  {formatPrice(
-                    discountedPriceAmount,
-                    currentPrice?.currencyCode,
-                  )}
+                  {formatDisplayPrice(originalPriceAmount)}
                 </p>
 
                 {hasDiscount && (
                   <>
                     <p className="shrink-0 text-xs text-stone-400 line-through">
-                      {formatPrice(
-                        originalPriceAmount,
-                        currentPrice?.currencyCode,
-                      )}
+                      {formatDisplayPrice(originalPriceAmount)}
                     </p>
 
                     <p className="shrink-0 text-xs font-semibold text-[#e98b8b]">
