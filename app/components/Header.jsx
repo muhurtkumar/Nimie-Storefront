@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
-import {ShoppingBag, User, Globe2} from 'lucide-react';
-import {NavLink, useLocation, useFetcher} from 'react-router';
+import {ShoppingBag, User} from 'lucide-react';
+import {NavLink, useLocation} from 'react-router';
 
 import LOGO_SRC from '~/assets/logo.png';
 import MOBILE_LOGO_SRC from '~/assets/Logo_mobile.png';
@@ -280,10 +280,6 @@ export function Header({
                   <HeaderLink {...link} />
                 </li>
               ))}
-
-              <li style={{margin: 0}}>
-                <CountrySelector />
-              </li>
             </ul>
           </div>
 
@@ -608,15 +604,6 @@ function MobileMenu({open, onClose, wishlistCount = 0, isLoggedIn = false}) {
             padding: `calc(${NAV_PAD_Y} * 2 + 24px + ${GAP_Y} + 28px) calc(${NAV_PAD_X} - ${PANEL_GAP}) 32px`,
           }}
         >
-          {/* NEW: Country selector */}
-          <div
-            style={{
-              ...itemMotion(0),
-              marginBottom: 8,
-            }}
-          >
-            <CountrySelector mobile />
-          </div>
 
           {MOBILE_PRIMARY_LINKS.map((link, i) =>
             renderLink(link, i, false),
