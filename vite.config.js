@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'lot-commands-listings-offered.trycloudflare.com',
+      'antibody-festival-mine-transcript.trycloudflare.com',
     ],
   },
 });

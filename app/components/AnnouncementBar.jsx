@@ -22,7 +22,7 @@ export function AnnouncementBar({announcement}) {
         borderRadius: 7,
         fontFamily: FONT,
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 400,
         lineHeight: 1.3,
         textAlign: 'center',
         textTransform: 'uppercase',
