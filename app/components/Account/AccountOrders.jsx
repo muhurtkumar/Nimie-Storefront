@@ -137,7 +137,7 @@ function OrderCard({order}) {
 
   // Later: set this from fulfillment tracking info, e.g.
   // order.fulfillments.nodes[0].trackingInformation[0]?.url
-  const trackingUrl = null;
+  const trackingUrl = 'https://nimie.shiprocket.co/tracking';
 
   return (
     <article className="rounded-[16px] border border-[#ebe7e1] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:p-6">
