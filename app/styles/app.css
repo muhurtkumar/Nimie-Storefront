@@ -27,7 +27,7 @@ img {
 .hero-media {
   display: block;
   width: 100%;
-  height: calc(100dvh - var(--announcement-height, 0px));
+  height: calc(100svh - var(--announcement-height, 0px));
   object-fit: cover;
 }
 
@@ -133,7 +133,6 @@ img {
   display: flex;
   width: max-content;
   animation: instagram-marquee-scroll 35s linear infinite;
-  will-change: transform;
 }
 
 .instagram-marquee:hover .instagram-marquee__track,

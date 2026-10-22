@@ -3,6 +3,50 @@ import {ArrowUpRight, ExternalLink} from 'lucide-react';
 
 export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
   const visibleReels = reels.slice(0, 6);
+  const trackRef = useRef(null);
+  const [activeVideoKey, setActiveVideoKey] = useState(null);
+
+  useEffect(() => {
+    const track = trackRef.current;
+
+    if (!track) return;
+
+    if (!('IntersectionObserver' in window)) {
+      setActiveVideoKey(track.querySelector('[data-reel-key]')?.dataset.reelKey ?? null);
+      return;
+    }
+
+    const visibility = new Map();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          visibility.set(
+            entry.target.dataset.reelKey,
+            entry.isIntersecting ? entry.intersectionRatio : 0,
+          );
+        }
+
+        let bestKey = null;
+        let bestRatio = 0.3;
+
+        for (const [key, ratio] of visibility) {
+          if (ratio > bestRatio) {
+            bestKey = key;
+            bestRatio = ratio;
+          }
+        }
+
+        setActiveVideoKey(bestKey);
+      },
+      {threshold: [0, 0.3, 0.6, 1]},
+    );
+
+    track.querySelectorAll('[data-reel-key]').forEach((card) => {
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, [visibleReels.length]);
 
   if (!visibleReels.length) {
     return null;
@@ -63,13 +107,14 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
           {/* Reels marquee */}
           <div className="min-w-0 overflow-hidden md:col-span-2">
             <div className="instagram-marquee">
-              <div className="instagram-marquee__track">
+              <div className="instagram-marquee__track" ref={trackRef}>
                 {[
                   ...visibleReels.map((reel) => ({...reel, copy: 'first'})),
                   ...visibleReels.map((reel) => ({...reel, copy: 'second'})),
                 ].map((reel) => (
                   <div
                     key={`${reel.id}-${reel.copy}`}
+                    data-reel-key={`${reel.id}-${reel.copy}`}
                     className="w-[calc(50vw-24px)] flex-none pr-2.5 sm:w-[240px] lg:w-[260px]"
                   >
                     <a
@@ -80,12 +125,21 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
                       tabIndex={reel.copy === 'second' ? -1 : undefined}
                       className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-stone-200"
                     >
-                      {reel.media_url && (
+                      {reel.media_url ? (
                         <VisibleReelVideo
                           src={reel.media_url}
                           poster={reel.thumbnail_url}
+                          isActive={activeVideoKey === `${reel.id}-${reel.copy}`}
                         />
-                      )}
+                      ) : reel.thumbnail_url ? (
+                        <img
+                          src={reel.thumbnail_url}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : null}
 
                       <div className="absolute left-3 top-3 text-[9px] font-medium text-white drop-shadow-md">
                         {instagramHandle}
@@ -106,46 +160,27 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
   );
 }
 
-function VisibleReelVideo({src, poster}) {
+function VisibleReelVideo({src, poster, isActive}) {
   const videoRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
 
     if (!video) return;
 
-    if (!('IntersectionObserver' in window)) {
-      setIsVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      {threshold: 0.25},
-    );
-
-    observer.observe(video);
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    if (isVisible) {
+    if (isActive) {
       video.play().catch(() => {});
     } else {
       video.pause();
+      video.removeAttribute('src');
+      video.load();
     }
-  }, [isVisible]);
+  }, [isActive]);
 
   return (
     <video
       ref={videoRef}
-      src={isVisible ? src : undefined}
+      src={isActive ? src : undefined}
       poster={poster || undefined}
       muted
       loop

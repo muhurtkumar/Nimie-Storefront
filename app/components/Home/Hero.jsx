@@ -21,7 +21,7 @@ export function Hero({
       className="hero -mx-4 w-[calc(100%+2rem)] p-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-2xl bg-[#11170d]">
+      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
         {video ? (
           <LazyVideo
             src={video}
@@ -74,7 +74,10 @@ export function Hero({
             md+: text bottom-left, CTA bottom-right, on one row. */}
         <div
           className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between"
-          style={{padding: `0 ${INSET} ${INSET}`, fontFamily: FONT}}
+          style={{
+            padding: `0 ${INSET} max(${INSET}, env(safe-area-inset-bottom))`,
+            fontFamily: FONT,
+          }}
         >
           <div style={{minWidth: 0}}>
             {eyebrow && (
