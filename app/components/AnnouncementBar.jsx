@@ -1,7 +1,8 @@
+
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-export function AnnouncementBar({announcement}) {
+export function AnnouncementBar({announcement, isHome = false}) {
   if (!announcement?.enabled || !announcement?.message?.trim()) {
     return null;
   }
@@ -17,7 +18,7 @@ export function AnnouncementBar({announcement}) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '6px 12px',
-        background: '#345225',
+        background: isHome ? '#345225' : '#000000',
         color: '#fff',
         borderRadius: 7,
         fontFamily: FONT,
@@ -25,7 +26,6 @@ export function AnnouncementBar({announcement}) {
         fontWeight: 400,
         lineHeight: 1.3,
         textAlign: 'center',
-        textTransform: 'uppercase',
         letterSpacing: '0.02em',
       }}
     >

@@ -24,15 +24,16 @@ const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
 
 export function Cart({open, onClose}) {
   const rootData = useRouteLoaderData('root');
-  const revalidator = useRevalidator();
+  const {revalidate} = useRevalidator();
 
-  
 useEffect(() => {
-  if (!open) return undefined;
+  if (!open) return;
 
-  if (revalidator.state === 'idle') {
-    revalidator.revalidate();
-  }
+  void revalidate();
+}, [open, revalidate]);
+
+useEffect(() => {
+  if (!open) return;
 
   const body = document.body;
   const html = document.documentElement;
@@ -46,6 +47,7 @@ useEffect(() => {
     width: body.style.width,
     overflow: body.style.overflow,
   };
+
   const previousHtmlOverflow = html.style.overflow;
 
   // Prevent the page behind the cart drawer from scrolling
@@ -73,7 +75,7 @@ useEffect(() => {
 
     window.removeEventListener('keydown', handleKeyDown);
   };
-}, [open, onClose, revalidator]);
+}, [open, onClose]);
 
   return (
     <>

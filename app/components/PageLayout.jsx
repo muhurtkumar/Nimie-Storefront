@@ -1,4 +1,4 @@
-import {Await, Link} from 'react-router';
+import {Await, Link, useLocation} from 'react-router';
 import {Suspense, useId} from 'react';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
@@ -24,6 +24,9 @@ export function PageLayout({
   publicStoreDomain,
   wishlist,
 }) {
+
+  const {pathname} = useLocation();
+  const isHome = pathname === '/';
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
@@ -40,7 +43,10 @@ export function PageLayout({
 
             return (
               <>
-                <AnnouncementBar announcement={resolvedAnnouncement} />
+                <AnnouncementBar
+                  announcement={resolvedAnnouncement}
+                  isHome={isHome}
+                />
 
                 {header && (
                   <Suspense fallback={null}>
