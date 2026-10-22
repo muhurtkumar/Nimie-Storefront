@@ -1,3 +1,5 @@
+import {LazyVideo} from '~/components/LazyVideo';
+
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
 const GAP_Y = '16px';
@@ -36,15 +38,10 @@ export function ContactMethod({
         style={{lineHeight: 0}}
       >
         {video ? (
-          <video
+          <LazyVideo
             src={video}
             poster={image}
             aria-label={imageAlt}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
             className="h-dvh lg:h-auto lg:max-h-[calc(100dvh-32px)]"
             style={{
               display: 'block',

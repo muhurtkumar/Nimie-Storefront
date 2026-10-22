@@ -1,5 +1,5 @@
-import {useEffect, useRef, useState} from 'react';
 import {Link} from 'react-router';
+import {LazyVideo} from '~/components/LazyVideo';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Space between the page edge and the card. Keep in sync with Header.jsx / Hero.jsx
@@ -154,32 +154,11 @@ export function BehindTheScenes({
  * so there's no loading gap at the cut.
  */
 function VideoCarousel({sources}) {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    const el = videoRef.current;
-
-    if (!el) return;
-
-    el.currentTime = 0;
-
-    const playPromise = el.play();
-
-    if (playPromise) {
-      playPromise.catch(() => {});
-    }
-  }, []);
-
   return (
     <div style={{position: 'relative', width: '100%', minHeight: 520}}>
-      <video
-        ref={videoRef}
+      <LazyVideo
         src={sources[0]}
-        muted
-        playsInline
-        autoPlay
-        loop
-        preload="auto"
+        poster={sources[0]?.poster}
         style={{
           display: 'block',
           width: '100%',

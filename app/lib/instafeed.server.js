@@ -9,7 +9,7 @@ export async function getInstagramFeed(env) {
 
   const url = new URL(INSTAFEED_ENDPOINT);
 
-  url.searchParams.set('limit', '50');
+  url.searchParams.set('limit', '12');
   url.searchParams.set('account', 'pf8ggf-un.myshopify.com');
   url.searchParams.set('fu', '0');
   url.searchParams.set('fid', '0');

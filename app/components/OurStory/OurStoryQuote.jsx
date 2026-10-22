@@ -1,3 +1,5 @@
+import {LazyVideo} from '~/components/LazyVideo';
+
 import React from "react";
 
 const FONT =
@@ -195,16 +197,11 @@ export function OurStoryQuote({ image, video, imageAlt = "", quote }) {
 
       {/* Background video (falls back to the image if no video is passed) */}
       {video ? (
-        <video
+        <LazyVideo
           className="our-story-quote__image"
           src={video}
           poster={image}
           aria-label={imageAlt}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
         />
       ) : (
         <img className="our-story-quote__image" src={image} alt={imageAlt} />

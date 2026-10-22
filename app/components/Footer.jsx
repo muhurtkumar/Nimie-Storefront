@@ -2,6 +2,7 @@ import footerBg from '~/assets/layout/footer-bg.mp4';
 import nimiLogo from '~/assets/layout/nimi-logo-white.png';
 import {useEffect, useState} from 'react';
 import {getSavedCurrency, saveCurrency} from '~/lib/currency';
+import {LazyVideo} from '~/components/LazyVideo';
 
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -324,13 +325,9 @@ export function Footer({
       <style>{css}</style>
 
       <div className="ftr__visual">
-        <video
+        <LazyVideo
           className="ftr__bg"
           src={footerBg}
-          autoPlay
-          loop
-          muted
-          playsInline
           aria-hidden="true"
         />
 

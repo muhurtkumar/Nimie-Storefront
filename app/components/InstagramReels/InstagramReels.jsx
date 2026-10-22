@@ -1,7 +1,10 @@
+import {useEffect, useRef, useState} from 'react';
 import {ArrowUpRight, ExternalLink} from 'lucide-react';
 
 export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
-  if (!reels.length) {
+  const visibleReels = reels.slice(0, 6);
+
+  if (!visibleReels.length) {
     return null;
   }
   
@@ -61,27 +64,26 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
           <div className="min-w-0 overflow-hidden md:col-span-2">
             <div className="instagram-marquee">
               <div className="instagram-marquee__track">
-                {[...reels, ...reels].map((reel, index) => (
+                {[
+                  ...visibleReels.map((reel) => ({...reel, copy: 'first'})),
+                  ...visibleReels.map((reel) => ({...reel, copy: 'second'})),
+                ].map((reel) => (
                   <div
-                    key={`${reel.id}-${index}`}
+                    key={`${reel.id}-${reel.copy}`}
                     className="w-[calc(50vw-24px)] flex-none pr-2.5 sm:w-[240px] lg:w-[260px]"
                   >
                     <a
                       href={reel.permalink}
                       target="_blank"
                       rel="noreferrer"
+                      aria-hidden={reel.copy === 'second' || undefined}
+                      tabIndex={reel.copy === 'second' ? -1 : undefined}
                       className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-stone-200"
                     >
-                      {reel.media_type === 'VIDEO' && reel.media_url && (
-                        <video
+                      {reel.media_url && (
+                        <VisibleReelVideo
                           src={reel.media_url}
                           poster={reel.thumbnail_url}
-                          muted
-                          loop
-                          playsInline
-                          autoPlay
-                          preload="auto"
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                         />
                       )}
 
@@ -101,5 +103,55 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
         </div>
       </div>
     </section>
+  );
+}
+
+function VisibleReelVideo({src, poster}) {
+  const videoRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    if (!('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      {threshold: 0.25},
+    );
+
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    if (isVisible) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isVisible]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={isVisible ? src : undefined}
+      poster={poster || undefined}
+      muted
+      loop
+      playsInline
+      preload="none"
+      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+    />
   );
 }

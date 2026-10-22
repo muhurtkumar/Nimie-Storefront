@@ -1,5 +1,5 @@
-import {useState} from 'react';
 import {Link} from 'react-router';
+import {LazyVideo} from '~/components/LazyVideo';
 
 const FONT =
   "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -7,7 +7,6 @@ const FONT =
 const GAP_Y = '16px'; // top and bottom
 const INSET = 'clamp(16px, 2.5vw, 32px)';
 const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2 - var(--announcement-height, 0px))`;
-const MOBILE_HEIGHT = `calc(100dvh - var(--announcement-height, 0px))`;
 
 export function Hero({
   image,
@@ -22,16 +21,12 @@ export function Hero({
       className="hero -mx-4 w-[calc(100%+2rem)] p-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
+      <div className="relative w-full overflow-hidden rounded-2xl bg-[#11170d]">
         {video ? (
-          <video
+          <LazyVideo
             src={video}
             aria-label={imageAlt}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
+            eager
             className="hero-media"
               style={{
                 display: 'block',
@@ -40,7 +35,6 @@ export function Hero({
                 maxHeight: undefined,
                 minHeight: undefined,
                 objectFit: 'cover',
-                borderRadius: 0,
               }}
           />
         ) : image ? (
@@ -56,7 +50,6 @@ export function Hero({
               maxHeight: undefined,
               minHeight: undefined,
               objectFit: 'cover',
-              borderRadius: 0,
             }}
           />
         ) : (
