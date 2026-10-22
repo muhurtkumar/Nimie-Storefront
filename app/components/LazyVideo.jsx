@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 
 export function LazyVideo({
   src,
+  fallbackSrc,
   poster,
   className,
   style,
@@ -53,7 +54,7 @@ export function LazyVideo({
   return (
     <video
       ref={videoRef}
-      src={shouldLoad ? src : undefined}
+      src={fallbackSrc ? undefined : shouldLoad ? src : undefined}
       poster={poster}
       muted
       playsInline
@@ -63,6 +64,13 @@ export function LazyVideo({
       aria-hidden={ariaHidden || undefined}
       className={className}
       style={style}
-    />
+    >
+      {fallbackSrc && shouldLoad ? (
+        <>
+          <source src={src} type="video/quicktime" />
+          <source src={fallbackSrc} type="video/webm" />
+        </>
+      ) : null}
+    </video>
   );
 }

@@ -17,7 +17,8 @@ import {Reviews} from '~/components/Pdp/Reviews.jsx';
 import productIntroImage from '~/assets/layout/ProductIntroImage.png';
 import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import nimieLogo from '~/assets/home/nimie-logo.png';
-import homepageBts from '~/assets/home/homepage_bts.webm';
+import homepageBts from '~/assets/home/homepage_bts.mov';
+import homepageBtsFallback from '~/assets/home/homepage_bts.webm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ShopForMore} from '~/components/Home/ShopForMore.jsx';
 
@@ -209,6 +210,7 @@ export default function Product() {
 
       <BehindTheScenes
         videos={[homepageBts]}
+        fallbackVideo={homepageBtsFallback}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"
         heading="Embroided with <3"
