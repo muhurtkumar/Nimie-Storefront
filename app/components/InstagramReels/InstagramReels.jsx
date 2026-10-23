@@ -125,19 +125,20 @@ export function InstagramReels({reels = [], instagramHandle = '@nimie.in'}) {
                       tabIndex={reel.copy === 'second' ? -1 : undefined}
                       className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-stone-200"
                     >
-                      {reel.media_url ? (
-                        <VisibleReelVideo
-                          src={reel.media_url}
-                          poster={reel.thumbnail_url}
-                          isActive={activeVideoKey === `${reel.id}-${reel.copy}`}
-                        />
-                      ) : reel.thumbnail_url ? (
+                      {reel.thumbnail_url ? (
                         <img
                           src={reel.thumbnail_url}
                           alt=""
                           loading="lazy"
                           decoding="async"
                           className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : null}
+                      {reel.media_url ? (
+                        <VisibleReelVideo
+                          src={reel.media_url}
+                          poster={reel.thumbnail_url}
+                          isActive={activeVideoKey === `${reel.id}-${reel.copy}`}
                         />
                       ) : null}
 

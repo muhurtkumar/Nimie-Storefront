@@ -92,9 +92,7 @@ const instagramReels = import('~/lib/instafeed.server.js')
       .map((item) => ({
         id: item.id,
         media_type: 'VIDEO',
-        media_url: `/api/instagram-media?url=${encodeURIComponent(
-          item.videos.standard_resolution.url,
-        )}`,
+        media_url: item.videos.standard_resolution.url,
         thumbnail_url: item.images?.standard_resolution?.url
           ? `/api/instagram-media?url=${encodeURIComponent(
               item.images.standard_resolution.url,
