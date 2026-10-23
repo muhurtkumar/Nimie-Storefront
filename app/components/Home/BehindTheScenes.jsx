@@ -16,7 +16,6 @@ export function BehindTheScenes({
   image,
   imageAlt = '',
   videos,
-  fallbackVideo,
   logo,
   logoAlt = '',
   eyebrow,
@@ -42,7 +41,7 @@ export function BehindTheScenes({
         style={{borderRadius: 0, textDecoration: 'none', lineHeight: 0}}
       >
         {videos && videos.length > 0 ? (
-          <VideoCarousel sources={videos} fallbackSrc={fallbackVideo} />
+          <VideoCarousel sources={videos} />
         ) : image ? (
           <img
             src={image}
@@ -154,12 +153,11 @@ export function BehindTheScenes({
  * back to the first. The next clip is preloaded while the current one plays,
  * so there's no loading gap at the cut.
  */
-function VideoCarousel({sources, fallbackSrc}) {
+function VideoCarousel({sources}) {
   return (
     <div style={{position: 'relative', width: '100%', minHeight: 520}}>
       <LazyVideo
         src={sources[0]}
-        fallbackSrc={fallbackSrc}
         poster={sources[0]?.poster}
         style={{
           display: 'block',

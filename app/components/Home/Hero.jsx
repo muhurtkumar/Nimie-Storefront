@@ -11,7 +11,6 @@ const MAX_HEIGHT = `calc(100dvh - ${GAP_Y} * 2 - var(--announcement-height, 0px)
 export function Hero({
   image,
   video,
-  fallbackVideo,
   imageAlt = '',
   eyebrow,
   heading,
@@ -22,11 +21,10 @@ export function Hero({
       className="hero -mx-4 w-[calc(100%+2rem)] p-0! lg:mx-0 lg:w-full lg:py-4!"
       style={{boxSizing: 'border-box'}}
     >
-      <div className="relative w-full overflow-hidden rounded-2xl bg-[#11170d]">
+      <div className="relative w-full overflow-hidden rounded-none bg-[#11170d] lg:rounded-2xl">
         {video ? (
           <LazyVideo
             src={video}
-            fallbackSrc={fallbackVideo}
             aria-label={imageAlt}
             eager
             className="hero-media"

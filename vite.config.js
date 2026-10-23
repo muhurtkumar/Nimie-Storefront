@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'patient-bids-coral-record.trycloudflare.com',
+      'submit-excel-computation-excitement.trycloudflare.com',
     ],
   },
 });

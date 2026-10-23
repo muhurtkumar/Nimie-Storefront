@@ -9,7 +9,6 @@ import {ProductShowcase} from '~/components/Home/ProductShowcase';
 import {Hero} from '~/components/Home/Hero';
 import heroBanner from '~/assets/home/hero-banner.png';
 import heroBannerVideo from '~/assets/home/hero-banner-video.mov';
-import heroBannerVideoFallback from '~/assets/home/hero-banner-video.webm';
 import {KnotLikeBefore} from '~/components/Home/KnotLikeBefore';
 import knotLikeBeforeImage from '~/assets/home/knot-like-before.png';
 import knotLikeBeforeHeading from '~/assets/home/KnotLikeBeforeHeading.png';
@@ -18,7 +17,6 @@ import {BehindTheScenes} from '~/components/Home/BehindTheScenes';
 import {InstagramReels} from '~/components/InstagramReels/InstagramReels.jsx';
 import nimieLogo from '~/assets/home/nimie-logo.png';
 import homepageBts from '~/assets/home/homepage_bts.mov';
-import homepageBtsFallback from '~/assets/home/homepage_bts.webm';
 
 import {restoreCustomerCart} from '~/lib/customer-cart';
 
@@ -159,7 +157,6 @@ export default function Homepage() {
       <Hero
         image={heroBanner}
         video={heroBannerVideo}
-        fallbackVideo={heroBannerVideoFallback}
         imageAlt="Nimie new collection"
         eyebrow="Meet Lucknow chikankari, the Nimie way."
         heading="The classics got a makeover."
@@ -175,7 +172,6 @@ export default function Homepage() {
 
       <BehindTheScenes
         videos={[homepageBts]}
-        fallbackVideo={homepageBtsFallback}
         logo={nimieLogo}
         eyebrow="From Behind the Scenes"
         heading="Embroided with <3"
