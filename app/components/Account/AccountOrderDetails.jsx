@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Link, useFetcher} from 'react-router';
 import {ArrowLeft, Package, Truck} from 'lucide-react';
 
@@ -56,10 +56,56 @@ const FALLBACK_BADGE = {
    MAIN COMPONENT
    Pass the `order` from the loader.
 ========================================================= */
-export function AccountOrderDetails({order}) {
+export function AccountOrderDetails({
+  order,
+  cancelledItems = [],
+}) {
   const cancelFetcher = useFetcher();
+
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
-  const items = order.lineItems?.nodes ?? [];
+  const [selectedItemToCancel, setSelectedItemToCancel] = useState(null);
+  const [cancelledItemIds, setCancelledItemIds] = useState([]);
+
+  useEffect(() => {
+    if (
+      cancelFetcher.data?.success &&
+      cancelFetcher.data?.type === 'item-cancelled' &&
+      cancelFetcher.data?.lineItemId
+    ) {
+      setCancelledItemIds((previousIds) =>
+        previousIds.includes(cancelFetcher.data.lineItemId)
+          ? previousIds
+          : [...previousIds, cancelFetcher.data.lineItemId],
+      );
+    }
+  }, [cancelFetcher.data]);
+
+  const activeItems = order.lineItems?.nodes ?? [];
+
+  const cancelledIds = new Set(
+    cancelledItems.map((item) => item.lineItemId),
+  );
+
+  const items = [
+    ...activeItems,
+    ...cancelledItems
+      .filter(
+        (cancelledItem) =>
+          !activeItems.some(
+            (activeItem) =>
+              activeItem.id === cancelledItem.lineItemId,
+          ),
+      )
+      .map((item) => ({
+        ...item,
+        id: item.lineItemId,
+        isCancelled: true,
+      })),
+  ];
+
+  const isCancelling = cancelFetcher.state !== 'idle';
+  const isItemCancellation =
+    cancelFetcher.formData?.get('intent') === 'cancel-item';
   const itemCount = items.reduce((n, item) => n + (item.quantity ?? 1), 0);
 
   const fulfillment = order.fulfillments?.nodes?.[0];
@@ -148,9 +194,29 @@ export function AccountOrderDetails({order}) {
                     Qty {item.quantity} × {formatMoney(item.price)}
                   </p>
                 </div>
-                <p className="shrink-0 text-[15px] text-[#111111]">
-                  {formatMoney({amount: lineTotal, currencyCode})}
-                </p>
+                <div className="flex shrink-0 flex-col items-end gap-3">
+                  <p className="text-[15px] text-[#111111]">
+                    {formatMoney({amount: lineTotal, currencyCode})}
+                  </p>
+
+                  {!order.cancelledAt &&
+                    (item.isCancelled ||
+                    cancelledIds.has(item.id) ||
+                    cancelledItemIds.includes(item.id) ? (
+                      <span className="rounded-full bg-[#f6dcd8] px-3 py-1 text-[12px] font-medium text-[#8a2c20]">
+                        Cancelled
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedItemToCancel(item)}
+                        disabled={isCancelling || !item.id}
+                        className="text-[12px] font-medium text-[#8a2c20] underline underline-offset-4 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Cancel item
+                      </button>
+                    ))}
+                </div>
               </li>
             );
           })}
@@ -218,8 +284,11 @@ export function AccountOrderDetails({order}) {
 
             <button
               type="button"
-              onClick={() => setShowCancelConfirmation(true)}
-              disabled={cancelFetcher.state !== 'idle'}
+              onClick={() => {
+                setSelectedItemToCancel(null);
+                setShowCancelConfirmation(true);
+              }}
+              disabled={isCancelling}
               className="inline-flex items-center justify-center rounded-full border border-[#c8b9ad] px-6 py-3 text-[14px] font-medium text-[#6b3029] transition-colors hover:bg-[#f8f1ee] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel order
@@ -248,8 +317,8 @@ export function AccountOrderDetails({order}) {
         </div>
       )}
 
-      {/* Confirmation dialog */}
-      {showCancelConfirmation && (
+      {/* Cancellation confirmation dialog */}
+      {(showCancelConfirmation || selectedItemToCancel) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div
             role="dialog"
@@ -261,39 +330,82 @@ export function AccountOrderDetails({order}) {
               id="cancel-order-title"
               className="m-0 font-serif text-[24px] text-[#111111]"
             >
-              Cancel this order?
+              {selectedItemToCancel
+                ? 'Cancel this item?'
+                : 'Cancel this order?'}
             </h2>
 
             <p className="mt-3 text-[14px] leading-6 text-[#55504a]">
-              If Nimie accepts the cancellation, eligible payments will be
-              refunded to your Nimie Wallet . This action cannot be undone.
+              {selectedItemToCancel ? (
+                <>
+                  Do you want to request cancellation of{' '}
+                  <strong>{selectedItemToCancel.title}</strong>
+                  {selectedItemToCancel.variantTitle
+                    ? ` (${selectedItemToCancel.variantTitle})`
+                    : ''}
+                  ? Other items in your order will remain unchanged.
+                </>
+              ) : (
+                <>
+                  If Nimie accepts the cancellation, eligible payments will
+                  be refunded to your Nimie Wallet. This action cannot be undone.
+                </>
+              )}
+            </p>
+
+            <p className="mt-3 text-[12px] leading-5 text-[#7a746c]">
+              Cancellation is subject to order status and eligibility.
+              Any applicable refund must be processed separately for an
+              individual item.
             </p>
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowCancelConfirmation(false)}
-                className="rounded-full border border-[#ebe7e1] px-5 py-2.5 text-[14px] text-[#55504a]"
+                onClick={() => {
+                  setShowCancelConfirmation(false);
+                  setSelectedItemToCancel(null);
+                }}
+                disabled={isCancelling}
+                className="rounded-full border border-[#ebe7e1] px-5 py-2.5 text-[14px] text-[#55504a] disabled:opacity-50"
               >
-                Keep order
+                Keep {selectedItemToCancel ? 'item' : 'order'}
               </button>
 
               <button
                 type="button"
-                disabled={cancelFetcher.state !== 'idle'}
+                disabled={isCancelling}
                 onClick={() => {
-                  setShowCancelConfirmation(false);
-                  cancelFetcher.submit(
-                    {},
-                    {
-                      method: 'post',
-                      encType: 'application/x-www-form-urlencoded',
-                    },
-                  );
+                  if (selectedItemToCancel) {
+                    cancelFetcher.submit(
+                      {
+                        intent: 'cancel-item',
+                        lineItemId: selectedItemToCancel.id,
+                      },
+                      {
+                        method: 'post',
+                        encType: 'application/x-www-form-urlencoded',
+                      },
+                    );
+
+                    setSelectedItemToCancel(null);
+                  } else {
+                    cancelFetcher.submit(
+                      {
+                        intent: 'cancel-order',
+                      },
+                      {
+                        method: 'post',
+                        encType: 'application/x-www-form-urlencoded',
+                      },
+                    );
+
+                    setShowCancelConfirmation(false);
+                  }
                 }}
-                className="rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50"
+                className="rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {cancelFetcher.state !== 'idle'
+                {isCancelling
                   ? 'Submitting...'
                   : 'Confirm cancellation'}
               </button>

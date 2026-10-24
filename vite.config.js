@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'polyester-dennis-carrier-activities.trycloudflare.com',
+      'leave-allocated-cited-fork.trycloudflare.com',
     ],
   },
 });
