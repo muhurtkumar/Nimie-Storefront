@@ -1,4 +1,5 @@
-import {Link} from 'react-router';
+import {useState} from 'react';
+import {Link, useFetcher} from 'react-router';
 import {ArrowLeft, Package, Truck} from 'lucide-react';
 
 /* =========================================================
@@ -56,12 +57,18 @@ const FALLBACK_BADGE = {
    Pass the `order` from the loader.
 ========================================================= */
 export function AccountOrderDetails({order}) {
+  const cancelFetcher = useFetcher();
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const items = order.lineItems?.nodes ?? [];
   const itemCount = items.reduce((n, item) => n + (item.quantity ?? 1), 0);
 
   const fulfillment = order.fulfillments?.nodes?.[0];
+
   const fulfillmentKey = fulfillment?.status ?? order.fulfillmentStatus;
-  const fulfillmentBadge = FULFILLMENT_BADGES[fulfillmentKey] ?? FALLBACK_BADGE;
+
+  const fulfillmentBadge = order.cancelledAt
+    ? FULFILLMENT_BADGES.CANCELLED
+    : FULFILLMENT_BADGES[fulfillmentKey] ?? FALLBACK_BADGE;
   const paymentBadge = order.financialStatus
     ? (PAYMENT_BADGES[order.financialStatus] ?? FALLBACK_BADGE)
     : null;
@@ -203,13 +210,100 @@ export function AccountOrderDetails({order}) {
         </div>
       </div>
 
-      {/* Track */}
-      <div className="mt-6">
-        <TrackButton url={trackingUrl} />
+      {/* Order actions */}
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {!order.cancelledAt && (
+          <>
+            <TrackButton url={trackingUrl} />
+
+            <button
+              type="button"
+              onClick={() => setShowCancelConfirmation(true)}
+              disabled={cancelFetcher.state !== 'idle'}
+              className="inline-flex items-center justify-center rounded-full border border-[#c8b9ad] px-6 py-3 text-[14px] font-medium text-[#6b3029] transition-colors hover:bg-[#f8f1ee] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancel order
+            </button>
+          </>
+        )}
       </div>
-    </div>
-  );
-}
+
+      {/* Cancellation success message */}
+      {cancelFetcher.data?.success && (
+        <div
+          role="status"
+          className="mt-4 rounded-xl bg-[#e3efdc] p-4 text-[14px] text-[#2f5a1f]"
+        >
+          {cancelFetcher.data.message}
+        </div>
+      )}
+
+      {/* Cancellation error message */}
+      {cancelFetcher.data?.error && (
+        <div
+          role="alert"
+          className="mt-4 rounded-xl bg-[#f6dcd8] p-4 text-[14px] text-[#8a2c20]"
+        >
+          {cancelFetcher.data.error}
+        </div>
+      )}
+
+      {/* Confirmation dialog */}
+      {showCancelConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-order-title"
+            className="w-full max-w-[420px] rounded-2xl bg-white p-6 shadow-xl"
+          >
+            <h2
+              id="cancel-order-title"
+              className="m-0 font-serif text-[24px] text-[#111111]"
+            >
+              Cancel this order?
+            </h2>
+
+            <p className="mt-3 text-[14px] leading-6 text-[#55504a]">
+              If Nimie accepts the cancellation, eligible payments will be
+              refunded to your Nimie Wallet . This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirmation(false)}
+                className="rounded-full border border-[#ebe7e1] px-5 py-2.5 text-[14px] text-[#55504a]"
+              >
+                Keep order
+              </button>
+
+              <button
+                type="button"
+                disabled={cancelFetcher.state !== 'idle'}
+                onClick={() => {
+                  setShowCancelConfirmation(false);
+                  cancelFetcher.submit(
+                    {},
+                    {
+                      method: 'post',
+                      encType: 'application/x-www-form-urlencoded',
+                    },
+                  );
+                }}
+                className="rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium text-white disabled:opacity-50"
+              >
+                {cancelFetcher.state !== 'idle'
+                  ? 'Submitting...'
+                  : 'Confirm cancellation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+          </div>
+        );
+      }
 
 /* =========================================================
    SMALL PIECES

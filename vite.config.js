@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'submit-excel-computation-excitement.trycloudflare.com',
+      'polyester-dennis-carrier-activities.trycloudflare.com',
     ],
   },
 });

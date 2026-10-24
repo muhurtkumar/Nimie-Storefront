@@ -8,6 +8,7 @@ export const ORDER_ITEM_FRAGMENT = `#graphql
     }
     financialStatus
     fulfillmentStatus
+    cancelledAt
     fulfillments(first: 1) {
       nodes {
         status

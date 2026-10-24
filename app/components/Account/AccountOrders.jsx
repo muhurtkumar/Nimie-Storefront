@@ -129,9 +129,15 @@ function OrderCard({order}) {
   const shownItems = items.slice(0, 3);
   const extraItems = items.length - shownItems.length;
 
-  const payment = PAYMENT_BADGES[order.financialStatus] ?? FALLBACK_BADGE;
+  const payment = order.cancelledAt
+    ? PAYMENT_BADGES.REFUNDED
+    : PAYMENT_BADGES[order.financialStatus] ?? FALLBACK_BADGE;
+
   const fulfillmentStatus = order.fulfillments?.nodes?.[0]?.status;
-  const fulfillment = FULFILLMENT_BADGES[fulfillmentStatus] ?? FALLBACK_BADGE;
+
+  const fulfillment = order.cancelledAt
+    ? FULFILLMENT_BADGES.CANCELLED
+    : FULFILLMENT_BADGES[fulfillmentStatus] ?? FALLBACK_BADGE;
 
   const total = order.currentTotalPrice ?? order.totalPrice;
 
@@ -191,7 +197,7 @@ function OrderCard({order}) {
             <ChevronRight size={16} strokeWidth={1.5} />
           </Link>
 
-          <TrackButton url={trackingUrl} />
+          {!order.cancelledAt && <TrackButton url={trackingUrl} />}
         </div>
       </div>
     </article>
