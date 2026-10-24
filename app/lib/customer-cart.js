@@ -6,42 +6,47 @@ import {
 export async function restoreCustomerCart({context}) {
   const {customerAccount, session} = context;
 
-  const isLoggedIn = await customerAccount.isLoggedIn();
+  try {
+    const isLoggedIn = await customerAccount.isLoggedIn();
 
-  if (!isLoggedIn) {
+    if (!isLoggedIn) {
+      return null;
+    }
+
+    const {data, errors} = await customerAccount.query(
+      CUSTOMER_CART_METAFIELD_QUERY,
+    );
+
+    if (errors?.length) {
+      console.error('Failed to fetch customer cart:', errors);
+      return null;
+    }
+
+    const customerCartId = data?.customer?.metafield?.value;
+    const sessionCartId = session.get('cartId');
+
+    // Customer already has a persistent cart.
+    if (customerCartId) {
+      session.set('cartId', customerCartId);
+      return customerCartId;
+    }
+
+    // Customer has no saved cart, but there is an existing
+    // guest cart in the current session. Claim that cart.
+    if (sessionCartId) {
+      await saveCustomerCart({
+        context,
+        cartId: sessionCartId,
+      });
+
+      return sessionCartId;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Failed to restore customer cart:', error);
     return null;
   }
-
-  const {data, errors} = await customerAccount.query(
-    CUSTOMER_CART_METAFIELD_QUERY,
-  );
-
-  if (errors?.length) {
-    console.error('Failed to fetch customer cart:', errors);
-    return null;
-  }
-
-  const customerCartId = data?.customer?.metafield?.value;
-  const sessionCartId = session.get('cartId');
-
-  // Customer already has a persistent cart.
-  if (customerCartId) {
-    session.set('cartId', customerCartId);
-    return customerCartId;
-  }
-
-  // Customer has no saved cart, but there is an existing
-  // guest cart in the current session. Claim that cart.
-  if (sessionCartId) {
-    await saveCustomerCart({
-      context,
-      cartId: sessionCartId,
-    });
-
-    return sessionCartId;
-  }
-
-  return null;
 }
 
 export async function saveCustomerCart({context, cartId}) {
