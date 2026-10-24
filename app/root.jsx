@@ -65,12 +65,22 @@ export function links() {
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
-  // Restore the logged-in customer's saved cart BEFORE the cart is read below
-  await restoreCustomerCart({context: args.context});
-  // Start fetching non-critical data without blocking time to first byte
+  // Restore the logged-in customer's saved cart.
+  // Cart restoration is non-critical: a failure should not
+  // prevent the storefront from rendering.
+  try {
+    await restoreCustomerCart({context: args.context});
+  } catch (error) {
+    console.error(
+      'Customer cart restoration failed. Continuing without restoration:',
+      error,
+    );
+  }
+
+  // Start fetching non-critical data
   const deferredData = loadDeferredData(args);
 
-  // Await the critical data required to render initial state of the page
+  // Fetch critical data required to render the page
   const criticalData = await loadCriticalData(args);
 
   const {storefront, env} = args.context;
@@ -87,7 +97,6 @@ export async function loader(args) {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: false,
-      // localize the privacy banner
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
