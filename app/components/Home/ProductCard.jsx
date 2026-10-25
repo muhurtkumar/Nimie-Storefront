@@ -1,12 +1,14 @@
 import {useEffect, useState} from 'react';
-import {Link, useFetcher, useNavigate} from 'react-router';
+import {
+  Link,
+  useFetcher,
+  useNavigate,
+  useRouteLoaderData,
+} from 'react-router';
 import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {Image, CartForm} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
-import {
-  getSavedCurrency,
-  getExchangeRates,
-} from '~/lib/currency';
+import {getRegionalPrice} from '~/lib/region-pricing';
 
 function formatPrice(amount, currencyCode) {
   if (amount == null || amount === '') return '';
@@ -42,52 +44,19 @@ export function ProductCard({
 
     const isLoggedIn = useIsLoggedIn();
   
-    const [displayCurrency, setDisplayCurrency] = useState('INR');
-    const [exchangeRates, setExchangeRates] = useState(null);
+    // Get the visitor's country from the root loader.
+    const rootData = useRouteLoaderData('root');
+    const visitorCountry = rootData?.visitorCountry ?? 'IN';
 
-    useEffect(() => {
-      let active = true;
-
-      const syncCurrency = () => {
-        setDisplayCurrency(getSavedCurrency());
-      };
-
-      syncCurrency();
-
-      window.addEventListener('nimie:currency-change', syncCurrency);
-      window.addEventListener('storage', syncCurrency);
-
-      getExchangeRates().then((rates) => {
-        console.log('ProductCard received rates:', rates);
-        if (active) setExchangeRates(rates);
-      });
-
-      return () => {
-        active = false;
-        window.removeEventListener('nimie:currency-change', syncCurrency);
-        window.removeEventListener('storage', syncCurrency);
-      };
-    }, []);
-
-    const convertDisplayPrice = (amount) => {
-      const numericAmount = Number(amount || 0);
-
-      if (displayCurrency === 'INR') return numericAmount;
-
-      const rate = exchangeRates?.[displayCurrency];
-
-      // Do not show a misleading conversion if rates aren't available.
-      if (!rate) return null;
-
-      return numericAmount * rate;
-    };
-
+    // Always display prices in INR, applying the visitor's regional multiplier.
     const formatDisplayPrice = (amount) => {
-      const convertedAmount = convertDisplayPrice(amount);
+      const numericAmount = Number(amount ?? 0);
 
-      if (convertedAmount == null) return 'Price unavailable';
+      const adjustedAmount = Number(
+        getRegionalPrice(numericAmount, visitorCountry),
+      );
 
-      return formatPrice(convertedAmount, displayCurrency);
+      return formatPrice(adjustedAmount, 'INR');
     };
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);

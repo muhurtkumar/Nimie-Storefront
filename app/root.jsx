@@ -13,6 +13,7 @@ import favicon from '~/assets/favicon.png';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {getCustomerWishlist} from '~/lib/customer-wishlist';
 import {restoreCustomerCart} from '~/lib/customer-cart';
+import {getPricingRegion} from '~/lib/region-pricing';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -65,6 +66,7 @@ export function links() {
  * @param {Route.LoaderArgs} args
  */
 export async function loader(args) {
+  const {request} = args;
   // Restore the logged-in customer's saved cart.
   // Cart restoration is non-critical: a failure should not
   // prevent the storefront from rendering.
@@ -85,14 +87,55 @@ export async function loader(args) {
 
   const {storefront, env} = args.context;
 
+  // Development-only country override for testing.
+  const url = new URL(request.url);
+
+  const devCountry = import.meta.env.DEV
+    ? url.searchParams.get('country')?.toUpperCase()
+    : null;
+
+  // Detect the visitor's country.
+  const visitorCountry =
+    devCountry ||
+    request.headers.get('oxygen-buyer-country') ||
+    request.cf?.country ||
+    storefront.i18n.country ||
+    'IN';
+
+  const pathname = new URL(request.url).pathname;
+
+if (
+  pathname === '/' ||
+  pathname.startsWith('/products/')
+) {
+  console.log('--- PAGE COUNTRY DIAGNOSTICS ---');
+  console.log('Path:', pathname);
+  console.log('Buyer IP:', request.headers.get('oxygen-buyer-ip'));
+  console.log(
+    'Buyer country:',
+    request.headers.get('oxygen-buyer-country'),
+  );
+  console.log('Detected country:', visitorCountry);
+  console.log('Pricing region:', getPricingRegion(visitorCountry));
+}
+
   return {
     ...deferredData,
     ...criticalData,
+
+    // Country detected from the request, with a fallback.
+    visitorCountry,
+
+    // Regional pricing information for the storefront.
+    pricingRegion: getPricingRegion(visitorCountry),
+
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
+
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,

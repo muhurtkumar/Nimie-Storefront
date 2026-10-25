@@ -1,5 +1,9 @@
 import {useEffect, useMemo, useState} from 'react';
-import {useFetcher, useNavigate} from 'react-router';
+import {
+  useFetcher,
+  useNavigate,
+  useRouteLoaderData,
+} from 'react-router';
 import {CartForm} from '@shopify/hydrogen';
 import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {
@@ -16,6 +20,7 @@ import {
   getSavedCurrency,
   getExchangeRates,
 } from '~/lib/currency';
+import {getRegionalPrice} from '~/lib/region-pricing';
 
 function formatPrice(amount, currencyCode = 'INR') {
   if (amount == null) {
@@ -125,6 +130,9 @@ export function ProductDetails({
   const navigate = useNavigate();
   const wishlistFetcher = useFetcher();
   const isLoggedIn = useIsLoggedIn();
+  // Get the country detected by the root loader.
+  const rootData = useRouteLoaderData('root');
+  const visitorCountry = rootData?.visitorCountry ?? 'IN';
   const [displayCurrency, setDisplayCurrency] = useState('INR');
   const [exchangeRates, setExchangeRates] = useState(null);
 
@@ -521,20 +529,27 @@ const discountedPriceAmount =
     : originalPriceAmount;
   
   const formatDisplayPrice = (amount) => {
-    const numericAmount = Number(amount || 0);
+  const numericAmount = Number(amount || 0);
 
-    if (displayCurrency === 'INR') {
-      return formatPrice(numericAmount, 'INR');
-    }
+  // Apply the regional pricing multiplier using the visitor's country.
+  const regionalAmount = Number(
+    getRegionalPrice(numericAmount, visitorCountry),
+  );
 
-    const rate = exchangeRates?.[displayCurrency];
+  // Display the adjusted amount in INR.
+  if (displayCurrency === 'INR') {
+    return formatPrice(regionalAmount, 'INR');
+  }
 
-    if (!rate) {
-      return 'Price unavailable';
-    }
+  // Preserve the existing currency conversion functionality.
+  const rate = exchangeRates?.[displayCurrency];
 
-    return formatPrice(numericAmount * rate, displayCurrency);
-  };
+  if (!rate) {
+    return 'Price unavailable';
+  }
+
+  return formatPrice(regionalAmount * rate, displayCurrency);
+};
 
   /* Quantity controls */
   const increaseQuantity = () => {
