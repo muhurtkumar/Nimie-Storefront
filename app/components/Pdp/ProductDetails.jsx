@@ -496,6 +496,9 @@ export function ProductDetails({
 
   /* First PDP image and discount percentage stored on the cart line */
   const cartLineAttributes = [
+    ...(price?.amount != null
+      ? [{key: '_pdp_base_price', value: String(price.amount)}]
+      : []),
     ...(galleryImages[0]?.url
       ? [{key: '_image', value: galleryImages[0].url}]
       : []),

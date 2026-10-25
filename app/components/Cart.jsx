@@ -170,6 +170,14 @@ function formatPrice(amount, currencyCode = 'INR') {
     .replace(/\s/g, '');
 }
 
+function getCartLineBasePrice(line) {
+  const pdpBasePrice = line.attributes?.find(
+    (attribute) => attribute.key === '_pdp_base_price',
+  )?.value;
+
+  return Number(pdpBasePrice ?? line.merchandise?.price?.amount ?? 0);
+}
+
 function EmptyCart() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
@@ -247,10 +255,7 @@ const outOfStockLines = lines.filter(
 
 const customCartTotal = availableLines.reduce((sum, line) => {
   const originalUnitPrice = Number(
-    getRegionalPrice(
-      line.merchandise?.price?.amount || 0,
-      visitorCountry,
-    ),
+    getRegionalPrice(getCartLineBasePrice(line), visitorCountry),
   );
 
   const discountPercentage = Number(
@@ -335,10 +340,7 @@ const displayedCartTotal = Math.max(
 
 const originalCartTotal = availableLines.reduce((sum, line) => {
   const unitPrice = Number(
-    getRegionalPrice(
-      line.merchandise?.price?.amount || 0,
-      visitorCountry,
-    ),
+    getRegionalPrice(getCartLineBasePrice(line), visitorCountry),
   );
   return sum + unitPrice * line.quantity;
 }, 0);
@@ -740,10 +742,7 @@ function CartLineRow({
   const currency = merchandise?.price?.currencyCode;
 
   const originalUnitPrice = Number(
-    getRegionalPrice(
-      merchandise?.price?.amount || 0,
-      visitorCountry,
-    ),
+    getRegionalPrice(getCartLineBasePrice(line), visitorCountry),
   );
 
   const discountPercentage = Number(
