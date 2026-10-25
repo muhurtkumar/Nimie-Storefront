@@ -288,10 +288,7 @@ export async function action({request, params, context}) {
     }
 
     if (intent === 'cancel-item') {
-      if (
-        typeof lineItemId !== 'string' ||
-        !lineItemId
-      ) {
+      if (typeof lineItemId !== 'string' || !lineItemId) {
         return data(
           {
             success: false,
@@ -302,8 +299,7 @@ export async function action({request, params, context}) {
       }
 
       // Verify that the item belongs to this customer's order.
-      const customerLineItems =
-        customerOrder.lineItems?.nodes ?? [];
+      const customerLineItems = customerOrder.lineItems?.nodes ?? [];
 
       const selectedItem = customerLineItems.find(
         (item) => item.id === lineItemId,
@@ -319,11 +315,8 @@ export async function action({request, params, context}) {
         );
       }
 
-      // Only allow cancellation if the order is completely
-      // unfulfilled. Partially fulfilled orders are rejected.
-      if (
-        verifiedOrder.displayFulfillmentStatus !== 'UNFULFILLED'
-      ) {
+      // Only allow cancellation for completely unfulfilled orders.
+      if (verifiedOrder.displayFulfillmentStatus !== 'UNFULFILLED') {
         return data(
           {
             success: false,
@@ -334,417 +327,419 @@ export async function action({request, params, context}) {
         );
       }
 
-      // Begin Shopify order-edit session.
-      const beginResponse = await fetch(
-        `https://${shop}/admin/api/2026-10/graphql.json`,
-        {
-          method: 'POST',
-          headers: adminHeaders,
-          body: JSON.stringify({
-            query: `
-              mutation BeginItemCancellation($id: ID!) {
-                orderEditBegin(id: $id) {
-                  calculatedOrder {
-                    id
-                    lineItems(first: 100) {
-                      nodes {
-                        id
-                        title
-                        sku
-                        quantity
-                        editableQuantityBeforeChanges
-                        variant {
-                          id
-                        }
+      // Only issue a wallet refund for paid orders.
+      if (
+        !['PAID', 'PARTIALLY_REFUNDED'].includes(
+          verifiedOrder.displayFinancialStatus,
+        )
+      ) {
+        return data(
+          {
+            success: false,
+            error:
+              'This order is not fully paid. Please contact Nimie support to cancel this item.',
+          },
+          {status: 400},
+        );
+      }
+
+      // Read previously cancelled items before processing a new refund.
+      const existingData = await adminGraphQL(
+        shop,
+        adminHeaders,
+        `
+          query GetCancelledItemsBeforeRefund($id: ID!) {
+            order(id: $id) {
+              id
+              metafield(
+                namespace: "custom"
+                key: "cancelled_items"
+              ) {
+                value
+              }
+            }
+          }
+        `,
+        {id: customerOrder.id},
+      );
+
+      const existingValue = existingData.order?.metafield?.value;
+      let savedItems = [];
+
+      if (existingValue) {
+        try {
+          const parsed = JSON.parse(existingValue);
+
+          if (Array.isArray(parsed)) {
+            savedItems = parsed;
+          }
+        } catch {
+          return data(
+            {
+              success: false,
+              error:
+                'The cancellation history could not be read. Please contact Nimie support.',
+            },
+            {status: 500},
+          );
+        }
+      }
+
+      // Prevent refunding an item that was already cancelled.
+      if (savedItems.some((item) => item.lineItemId === selectedItem.id)) {
+        return data(
+          {
+            success: false,
+            error: 'This item has already been cancelled.',
+          },
+          {status: 400},
+        );
+      }
+
+      // Retrieve Shopify's authoritative line-item totals.
+      const orderAmounts = await adminGraphQL(
+        shop,
+        adminHeaders,
+        `
+          query GetItemRefundAmount($orderId: ID!) {
+            order(id: $orderId) {
+              id
+              lineItems(first: 100) {
+                nodes {
+                  id
+                  quantity
+                  discountedTotalSet {
+                    presentmentMoney {
+                      amount
+                      currencyCode
+                    }
+                  }
+                  taxLines {
+                    priceSet {
+                      presentmentMoney {
+                        amount
+                        currencyCode
                       }
                     }
                   }
-                  userErrors {
-                    field
-                    message
-                  }
                 }
               }
-            `,
-            variables: {
-              id: verifiedOrder.id,
-            },
-          }),
-        },
+            }
+          }
+        `,
+        {orderId: customerOrder.id},
       );
 
-      const beginResult = await beginResponse.json();
-      const beginPayload =
-        beginResult.data?.orderEditBegin;
+      const adminLineItem = (
+        orderAmounts.order?.lineItems?.nodes ?? []
+      ).find((item) => item.id === selectedItem.id);
 
       if (
-        !beginResponse.ok ||
-        beginResult.errors?.length ||
-        beginPayload?.userErrors?.length ||
-        !beginPayload?.calculatedOrder
+        !adminLineItem ||
+        adminLineItem.quantity < selectedItem.quantity
       ) {
-        console.error(
-          'Shopify orderEditBegin failed:',
-          JSON.stringify(
-            beginResult.errors ??
-              beginPayload?.userErrors ??
-              [],
-          ),
-        );
-
         return data(
           {
             success: false,
-            error: 'Could not start item cancellation.',
+            error:
+              'The item quantity could not be verified. Please refresh and try again.',
+          },
+          {status: 409},
+        );
+      }
+
+      const money =
+        adminLineItem.discountedTotalSet?.presentmentMoney;
+
+      if (!money?.amount || !money?.currencyCode) {
+        return data(
+          {
+            success: false,
+            error:
+              'Could not calculate the refundable amount for this item.',
           },
           {status: 502},
         );
       }
 
-      const calculatedOrder = beginPayload.calculatedOrder;
-      console.log(
-        'Original selected item:',
-        JSON.stringify(
-          customerOrder.lineItems.nodes.find(
-            (item) => item.id === lineItemId,
-          ),
-          null,
-          2,
-        ),
+      // Include the discounted item total and its applicable line-item taxes.
+      const taxLines = adminLineItem.taxLines ?? [];
+
+      const taxCurrencyMismatch = taxLines.some(
+        (tax) =>
+          tax.priceSet?.presentmentMoney?.currencyCode &&
+          tax.priceSet.presentmentMoney.currencyCode !== money.currencyCode,
       );
 
-      console.log(
-        'Calculated order items:',
-        JSON.stringify(
-          calculatedOrder.lineItems.nodes.map((item) => ({
-            id: item.id,
-            title: item.title,
-            sku: item.sku,
-            quantity: item.quantity,
-            editableQuantityBeforeChanges:
-              item.editableQuantityBeforeChanges,
-            variantId: item.variant?.id,
-            variantTitle: item.variantTitle,
-          })),
-          null,
-          2,
-        ),
-      );
-
-      // Find the original line item selected by the customer.
-      const originalLineItem = customerOrder.lineItems.nodes.find(
-        (item) => item.id === lineItemId,
-      );
-
-      if (!originalLineItem) {
+      if (taxCurrencyMismatch) {
         return data(
           {
             success: false,
-            error: 'This item does not belong to your order.',
-          },
-          {status: 400},
-        );
-      }
-
-      // Match the calculated line item using the original line item ID.
-      const calculatedLineItems = calculatedOrder.lineItems.nodes;
-
-      // Match using the numeric resource ID after verifying the
-      // original line item belongs to the customer's order.
-      const originalNumericId = originalLineItem.id.split('/').pop();
-
-      const matchingItems = calculatedLineItems.filter((item) => {
-        const calculatedNumericId = item.id.split('/').pop();
-
-        return calculatedNumericId === originalNumericId;
-      });
-
-      // Ensure exactly one calculated line item matches.
-      if (matchingItems.length !== 1) {
-        console.error('Could not uniquely match the selected order line item.', {
-          originalLineItemId: originalLineItem.id,
-          originalTitle: originalLineItem.title,
-          calculatedItemIds: calculatedLineItems.map((item) => item.id),
-          matchingItemsCount: matchingItems.length,
-        });
-
-        return data(
-          {
-            success: false,
-            error: 'This item could not be uniquely matched for editing.',
-          },
-          {status: 400},
-        );
-      }
-
-      // Declare the matched item exactly once.
-      const calculatedLineItem = matchingItems[0];
-
-      // Verify that the item can be cancelled.
-      if (
-        calculatedLineItem.editableQuantityBeforeChanges < 1 ||
-        calculatedLineItem.quantity < 1
-      ) {
-        return data(
-          {
-            success: false,
-            error: 'This item is no longer available for cancellation.',
-          },
-          {status: 400},
-        );
-      }
-
-      // Stage removal of the selected line item.
-      const quantityResponse = await fetch(
-        `https://${shop}/admin/api/2026-10/graphql.json`,
-        {
-          method: 'POST',
-          headers: adminHeaders,
-          body: JSON.stringify({
-            query: `
-              mutation RemoveSelectedItem(
-                $id: ID!
-                $lineItemId: ID!
-                $quantity: Int!
-                $restock: Boolean!
-              ) {
-                orderEditSetQuantity(
-                  id: $id
-                  lineItemId: $lineItemId
-                  quantity: $quantity
-                  restock: $restock
-                ) {
-                  calculatedOrder {
-                    id
-                  }
-                  userErrors {
-                    field
-                    message
-                  }
-                }
-              }
-            `,
-            variables: {
-              id: calculatedOrder.id,
-              lineItemId: calculatedLineItem.id,
-              quantity: 0,
-              restock: true,
-            },
-          }),
-        },
-      );
-
-      const quantityResult = await quantityResponse.json();
-      const quantityPayload =
-        quantityResult.data?.orderEditSetQuantity;
-
-      if (
-        !quantityResponse.ok ||
-        quantityResult.errors?.length ||
-        quantityPayload?.userErrors?.length ||
-        !quantityPayload?.calculatedOrder
-      ) {
-        console.error(
-          'Shopify orderEditSetQuantity failed:',
-          JSON.stringify(
-            quantityResult.errors ??
-              quantityPayload?.userErrors ??
-              [],
-          ),
-        );
-
-        return data(
-          {
-            success: false,
-            error: 'Shopify could not remove this item.',
+            error:
+              'The item refund currency could not be verified.',
           },
           {status: 502},
         );
       }
 
-      // Commit the item removal to the existing order.
-      const commitResponse = await fetch(
-        `https://${shop}/admin/api/2026-10/graphql.json`,
-        {
-          method: 'POST',
-          headers: adminHeaders,
-          body: JSON.stringify({
-            query: `
-              mutation CommitItemCancellation(
-                $id: ID!
-                $notifyCustomer: Boolean!
-                $staffNote: String
-              ) {
-                orderEditCommit(
-                  id: $id
-                  notifyCustomer: $notifyCustomer
-                  staffNote: $staffNote
-                ) {
-                  order {
-                    id
-                    cancelledAt
-                    displayFinancialStatus
-                    displayFulfillmentStatus
+      const taxAmount = taxLines.reduce(
+        (total, tax) =>
+          total +
+          Number(tax.priceSet?.presentmentMoney?.amount ?? 0),
+        0,
+      );
+
+      const refundAmount = (
+        Number(money.amount) + taxAmount
+      ).toFixed(2);
+
+      if (!Number.isFinite(Number(refundAmount)) || Number(refundAmount) <= 0) {
+        return data(
+          {
+            success: false,
+            error:
+              'The refundable amount is invalid. Please contact Nimie support.',
+          },
+          {status: 400},
+        );
+      }
+
+      // Retrieve an active Shopify inventory location for restocking.
+      const locationsData = await adminGraphQL(
+        shop,
+        adminHeaders,
+        `#graphql
+          query GetActiveLocations {
+            locations(first: 50, query: "isActive:true") {
+              nodes {
+                id
+                name
+                isActive
+              }
+            }
+          }
+        `,
+        {},
+      );
+
+      const restockLocationId =
+        locationsData.locations.nodes.find((location) => location.isActive)?.id;
+
+      if (!restockLocationId) {
+        return data(
+          {
+            success: false,
+            error:
+              'No active inventory location was found. Please contact Nimie support.',
+          },
+          {status: 502},
+        );
+      }
+
+      // Generate a stable UUID-shaped idempotency key for this order/item.
+      // A retry uses the same key instead of creating a second refund.
+      const hashBuffer = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(
+          `nimie-item-refund:${customerOrder.id}:${selectedItem.id}`,
+        ),
+      );
+
+      const hashHex = Array.from(new Uint8Array(hashBuffer))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('');
+
+      const idempotencyKey =
+        `${hashHex.slice(0, 8)}-${hashHex.slice(8, 12)}-5${hashHex.slice(13, 16)}-a${hashHex.slice(17, 20)}-${hashHex.slice(20, 32)}`;
+
+      // Refund the item to Shopify Store Credit (Nimie Wallet).
+      // Restocking is requested as part of the refund operation.
+      const refundResult = await adminGraphQL(
+        shop,
+        adminHeaders,
+        `
+          mutation RefundCancelledItem($input: RefundInput!) {
+            refundCreate(input: $input)
+              @idempotent(key: "${idempotencyKey}") {
+              refund {
+                id
+                totalRefundedSet {
+                  presentmentMoney {
+                    amount
+                    currencyCode
                   }
-                  userErrors {
-                    field
-                    message
+                }
+                transactions(first: 5) {
+                  nodes {
+                    gateway
+                    kind
+                    status
+                    amountSet {
+                      presentmentMoney {
+                        amount
+                        currencyCode
+                      }
+                    }
                   }
                 }
               }
-            `,
-            variables: {
-              id: calculatedOrder.id,
-              notifyCustomer: true,
-              staffNote:
-                'Customer requested cancellation of an individual item through the Nimie storefront.',
-            },
-          }),
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `,
+        {
+          input: {
+            orderId: customerOrder.id,
+            refundLineItems: [
+              {
+                lineItemId: selectedItem.id,
+                quantity: selectedItem.quantity,
+                restockType: 'CANCEL',
+                locationId: restockLocationId,
+              },
+            ],
+            transactions: [],
+            refundMethods: [
+              {
+                storeCreditRefund: {
+                  amount: {
+                    amount: refundAmount,
+                    currencyCode: money.currencyCode,
+                  },
+                },
+              },
+            ],
+            notify: true,
+            note:
+              'Customer requested an individual-item cancellation through the Nimie storefront.',
+          },
         },
       );
 
-      const commitResult = await commitResponse.json();
-      const commitPayload =
-        commitResult.data?.orderEditCommit;
+      const refundPayload = refundResult.refundCreate;
 
       if (
-        !commitResponse.ok ||
-        commitResult.errors?.length ||
-        commitPayload?.userErrors?.length ||
-        !commitPayload?.order
+        refundPayload?.userErrors?.length ||
+        !refundPayload?.refund
       ) {
         console.error(
-          'Shopify orderEditCommit failed:',
-          JSON.stringify(
-            commitResult.errors ??
-              commitPayload?.userErrors ??
-              [],
-          ),
+          'Shopify item refund failed:',
+          JSON.stringify(refundPayload?.userErrors ?? []),
         );
 
         return data(
           {
             success: false,
             error:
-              'Shopify could not complete the item cancellation. Please check the order in Shopify Admin.',
+              refundPayload?.userErrors
+                ?.map((error) => error.message)
+                .join(' ') ||
+              'Shopify could not process the item refund.',
           },
           {status: 502},
         );
       }
 
-      // Save the cancelled item in the Shopify order metafield.
-      let persistenceError = false;
+      // Confirm Shopify created the refund for the expected amount.
+      const actualRefund =
+        refundPayload.refund.totalRefundedSet?.presentmentMoney;
 
-      try {
-        // Read existing cancelled items so we don't overwrite previous records.
-        const existingData = await adminGraphQL(
-          shop,
-          adminHeaders,
-          `
-            query GetCancelledItemsForUpdate($id: ID!) {
-              order(id: $id) {
-                metafield(
-                  namespace: "custom"
-                  key: "cancelled_items"
-                ) {
-                  value
-                }
-              }
-            }
-          `,
-          {id: customerOrder.id},
-        );
+      if (
+        !actualRefund ||
+        actualRefund.currencyCode !== money.currencyCode ||
+        Math.abs(
+          Number(actualRefund.amount) - Number(refundAmount),
+        ) > 0.01
+      ) {
+        console.error('Unexpected Shopify refund amount:', {
+          expected: refundAmount,
+          actual: actualRefund,
+        });
 
-        const existingValue =
-          existingData.order?.metafield?.value;
-
-        let savedItems = [];
-
-        if (existingValue) {
-          try {
-            const parsed = JSON.parse(existingValue);
-
-            if (Array.isArray(parsed)) {
-              savedItems = parsed;
-            }
-          } catch {
-            throw new Error(
-              'The existing cancelled-items metafield contains invalid JSON.',
-            );
-          }
-        }
-
-        // Avoid creating duplicate records for the same line item.
-        const alreadySaved = savedItems.some(
-          (item) => item.lineItemId === selectedItem.id,
-        );
-
-        if (!alreadySaved) {
-          savedItems.push({
-            lineItemId: selectedItem.id,
-            title: selectedItem.title,
-            variantTitle: selectedItem.variantTitle,
-            quantity: selectedItem.quantity,
-            price: selectedItem.price,
-            totalDiscount: selectedItem.totalDiscount,
-            image: selectedItem.image,
-            cancelledAt: new Date().toISOString(),
-          });
-        }
-
-        const saveResult = await adminGraphQL(
-          shop,
-          adminHeaders,
-          `
-            mutation SaveCancelledItems($metafields: [MetafieldsSetInput!]!) {
-              metafieldsSet(metafields: $metafields) {
-                metafields {
-                  namespace
-                  key
-                  value
-                }
-                userErrors {
-                  field
-                  message
-                  code
-                }
-              }
-            }
-          `,
+        return data(
           {
-            metafields: [
-              {
-                ownerId: customerOrder.id,
-                namespace: 'custom',
-                key: 'cancelled_items',
-                type: 'json',
-                value: JSON.stringify(savedItems),
-              },
-            ],
+            success: false,
+            error:
+              'Shopify created a refund, but its amount could not be confirmed. Please contact Nimie support before retrying.',
           },
+          {status: 502},
+        );
+      }
+
+      // Persist the cancelled item only after Shopify confirms the refund.
+      savedItems.push({
+        lineItemId: selectedItem.id,
+        title: selectedItem.title,
+        variantTitle: selectedItem.variantTitle,
+        quantity: selectedItem.quantity,
+        price: selectedItem.price,
+        totalDiscount: selectedItem.totalDiscount,
+        image: selectedItem.image,
+        refundId: refundPayload.refund.id,
+        refundAmount,
+        refundCurrency: money.currencyCode,
+        cancelledAt: new Date().toISOString(),
+      });
+
+      const saveResult = await adminGraphQL(
+        shop,
+        adminHeaders,
+        `
+          mutation SaveCancelledItems(
+            $metafields: [MetafieldsSetInput!]!
+          ) {
+            metafieldsSet(metafields: $metafields) {
+              metafields {
+                namespace
+                key
+                value
+              }
+              userErrors {
+                field
+                message
+                code
+              }
+            }
+          }
+        `,
+        {
+          metafields: [
+            {
+              ownerId: customerOrder.id,
+              namespace: 'custom',
+              key: 'cancelled_items',
+              type: 'json',
+              value: JSON.stringify(savedItems),
+            },
+          ],
+        },
+      );
+
+      const savePayload = saveResult.metafieldsSet;
+
+      if (
+        savePayload?.userErrors?.length ||
+        !savePayload?.metafields?.length
+      ) {
+        console.error(
+          'Refund succeeded, but cancellation history could not be saved:',
+          JSON.stringify(savePayload?.userErrors ?? []),
         );
 
-        const savePayload = saveResult.metafieldsSet;
-
-        if (savePayload?.userErrors?.length) {
-          throw new Error(
-            savePayload.userErrors
-              .map((error) => error.message)
-              .join(', '),
-          );
-        }
-
-        if (!savePayload?.metafields?.length) {
-          throw new Error(
-            'Shopify did not confirm that the cancelled-items metafield was saved.',
-          );
-        }
-      } catch (error) {
-        persistenceError = true;
-
-        console.error(
-          'Item cancellation succeeded, but saving cancelled-item metafield failed:',
-          error instanceof Error ? error.message : error,
+        return data(
+          {
+            success: true,
+            type: 'item-cancelled',
+            lineItemId,
+            persistenceError: true,
+            refundAmount,
+            refundCurrency: money.currencyCode,
+            message:
+              'The item refund was processed, but its cancellation status could not be saved. Please contact Nimie support before retrying.',
+          },
         );
       }
 
@@ -752,10 +747,10 @@ export async function action({request, params, context}) {
         success: true,
         type: 'item-cancelled',
         lineItemId,
-        persistenceError,
-        message: persistenceError
-          ? 'The item was cancelled, but its status could not be saved. Please refresh and check Shopify Admin.'
-          : 'The selected item has been cancelled. Any applicable refund still needs to be processed.',
+        refundAmount,
+        refundCurrency: money.currencyCode,
+        message:
+          `The item was cancelled and a refund of ${money.currencyCode} ${refundAmount} was issued to your Nimie Wallet.`,
       });
     }
 
@@ -830,6 +825,10 @@ export async function action({request, params, context}) {
 
     const cancelResult = await cancelResponse.json();
     const cancelPayload = cancelResult.data?.orderCancel;
+    console.log(
+      'Shopify orderCancel response:',
+      JSON.stringify(cancelResult, null, 2),
+    );
 
     if (!cancelResponse.ok || cancelResult.errors?.length) {
       console.error(
@@ -863,13 +862,16 @@ export async function action({request, params, context}) {
       jobId: cancelPayload?.job?.id ?? null,
     });
   } catch (error) {
-    console.error(
-      'Order cancellation failed:',
-      error instanceof Error ? error.message : 'Unknown error',
-    );
+    console.error('Order cancellation failed:', error);
 
     return data(
-      {success: false, error: 'Something went wrong. Please try again later.'},
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error during order cancellation.',
+      },
       {status: 500},
     );
   }
