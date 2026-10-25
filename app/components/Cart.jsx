@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Tag,
 } from 'lucide-react';
+import {getRegionalPrice} from '~/lib/region-pricing';
 
 const FONT = "'Swiss 721', 'Swiss', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
@@ -190,6 +191,8 @@ function CartBody({
   storeCreditAccounts = [],
 }) {
   const cart = useOptimisticCart(originalCart);
+  const rootData = useRouteLoaderData('root');
+  const visitorCountry = rootData?.visitorCountry || 'IN';
   const [showStoreCredit, setShowStoreCredit] = useState(false);
   const [useStoreCredit, setUseStoreCredit] = useState(false);
   const [showCoupon, setShowCoupon] = useState(true);
@@ -244,7 +247,10 @@ const outOfStockLines = lines.filter(
 
 const customCartTotal = availableLines.reduce((sum, line) => {
   const originalUnitPrice = Number(
-    line.merchandise?.price?.amount || 0,
+    getRegionalPrice(
+      line.merchandise?.price?.amount || 0,
+      visitorCountry,
+    ),
   );
 
   const discountPercentage = Number(
@@ -328,7 +334,12 @@ const displayedCartTotal = Math.max(
 );
 
 const originalCartTotal = availableLines.reduce((sum, line) => {
-  const unitPrice = Number(line.merchandise?.price?.amount || 0);
+  const unitPrice = Number(
+    getRegionalPrice(
+      line.merchandise?.price?.amount || 0,
+      visitorCountry,
+    ),
+  );
   return sum + unitPrice * line.quantity;
 }, 0);
 
@@ -350,10 +361,11 @@ const totalSavings = Math.max(
         
         <ul className="m-0 list-none p-0">
           {availableLines.map((line) => (
-            <CartLineRow
+           <CartLineRow
               key={line.id}
               line={line}
               onClose={onClose}
+              visitorCountry={visitorCountry}
             />
           ))}
         </ul>
@@ -370,12 +382,13 @@ const totalSavings = Math.max(
 
             <ul className="m-0 list-none p-0">
               {outOfStockLines.map((line) => (
-                <CartLineRow
-                  key={line.id}
-                  line={line}
-                  onClose={onClose}
-                  outOfStock
-                />
+               <CartLineRow
+                key={line.id}
+                line={line}
+                onClose={onClose}
+                visitorCountry={visitorCountry}
+                outOfStock
+              />
               ))}
             </ul>
           </div>
@@ -701,7 +714,12 @@ const totalSavings = Math.max(
   );
 }
 
-function CartLineRow({line, onClose, outOfStock = false}) {
+function CartLineRow({
+  line,
+  onClose,
+  visitorCountry,
+  outOfStock = false,
+}) {
   const {id, quantity, merchandise, isOptimistic} = line;
 
   const options = merchandise?.selectedOptions ?? [];
@@ -722,7 +740,10 @@ function CartLineRow({line, onClose, outOfStock = false}) {
   const currency = merchandise?.price?.currencyCode;
 
   const originalUnitPrice = Number(
-    merchandise?.price?.amount || 0,
+    getRegionalPrice(
+      merchandise?.price?.amount || 0,
+      visitorCountry,
+    ),
   );
 
   const discountPercentage = Number(
