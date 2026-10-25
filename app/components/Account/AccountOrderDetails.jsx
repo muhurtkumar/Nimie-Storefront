@@ -143,20 +143,40 @@ export function AccountOrderDetails({
       {/* Header */}
       <div className="mt-4 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h1 className="m-0 font-serif text-[26px] leading-tight text-[#111111] md:text-[30px]">
+          <h1
+            className="m-0 font-serif text-[26px] leading-tight text-[#111111] md:text-[30px]"
+            style={{margin: 0}}
+          >
             Order {order.name ?? `#${order.number}`}
           </h1>
-          <p className="m-0 mt-1 text-[13px] text-[#7a746c]">
-            Placed on {formatDate(order.processedAt)}
-            {order.confirmationNumber
-              ? ` · Confirmation ${order.confirmationNumber}`
-              : ''}
-          </p>
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-2">
           {paymentBadge && <Badge {...paymentBadge} />}
           <Badge {...fulfillmentBadge} />
         </div>
+      </div>
+
+      {/* Placed on + item count */}
+      <div
+        className="flex items-center justify-between gap-3"
+        style={{marginTop: '16px'}}
+      >
+        <p className="m-0 min-w-0 text-[13px] text-[#7a746c]">
+          Placed on {formatDate(order.processedAt)}
+          {order.processedAt &&
+            ` · ${new Date(order.processedAt).toLocaleTimeString('en-IN', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+              timeZone: 'Asia/Kolkata',
+            })}`}
+        </p>
+        <p
+          className="m-0 hidden shrink-0 text-[13px] text-[#7a746c] md:block"
+          style={{paddingRight: '10px'}}
+        >
+          {itemCount} {itemCount === 1 ? 'item' : 'items'}
+        </p>
       </div>
 
       {/* Items */}
@@ -165,10 +185,9 @@ export function AccountOrderDetails({
         aria-label="Items in this order"
         className="mt-6 rounded-[16px] border border-[#ebe7e1] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:p-6"
       >
-        <h2 className="m-0 text-[16px] font-medium text-[#111111]">
+        <h2 className="m-0 text-[16px] font-medium text-[#111111] md:hidden">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </h2>
-
         <ul className="mt-4 divide-y divide-[#f0ece6]">
           {items.map((item, idx) => {
             const unit = Number(item.price?.amount ?? 0);
@@ -181,20 +200,22 @@ export function AccountOrderDetails({
                 className="flex items-center gap-4 py-4"
               >
                 <Thumb item={item} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-medium text-[#111111]">
-                    {item.title}
-                  </p>
-                  {item.variantTitle && (
-                    <p className="mt-0.5 text-[13px] text-[#7a746c]">
-                      {item.variantTitle}
+                  <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch">
+                    <div>
+                      <p className="text-[15px] font-medium text-[#111111]">
+                        {item.title}
+                      </p>
+                      {item.variantTitle && (
+                        <p className="mt-0.5 text-[13px] text-[#7a746c]">
+                          {item.variantTitle}
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-[13px] text-[#7a746c]">
+                      Qty {item.quantity} × {formatMoney(item.price)}
                     </p>
-                  )}
-                  <p className="mt-0.5 text-[13px] text-[#7a746c]">
-                    Qty {item.quantity} × {formatMoney(item.price)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-3">
+                  </div>
+                <div className="flex shrink-0 flex-col items-end justify-between self-stretch">
                   <p className="text-[15px] text-[#111111]">
                     {formatMoney({amount: lineTotal, currencyCode})}
                   </p>
@@ -211,9 +232,12 @@ export function AccountOrderDetails({
                         type="button"
                         onClick={() => setSelectedItemToCancel(item)}
                         disabled={isCancelling || !item.id}
-                        className="text-[12px] font-medium text-[#8a2c20] underline underline-offset-4 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="cursor-pointer text-[13px] font-medium text-[#8a2c20] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Cancel item
+                      {isCancelling &&
+                        cancelFetcher.formData?.get('lineItemId') === item.id
+                          ? 'Cancelling...'
+                          : 'Cancel item'}
                       </button>
                     ))}
                 </div>
@@ -277,7 +301,7 @@ export function AccountOrderDetails({
       </div>
 
       {/* Order actions */}
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-6 flex items-center justify-between gap-3">
         {!order.cancelledAt && (
           <>
             <TrackButton url={trackingUrl} />
@@ -289,9 +313,9 @@ export function AccountOrderDetails({
                 setShowCancelConfirmation(true);
               }}
               disabled={isCancelling}
-              className="inline-flex items-center justify-center rounded-full border border-[#c8b9ad] px-6 py-3 text-[14px] font-medium text-[#6b3029] transition-colors hover:bg-[#f8f1ee] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-full border border-[#c8b9ad] px-4 py-2.5 text-[13px] sm:px-6 sm:py-3 sm:text-[14px] font-medium text-[#6b3029] transition-colors hover:bg-[#f8f1ee] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
-              Cancel order
+              Cancel full Order
             </button>
           </>
         )}
@@ -367,9 +391,9 @@ export function AccountOrderDetails({
                   setSelectedItemToCancel(null);
                 }}
                 disabled={isCancelling}
-                className="rounded-full border border-[#ebe7e1] px-5 py-2.5 text-[14px] text-[#55504a] disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-full border border-[#8a2c20] bg-[#8a2c20] px-5 py-2.5 text-[14px] font-medium leading-5 text-white transition-colors hover:bg-[#74241b] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               >
-                Keep {selectedItemToCancel ? 'item' : 'order'}
+                Do not Cancel
               </button>
 
               <button
@@ -403,7 +427,7 @@ export function AccountOrderDetails({
                     setShowCancelConfirmation(false);
                   }
                 }}
-                className="rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-full border border-[#ebe7e1] bg-white px-5 py-2.5 text-[14px] font-medium leading-5 text-[#55504a] transition-colors hover:bg-[#f8f6f3] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               >
                 {isCancelling
                   ? 'Submitting...'
@@ -423,7 +447,7 @@ export function AccountOrderDetails({
 
 function TrackButton({url}) {
   const className =
-    'inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#35522a] px-6 py-3 text-[14px] font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]';
+    'inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#35522a] px-4 py-2.5 text-[13px] sm:px-6 sm:py-3 sm:text-[14px] font-medium !text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]';
 
   return (
     <a
@@ -433,7 +457,7 @@ function TrackButton({url}) {
       className={className}
     >
       <Truck size={17} strokeWidth={1.6} />
-      Track your order
+      Track your Order
     </a>
   );
 }
@@ -465,12 +489,12 @@ function Thumb({item}) {
         src={item.image.url}
         alt={item.image.altText || item.title}
         loading="lazy"
-        className="h-[72px] w-[72px] shrink-0 rounded-[10px] bg-[#f5f2ee] object-cover"
+        className="h-[96px] w-[72px] shrink-0 rounded-[10px] bg-[#f5f2ee] object-cover"
       />
     );
   }
   return (
-    <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[10px] bg-[#f5f2ee] text-[#a39d94]">
+    <div className="flex h-[96px] w-[72px] shrink-0 items-center justify-center rounded-[10px] bg-[#f5f2ee] text-[#a39d94]">
       <Package size={24} strokeWidth={1.4} />
     </div>
   );
