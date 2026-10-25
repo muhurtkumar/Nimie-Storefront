@@ -163,8 +163,8 @@ function formatPrice(amount, currencyCode = 'INR') {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currencyCode,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })
     .format(Number(amount))
     .replace(/\s/g, '');
@@ -323,9 +323,7 @@ const inrBalance = (storeCreditAccounts ?? [])
 
 const cartTotal =
   hasAppliedCoupon && shopifyCouponDiscountRate > 0
-    ? Math.round(
-        customCartTotal * (1 - shopifyCouponDiscountRate),
-      )
+    ? customCartTotal * (1 - shopifyCouponDiscountRate)
     : customCartTotal;
 
 const storeCreditToApply =
@@ -754,10 +752,8 @@ function CartLineRow({
 
   const discountedUnitPrice =
     discountPercentage > 0
-      ? Math.round(
-          originalUnitPrice *
-            (1 - discountPercentage / 100),
-        )
+      ? originalUnitPrice *
+        (1 - discountPercentage / 100)
       : originalUnitPrice;
 
   const hasDiscount =
