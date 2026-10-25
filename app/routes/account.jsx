@@ -42,15 +42,13 @@ export default function AccountLayout() {
   const {customer} = useLoaderData();
 
   return (
-    <div className="account-page min-h-screen bg-[#f7f4ef] text-[#111111]">
-      <div className="mx-auto flex w-full flex-col md:flex-row md:items-stretch md:gap-6">
+    <div className="account-page mt-3 bg-[#f7f4ef] text-[#111111] md:h-[calc(100vh-175px)] md:overflow-hidden">
+      <div className="mx-auto flex w-full flex-col md:h-full md:flex-row md:items-stretch md:gap-6">
         <AccountSidebar customer={customer} />
 
-        {/* =========================
-            MAIN CONTENT
-        ========================== */}
-        <main className="min-w-0 w-full md:flex-1">
-          <div className="flex min-h-[calc(100vh-2rem)] w-full flex-col px-[clamp(8px,2vw,16px)] py-4 md:pl-8 md:pr-0 md:py-4 lg:pl-10 lg:py-4 xl:pl-12">
+        {/* Main content: only this section scrolls on desktop */}
+        <main className="min-w-0 w-full md:h-full md:flex-1 md:overflow-y-auto">
+          <div className="flex min-h-0 w-full flex-col px-[clamp(8px,2vw,16px)] py-4 md:pl-8 md:pr-4 md:py-4 lg:pl-10 xl:pl-12">
             <Outlet context={{customer}} />
           </div>
         </main>

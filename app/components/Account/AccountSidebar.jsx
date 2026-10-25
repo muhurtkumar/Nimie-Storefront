@@ -29,7 +29,7 @@ export function AccountSidebar({customer}) {
       {/* =========================
           SIDEBAR
       ========================== */}
-      <div className="sticky top-4 hidden min-h-[calc(100vh-2rem)] w-[220px] shrink-0 rounded-[20px] border border-[#ebe7e1] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:my-4 md:flex md:flex-col lg:w-[300px]">
+      <div className="sticky top-4 hidden h-[calc(100vh-180px)] min-h-[400px] w-[220px] shrink-0 rounded-[20px] border border-[#ebe7e1] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] md:my-4 md:flex md:flex-col lg:w-[300px]">
         {/* Customer Information */}
         <div className="px-8 pb-8 pt-10">
           <div className="flex items-center gap-4">
@@ -50,10 +50,6 @@ export function AccountSidebar({customer}) {
         {/* Navigation */}
         <AccountMenu />
 
-        {/* Logout */}
-        <div className="mt-auto px-8 pb-10 cursor-pointer">
-          <Logout />
-        </div>
       </div>
 
       {/* =========================
@@ -109,11 +105,6 @@ function AccountMenu({mobile = false}) {
       label: 'Addresses',
       icon: MapPin,
     },
-    {
-      to: '/account/wishlist',
-      label: 'Wishlist',
-      icon: Heart,
-    },
   ];
 
   if (mobile) {
@@ -164,9 +155,7 @@ function AccountMenu({mobile = false}) {
                   size={21}
                   strokeWidth={1.5}
                   className={
-                    isActive
-                      ? 'text-[#111111]'
-                      : 'text-[#2d2a27]'
+                    isActive ? 'text-[#111111]' : 'text-[#2d2a27]'
                   }
                 />
 
@@ -185,6 +174,9 @@ function AccountMenu({mobile = false}) {
             )}
           </NavLink>
         ))}
+
+        {/* Log Out appears where Wishlist previously appeared */}
+        <Logout />
       </div>
     </nav>
   );
