@@ -48,7 +48,7 @@ export default function AccountLayout() {
 
         {/* Main content: only this section scrolls on desktop */}
         <main className="min-w-0 w-full md:h-full md:flex-1 md:overflow-y-auto">
-          <div className="flex min-h-0 w-full flex-col px-[clamp(8px,2vw,16px)] py-4 md:pl-8 md:pr-4 md:py-4 lg:pl-10 xl:pl-12">
+          <div className="flex min-h-0 w-full flex-col px-[clamp(8px,2vw,16px)] py-4 md:px-0 md:py-4">
             <Outlet context={{customer}} />
           </div>
         </main>

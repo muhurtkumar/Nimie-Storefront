@@ -84,8 +84,8 @@ export function AccountOrders({orders = MOCK_ORDERS}) {
   const remaining = orders.length - visibleCount;
 
   return (
-    <div className="min-w-0 flex-1 px-2 py-4 md:px-8 md:py-8">
-      <h1 className="font-serif text-[26px] text-[#111111] md:text-[30px]">
+    <div className="account-profile flex min-h-full w-full flex-col px-0 py-0">
+      <h1 className="mt-0 mb-4 font-serif text-[38px] leading-none tracking-[-0.02em] text-[#111111] sm:text-[42px]">
         My Orders
       </h1>
 
@@ -93,7 +93,7 @@ export function AccountOrders({orders = MOCK_ORDERS}) {
         <EmptyOrders />
       ) : (
         <>
-          <ul className="mt-6 flex max-w-[760px] flex-col gap-4">
+          <ul className="flex max-w-[760px] flex-col gap-4" style={{marginTop: '16px'}}>
             {visibleOrders.map((order) => (
               <li key={order.id}>
                 <OrderCard order={order} />
@@ -102,7 +102,7 @@ export function AccountOrders({orders = MOCK_ORDERS}) {
           </ul>
 
           {remaining > 0 && (
-            <div className="mt-6 max-w-[760px] text-center">
+            <div className="mt-6 flex max-w-[760px] items-center justify-between">
               <button
                 type="button"
                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
@@ -110,7 +110,7 @@ export function AccountOrders({orders = MOCK_ORDERS}) {
               >
                 Load more orders
               </button>
-              <p className="mt-2 text-[12px] text-[#7a746c]" aria-live="polite">
+              <p className="text-[12px] text-[#7a746c]" aria-live="polite">
                 Showing {visibleOrders.length} of {orders.length}
               </p>
             </div>
@@ -210,7 +210,7 @@ function OrderCard({order}) {
 ========================================================= */
 function TrackButton({url}) {
   const className =
-    'inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]';
+     'inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium !text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35522a]';
 
   if (url) {
     return (
@@ -269,7 +269,7 @@ function Thumb({item}) {
 
 function EmptyOrders() {
   return (
-    <div className="mt-8 max-w-[760px] rounded-[16px] border border-[#ebe7e1] bg-white px-6 py-12 text-center">
+    <div className="mt-4 max-w-[760px] rounded-[16px] border border-[#ebe7e1] bg-white px-6 py-12 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eeeae5] text-[#55504a]">
         <Package size={26} strokeWidth={1.4} />
       </div>
