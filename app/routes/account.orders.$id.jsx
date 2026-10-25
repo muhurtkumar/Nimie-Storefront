@@ -766,9 +766,12 @@ export async function action({request, params, context}) {
       );
     }
 
-    // Decide whether the order should receive a Store Credit refund.
-    const isPaidOrder =
-      verifiedOrder.displayFinancialStatus === 'PAID';
+    // Refund paid and partially refunded orders to Nimie Wallet.
+    // A prior item cancellation can change PAID to PARTIALLY_REFUNDED.
+    const isPaidOrder = [
+      'PAID',
+      'PARTIALLY_REFUNDED',
+    ].includes(verifiedOrder.displayFinancialStatus);
 
     const refundMethod = isPaidOrder
       ? {
