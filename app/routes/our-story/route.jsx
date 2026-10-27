@@ -203,7 +203,19 @@ export default function PreviewOurStory() {
 
       <OurStoryQuote {...OUR_STORY_QUOTE_DATA} />
 
-      <AboutCurator {...ABOUT_CURATOR_DATA} />
+      <AboutCurator
+        {...ABOUT_CURATOR_DATA}
+        paragraphs={[
+          ourStoryFields.curator_paragraph_1 ||
+            ABOUT_CURATOR_DATA.paragraphs[0],
+
+          ourStoryFields.curator_paragraph_2 ||
+            ABOUT_CURATOR_DATA.paragraphs[1],
+
+          ourStoryFields.curator_paragraph_3 ||
+            ABOUT_CURATOR_DATA.paragraphs[2],
+        ]}
+      />
 
       <ShopAtNimie
         products={data.allProducts}
