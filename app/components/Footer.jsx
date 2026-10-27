@@ -1,7 +1,11 @@
 import footerBg from '~/assets/layout/footer-bg.mp4';
 import nimiLogo from '~/assets/layout/nimi-logo-white.png';
 import {useEffect, useState} from 'react';
-import {getSavedCurrency, saveCurrency} from '~/lib/currency';
+import {
+  getSavedCurrency,
+  saveCurrency,
+  getExchangeRates,
+} from '~/lib/currency';
 import {LazyVideo} from '~/components/LazyVideo';
 
 const FONT =
@@ -302,15 +306,78 @@ export function Footer({
   isLoggedIn = false,
 }) {
   const [displayCurrency, setDisplayCurrency] = useState('INR');
+  const [availableCurrencies, setAvailableCurrencies] = useState(['INR']);
 
   useEffect(() => {
-    setDisplayCurrency(getSavedCurrency());
+    let active = true;
+
+    const syncCurrency = () => {
+      setDisplayCurrency(getSavedCurrency());
+    };
+
+    syncCurrency();
+
+    window.addEventListener('nimie:currency-change', syncCurrency);
+    window.addEventListener('storage', syncCurrency);
+
+    async function loadCurrencies() {
+      const rates = await getExchangeRates();
+
+      if (!active || !rates) return;
+
+      const currencies = Object.keys(rates)
+        .filter(
+          (currency) =>
+            /^[A-Z]{3}$/.test(currency) &&
+            Number.isFinite(rates[currency]) &&
+            rates[currency] > 0,
+        )
+        .sort((a, b) => a.localeCompare(b));
+
+      if (!currencies.includes('INR')) {
+        currencies.unshift('INR');
+      }
+
+      setAvailableCurrencies(currencies);
+
+      const savedCurrency = getSavedCurrency();
+
+      if (!currencies.includes(savedCurrency)) {
+        saveCurrency('INR');
+        setDisplayCurrency('INR');
+      }
+    }
+
+    loadCurrencies();
+
+    return () => {
+      active = false;
+      window.removeEventListener('nimie:currency-change', syncCurrency);
+      window.removeEventListener('storage', syncCurrency);
+    };
   }, []);
 
   const handleCurrencyChange = (event) => {
     const currency = event.target.value;
+
+    if (!availableCurrencies.includes(currency)) return;
+
     saveCurrency(currency);
     setDisplayCurrency(currency);
+  };
+
+  const getCurrencyLabel = (currency) => {
+    try {
+      const displayNames = new Intl.DisplayNames(['en'], {
+        type: 'currency',
+      });
+
+      const name = displayNames.of(currency);
+
+      return name ? `${name} (${currency})` : currency;
+    } catch {
+      return currency;
+    }
   };
 
   // Guests see "Login" instead of "My Account"
@@ -347,7 +414,7 @@ export function Footer({
           <div className="ftr__bottom">
             <div className="ftr__country">
               <label htmlFor="footer-country" className="ftr__country-label">
-                Country/region:
+                Currency:
               </label>
 
               <select
@@ -357,11 +424,11 @@ export function Footer({
                 onChange={handleCurrencyChange}
                 aria-label="Select display currency"
               >
-                <option value="INR">India (INR ₹)</option>
-                <option value="USD">United States (USD $)</option>
-                <option value="GBP">United Kingdom (GBP £)</option>
-                <option value="AED">United Arab Emirates (AED د.إ)</option>
-                <option value="AUD">Australia (AUD $)</option>
+                {availableCurrencies.map((currency) => (
+                  <option key={currency} value={currency}>
+                    {getCurrencyLabel(currency)}
+                  </option>
+                ))}
               </select>
             </div>
             <p className="ftr__bottom-line">

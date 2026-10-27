@@ -8,6 +8,11 @@ import {
 import {useIsLoggedIn} from '~/lib/use-is-logged-in';
 import {Image, CartForm} from '@shopify/hydrogen';
 import {Heart, ShoppingCart, X} from 'lucide-react';
+import {
+  getSavedCurrency,
+  getExchangeRates,
+} from '~/lib/currency';
+
 import {getRegionalPrice} from '~/lib/region-pricing';
 
 function formatPrice(amount, currencyCode) {
@@ -48,16 +53,63 @@ export function ProductCard({
     const rootData = useRouteLoaderData('root');
     const visitorCountry = rootData?.visitorCountry ?? 'IN';
 
-    // Always display prices in INR, applying the visitor's regional multiplier.
+    const [displayCurrency, setDisplayCurrency] = useState('INR');
+    const [exchangeRates, setExchangeRates] = useState(null);
+
+    useEffect(() => {
+      let active = true;
+
+      const syncCurrency = () => {
+        setDisplayCurrency(getSavedCurrency());
+      };
+
+      // Load the currency selected in the footer.
+      syncCurrency();
+
+      // Update this ProductCard when the footer selection changes.
+      window.addEventListener('nimie:currency-change', syncCurrency);
+      window.addEventListener('storage', syncCurrency);
+
+      // Fetch exchange rates for currency conversion.
+      getExchangeRates().then((rates) => {
+        if (active) {
+          setExchangeRates(rates);
+        }
+      });
+
+      return () => {
+        active = false;
+
+        window.removeEventListener('nimie:currency-change', syncCurrency);
+        window.removeEventListener('storage', syncCurrency);
+      };
+    }, []);
+
     const formatDisplayPrice = (amount) => {
-      const numericAmount = Number(amount ?? 0);
+    const numericAmount = Number(amount ?? 0);
 
-      const adjustedAmount = Number(
-        getRegionalPrice(numericAmount, visitorCountry),
-      );
+    // Apply the regional pricing multiplier first.
+    const regionalAmount = Number(
+      getRegionalPrice(numericAmount, visitorCountry),
+    );
 
-      return formatPrice(adjustedAmount, 'INR');
-    };
+    // Display the regional price in INR when INR is selected.
+    if (displayCurrency === 'INR') {
+      return formatPrice(regionalAmount, 'INR');
+    }
+
+    // Convert the regional price into the selected currency.
+    const rate = exchangeRates?.[displayCurrency];
+
+    if (!rate) {
+      return 'Price unavailable';
+    }
+
+    return formatPrice(
+      regionalAmount * rate,
+      displayCurrency,
+    );
+  };
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);

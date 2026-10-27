@@ -1,6 +1,3 @@
-
-const SUPPORTED_CURRENCIES = ['INR', 'USD', 'GBP', 'AED', 'AUD'];
-
 const CURRENCY_KEY = 'nimie_display_currency';
 const RATES_KEY = 'nimie_exchange_rates_v1';
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
@@ -12,13 +9,16 @@ export function getSavedCurrency() {
 
   const saved = localStorage.getItem(CURRENCY_KEY);
 
-  return SUPPORTED_CURRENCIES.includes(saved) ? saved : 'INR';
+  // Validate the format here. The actual supported currencies are
+  // determined by the exchange-rate API.
+  return saved && /^[A-Z]{3}$/.test(saved) ? saved : 'INR';
 }
 
 export function saveCurrency(currency) {
   if (
     typeof window === 'undefined' ||
-    !SUPPORTED_CURRENCIES.includes(currency)
+    typeof currency !== 'string' ||
+    !/^[A-Z]{3}$/.test(currency)
   ) {
     return;
   }
@@ -45,52 +45,44 @@ export async function getExchangeRates() {
         if (
           parsed.timestamp &&
           Date.now() - parsed.timestamp < CACHE_DURATION &&
-          parsed.rates?.INR === 1 &&
-          SUPPORTED_CURRENCIES.every(
-            (currency) =>
-              currency === 'INR' ||
-              Number(parsed.rates[currency]) > 0,
-          )
+          cachedRates?.INR === 1 &&
+          cachedRates?.USD > 0 &&
+          Object.keys(cachedRates).length >= 10
         ) {
-          return parsed.rates;
+          return cachedRates;
         }
       }
 
       const response = await fetch('/api/exchange-rates');
 
-      if (!response.ok) throw new Error('Exchange-rate request failed');
+      if (!response.ok) {
+        throw new Error('Exchange-rate request failed');
+      }
 
       const rates = await response.json();
 
-      console.log('Nimie exchange rates loaded:', rates);
-
       if (
-        SUPPORTED_CURRENCIES.some(
-          (currency) =>
-            !Number.isFinite(rates[currency]) ||
-            rates[currency] <= 0,
-        )
+        rates.INR !== 1 ||
+        !Number.isFinite(rates.USD) ||
+        rates.USD <= 0 ||
+        Object.keys(rates).length < 10
       ) {
-        throw new Error('One or more currency rates are missing');
+        throw new Error('Invalid or incomplete exchange-rate data');
       }
 
       localStorage.setItem(
         RATES_KEY,
-        JSON.stringify({timestamp: Date.now(), rates}),
+        JSON.stringify({
+          timestamp: Date.now(),
+          rates,
+        }),
       );
 
       return rates;
     } catch (error) {
       console.error('Unable to load Nimie exchange rates:', error);
 
-      if (
-        cachedRates?.INR === 1 &&
-        SUPPORTED_CURRENCIES.every(
-          (currency) =>
-            currency === 'INR' ||
-            Number(cachedRates[currency]) > 0,
-        )
-      ) {
+      if (cachedRates?.INR === 1 && cachedRates?.USD > 0) {
         return cachedRates;
       }
 
