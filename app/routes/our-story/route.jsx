@@ -41,6 +41,24 @@ const OUR_STORY_HERO_DATA = {
   imageAlt: 'Nimie Our Story',
 };
 
+const OUR_STORY_CONTENT_QUERY = `#graphql
+  query OurStoryContent {
+    metaobject(
+      handle: {
+        type: "our_story_content"
+        handle: "our-story-content"
+      }
+    ) {
+      id
+      handle
+      fields {
+        key
+        value
+      }
+    }
+  }
+`;
+
 const ABOUT_NIMIE_DATA = {
   logoMark: nimieLogoWhite,
   logoMarkAlt: 'Nimie',
@@ -74,7 +92,17 @@ export async function loader(args) {
     context: args.context,
   });
 
-  // Not awaited, so the page streams in while products load
+  // Fetch the Our Story content from Shopify.
+  const ourStoryContent = await args.context.storefront
+    .query(OUR_STORY_CONTENT_QUERY, {
+      cache: args.context.storefront.CacheShort(),
+    })
+    .catch((error) => {
+      console.error('Failed to load Our Story content from Shopify:', error);
+      return null;
+    });
+
+  // Not awaited, so the page streams in while products load.
   const deferredData = loadDeferredData(args);
 
   const instagramReels = loadInstagramReels(args.context);
@@ -83,6 +111,7 @@ export async function loader(args) {
     ...deferredData,
     instagramReels,
     wishlist,
+    ourStoryContent,
   };
 }
 
@@ -138,11 +167,39 @@ export default function PreviewOurStory() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
 
+  // Convert the Shopify metaobject fields into an object.
+  const ourStoryFields = Object.fromEntries(
+    (data.ourStoryContent?.metaobject?.fields ?? []).map(
+      ({key, value}) => [key, value],
+    ),
+  );
+
+  // Use Shopify content, falling back to the existing description.
+  const heroDescription =
+    ourStoryFields.hero_description || OUR_STORY_HERO_DATA.description;
+
   return (
     <main className="our-story-page">
-      <OurStoryHero {...OUR_STORY_HERO_DATA} />
+      <OurStoryHero
+        {...OUR_STORY_HERO_DATA}
+        description={heroDescription}
+      />
 
-      <AboutNimie {...ABOUT_NIMIE_DATA} />
+      <AboutNimie
+        {...ABOUT_NIMIE_DATA}
+        heading={
+          ourStoryFields.about_heading ||
+          'For The Love Of Where We Come From.'
+        }
+        paragraph1={
+          ourStoryFields.about_paragraph_1 ||
+          'The idea for NIMIE™ came about from a simple insight, genuine hand-embroidery needn’t be reserved for weddings or festivals. We have taken the centuries-old, highly detailed craftsmanship from the heart of Lucknow and transformed it into simple, casual styles which blend easily into your contemporary way of life.'
+        }
+        paragraph2={
+          ourStoryFields.about_paragraph_2 ||
+          'No stiff rules, no heavy layers, and no waiting for a special occasion, just authentic heritage made to be lived in. We are building NIMIE™ for girls just like us.'
+        }
+      />
 
       <OurStoryQuote {...OUR_STORY_QUOTE_DATA} />
 

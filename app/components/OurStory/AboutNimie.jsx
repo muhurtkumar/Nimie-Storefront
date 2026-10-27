@@ -154,7 +154,10 @@ const css = `
 
 export function AboutNimie({
   logoMark,
-  logoMarkAlt = "Nimie",
+  logoMarkAlt = 'Nimie',
+  heading = 'For The Love Of Where We Come From.',
+  paragraph1 = '',
+  paragraph2 = '',
 }) {
   return (
     <section className="about-nimie" aria-labelledby="about-nimie-title">
@@ -179,23 +182,17 @@ export function AboutNimie({
           id="about-nimie-title"
           className="about-nimie__title"
         >
-          For The Love Of Where We Come From.
+          {heading}
         </h2>
 
         {/* First paragraph */}
         <p className="about-nimie__text">
-          The idea for NIMIE™ came about from a simple insight, genuine
-          hand-embroidery needn't be reserved for weddings or festivals.
-          We have taken the centuries-old, highly detailed craftsmanship
-          from the heart of Lucknow and transformed it into simple, casual
-          styles which blend easily into your contemporary way of life.
+          {paragraph1}
         </p>
 
         {/* Second paragraph */}
         <p className="about-nimie__text">
-          No stiff rules, no heavy layers, and no waiting for a special
-          occasion, just authentic heritage made to be lived in. We are
-          building NIMIE™ for girls just like us.
+          {paragraph2}
         </p>
 
       </div>
