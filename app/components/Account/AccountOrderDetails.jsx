@@ -61,10 +61,16 @@ export function AccountOrderDetails({
   cancelledItems = [],
 }) {
   const cancelFetcher = useFetcher();
+  const returnFetcher = useFetcher();
 
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [selectedItemToCancel, setSelectedItemToCancel] = useState(null);
   const [cancelledItemIds, setCancelledItemIds] = useState([]);
+
+  const [selectedItemToReturn, setSelectedItemToReturn] = useState(null);
+  const [returnedItemIds, setReturnedItemIds] = useState([]);
+  const [returnReason, setReturnReason] = useState('Damaged item');
+  const [returnDescription, setReturnDescription] = useState('');
 
   useEffect(() => {
     if (
@@ -80,14 +86,39 @@ export function AccountOrderDetails({
     }
   }, [cancelFetcher.data]);
 
+  useEffect(() => {
+    if (
+      returnFetcher.data?.success &&
+      returnFetcher.data?.type === 'return-request' &&
+      returnFetcher.data?.lineItemId
+    ) {
+      setReturnedItemIds((previousIds) =>
+        previousIds.includes(returnFetcher.data.lineItemId)
+          ? previousIds
+          : [...previousIds, returnFetcher.data.lineItemId],
+      );
+
+      setSelectedItemToReturn(null);
+    }
+  }, [returnFetcher.data]);
+
   const activeItems = order.lineItems?.nodes ?? [];
 
   const cancelledIds = new Set(
     cancelledItems.map((item) => item.lineItemId),
   );
 
+  const fulfillment = order.fulfillments?.nodes?.[0];
+
+  const isOrderDelivered =
+    fulfillment?.status === 'SUCCESS' ||
+    fulfillment?.status === 'DELIVERED';
+
   const items = [
-    ...activeItems,
+    ...activeItems.map((item) => ({
+      ...item,
+      isDelivered: isOrderDelivered,
+    })),
     ...cancelledItems
       .filter(
         (cancelledItem) =>
@@ -100,6 +131,7 @@ export function AccountOrderDetails({
         ...item,
         id: item.lineItemId,
         isCancelled: true,
+        isDelivered: false,
       })),
   ];
 
@@ -109,8 +141,6 @@ export function AccountOrderDetails({
   const itemCount = items.reduce((n, item) => n + (item.quantity ?? 1), 0);
 
   const fulfillment = order.fulfillments?.nodes?.[0];
-
-  const fulfillmentKey = fulfillment?.status ?? order.fulfillmentStatus;
 
   const fulfillmentBadge = order.cancelledAt
     ? FULFILLMENT_BADGES.CANCELLED
@@ -223,22 +253,48 @@ export function AccountOrderDetails({
                   {!order.cancelledAt &&
                     (item.isCancelled ||
                     cancelledIds.has(item.id) ||
-                    cancelledItemIds.includes(item.id) ? (
-                      <span className="rounded-full bg-[#f6dcd8] px-3 py-1 text-[12px] font-medium text-[#8a2c20]">
-                        Cancelled
+                    cancelledItemIds.includes(item.id) ||
+                    returnedItemIds.includes(item.id) ? (
+                      <span
+                        className={`rounded-full px-3 py-1 text-[12px] font-medium ${
+                          returnedItemIds.includes(item.id)
+                            ? 'bg-[#dde8f3] text-[#1f4a73]'
+                            : 'bg-[#f6dcd8] text-[#8a2c20]'
+                        }`}
+                      >
+                        {returnedItemIds.includes(item.id)
+                          ? 'Return Initiated'
+                          : 'Cancelled'}
                       </span>
                     ) : (
+                      <div className="flex flex-wrap items-center justify-end gap-3">
                       <button
                         type="button"
                         onClick={() => setSelectedItemToCancel(item)}
                         disabled={isCancelling || !item.id}
                         className="cursor-pointer text-[13px] font-medium text-[#8a2c20] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                      {isCancelling &&
+                        {isCancelling &&
                         cancelFetcher.formData?.get('lineItemId') === item.id
                           ? 'Cancelling...'
                           : 'Cancel item'}
                       </button>
+
+                      {item.isDelivered && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedItemToReturn(item);
+                            setReturnReason('Damaged item');
+                            setReturnDescription('');
+                          }}
+                          disabled={!item.id}
+                          className="cursor-pointer text-[13px] font-medium text-[#35522a] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Return item
+                        </button>
+                      )}
+                    </div>
                     ))}
                 </div>
               </li>
@@ -330,6 +386,17 @@ export function AccountOrderDetails({
           {cancelFetcher.data.message}
         </div>
       )}
+
+      {/* Return request success message */}
+      {returnFetcher.data?.success &&
+        returnFetcher.data?.type === 'return-request' && (
+          <div
+            role="status"
+            className="mt-4 rounded-xl bg-[#e3efdc] p-4 text-[14px] text-[#2f5a1f]"
+          >
+            {returnFetcher.data.message}
+          </div>
+        )}
 
       {/* Cancellation error message */}
       {cancelFetcher.data?.error && (
@@ -434,6 +501,128 @@ export function AccountOrderDetails({
                   : 'Confirm cancellation'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Return item dialog */}
+      {selectedItemToReturn && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="return-item-title"
+            className="w-full max-w-[440px] rounded-2xl bg-white p-6 shadow-xl"
+          >
+            <h2
+              id="return-item-title"
+              className="m-0 font-serif text-[24px] text-[#111111]"
+            >
+              Request a return
+            </h2>
+
+            <p className="mt-3 text-[14px] leading-6 text-[#55504a]">
+              Submit a return request for{' '}
+              <strong>{selectedItemToReturn.title}</strong>
+              {selectedItemToReturn.variantTitle
+                ? ` (${selectedItemToReturn.variantTitle})`
+                : ''}
+              . Your request will be reviewed by Nimie.
+            </p>
+
+            <form
+              className="mt-5 space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+
+                returnFetcher.submit(
+                  {
+                    intent: 'return-request',
+                    lineItemId: selectedItemToReturn.id,
+                    reason: returnReason,
+                    description: returnDescription,
+                    quantity: String(selectedItemToReturn.quantity ?? 1),
+                  },
+                  {
+                    method: 'post',
+                    encType: 'application/x-www-form-urlencoded',
+                  },
+                );
+              }}
+            >
+              <div>
+                <label
+                  htmlFor="return-reason"
+                  className="mb-1.5 block text-[13px] font-medium text-[#333333]"
+                >
+                  Reason for return
+                </label>
+
+                <select
+                  id="return-reason"
+                  value={returnReason}
+                  onChange={(event) => setReturnReason(event.target.value)}
+                  className="w-full rounded-lg border border-[#ebe7e1] bg-white px-3 py-2.5 text-[14px] text-[#333333] outline-none focus:border-[#35522a]"
+                >
+                  <option value="Damaged item">Damaged item</option>
+                  <option value="Defective item">Defective item</option>
+                  <option value="Missing item">Missing item</option>
+                  <option value="Wrong item received">Wrong item received</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="return-description"
+                  className="mb-1.5 block text-[13px] font-medium text-[#333333]"
+                >
+                  Additional details
+                </label>
+
+                <textarea
+                  id="return-description"
+                  value={returnDescription}
+                  onChange={(event) => setReturnDescription(event.target.value)}
+                  rows={3}
+                  maxLength={1000}
+                  placeholder="Describe the issue with your item..."
+                  className="w-full resize-y rounded-lg border border-[#ebe7e1] px-3 py-2.5 text-[14px] text-[#333333] outline-none placeholder:text-[#a39d94] focus:border-[#35522a]"
+                />
+              </div>
+
+              {returnFetcher.data?.error && (
+                <p role="alert" className="text-[13px] text-[#8a2c20]">
+                  {returnFetcher.data.error}
+                </p>
+              )}
+
+              <p className="text-[12px] leading-5 text-[#7a746c]">
+                Submitting this form requests a return; it does not automatically
+                approve the return, issue a refund, or arrange a pickup.
+              </p>
+
+              <div className="flex flex-wrap justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedItemToReturn(null)}
+                  disabled={returnFetcher.state !== 'idle'}
+                  className="inline-flex items-center justify-center rounded-full border border-[#ebe7e1] bg-white px-5 py-2.5 text-[14px] font-medium leading-5 text-[#55504a] hover:bg-[#f8f6f3] disabled:opacity-50"
+                >
+                  Close
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={returnFetcher.state !== 'idle'}
+                  className="inline-flex items-center justify-center rounded-full bg-[#35522a] px-5 py-2.5 text-[14px] font-medium leading-5 text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {returnFetcher.state !== 'idle'
+                    ? 'Submitting...'
+                    : 'Submit request'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

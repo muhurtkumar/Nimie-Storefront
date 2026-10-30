@@ -79,6 +79,24 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
         ...OrderLineItemFull
       }
     }
+    returnInformation {
+      returnableLineItems(first: 100) {
+        nodes {
+          quantity
+          lineItem {
+            id
+          }
+        }
+      }
+      nonReturnableLineItems(first: 100) {
+        nodes {
+          quantity
+          lineItem {
+            id
+          }
+        }
+      }
+    }
   }
   query Order($orderId: ID!, $language: LanguageCode)
     @inContext(language: $language) {

@@ -166,9 +166,11 @@ export async function action({request, params, context}) {
     return result.data;
   }
 
-  if (!['cancel-order', 'cancel-item'].includes(intent)) {
+  if (
+    !['cancel-order', 'cancel-item', 'return-request'].includes(intent)
+  ) {
     return data(
-      {success: false, error: 'Invalid cancellation action.'},
+      {success: false, error: 'Invalid order action.'},
       {status: 400},
     );
   }
@@ -285,6 +287,185 @@ export async function action({request, params, context}) {
         {success: false, error: 'This order has already been cancelled.'},
         {status: 400},
       );
+    }
+
+    // Submit a native Shopify return request through the Customer Account API.
+    if (intent === 'return-request') {
+      const reason = formData.get('reason');
+      const description = String(formData.get('description') ?? '').trim();
+      const requestedQuantity = Number(formData.get('quantity'));
+
+      if (
+        typeof lineItemId !== 'string' ||
+        !lineItemId ||
+        typeof reason !== 'string'
+      ) {
+        return data(
+          {success: false, error: 'Please select a valid item and return reason.'},
+          {status: 400},
+        );
+      }
+
+      if (description.length > 300) {
+        return data(
+          {
+            success: false,
+            error: 'Additional details must not exceed 300 characters.',
+          },
+          {status: 400},
+        );
+      }
+
+      if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+        return data(
+          {success: false, error: 'Please select a valid return quantity.'},
+          {status: 400},
+        );
+      }
+
+      // Verify that the selected item belongs to this customer's order.
+      const customerLineItems = customerOrder.lineItems?.nodes ?? [];
+
+      const selectedItem = customerLineItems.find(
+        (item) => item.id === lineItemId,
+      );
+
+      if (!selectedItem) {
+        return data(
+          {success: false, error: 'This item does not belong to your order.'},
+          {status: 400},
+        );
+      }
+
+            // Check Shopify's authoritative returnable quantity.
+      const returnableItems =
+        customerOrder.returnInformation?.returnableLineItems?.nodes ?? [];
+
+      const returnableItem = returnableItems.find(
+        (item) => item.lineItem?.id === selectedItem.id,
+      );
+
+      if (!returnableItem) {
+        return data(
+          {
+            success: false,
+            error:
+              'This item is not currently eligible for return according to Shopify.',
+          },
+          {status: 400},
+        );
+      }
+
+      if (
+        !Number.isInteger(requestedQuantity) ||
+        requestedQuantity < 1 ||
+        requestedQuantity > returnableItem.quantity
+      ) {
+        return data(
+          {
+            success: false,
+            error: `You can return a maximum of ${returnableItem.quantity} unit(s) of this item.`,
+          },
+          {status: 400},
+        );
+      }
+
+      // Map the storefront's reasons to Shopify's native return reasons.
+      const reasonMap = {
+        'Damaged item': 'DEFECTIVE',
+        'Defective item': 'DEFECTIVE',
+        'Missing item': 'OTHER',
+        'Wrong item received': 'WRONG_ITEM',
+        Other: 'OTHER',
+      };
+
+      const shopifyReason = reasonMap[reason];
+
+      if (!shopifyReason) {
+        return data(
+          {success: false, error: 'Please select a valid return reason.'},
+          {status: 400},
+        );
+      }
+
+      // Submit the request directly to Shopify.
+      const RETURN_REQUEST_MUTATION = `#graphql
+        mutation OrderRequestReturn(
+          $orderId: ID!
+          $requestedLineItems: [RequestedLineItemInput!]!
+        ) {
+          orderRequestReturn(
+            orderId: $orderId
+            requestedLineItems: $requestedLineItems
+          ) {
+            return {
+              id
+              status
+            }
+            userErrors {
+              field
+              message
+              code
+            }
+          }
+        }
+      `;
+
+      const {data: returnData, errors} = await customerAccount.mutate(
+        RETURN_REQUEST_MUTATION,
+        {
+          variables: {
+            orderId: customerOrder.id,
+            requestedLineItems: [
+              {
+                lineItemId: selectedItem.id,
+                quantity: requestedQuantity,
+                returnReason: shopifyReason,
+                customerNote: description || null,
+              },
+            ],
+          },
+        },
+      );
+
+      if (errors?.length) {
+        console.error('Shopify return request failed:', errors);
+
+        return data(
+          {
+            success: false,
+            error: 'Could not submit your return request. Please try again.',
+          },
+          {status: 502},
+        );
+      }
+
+      const payload = returnData?.orderRequestReturn;
+
+      if (payload?.userErrors?.length || !payload?.return?.id) {
+        console.error(
+          'Shopify rejected the return request:',
+          JSON.stringify(payload?.userErrors ?? []),
+        );
+
+        return data(
+          {
+            success: false,
+            error:
+              payload?.userErrors?.map((item) => item.message).join(' ') ||
+              'Shopify could not accept this return request.',
+          },
+          {status: 400},
+        );
+      }
+
+      return data({
+        success: true,
+        type: 'return-request',
+        returnId: payload.return.id,
+        lineItemId: selectedItem.id,
+        message: 'Your return request has been submitted to Shopify successfully.',
+      });
     }
 
     if (intent === 'cancel-item') {
@@ -865,7 +1046,7 @@ export async function action({request, params, context}) {
       jobId: cancelPayload?.job?.id ?? null,
     });
   } catch (error) {
-    console.error('Order cancellation failed:', error);
+    console.error('Order action failed:', error);
 
     return data(
       {
@@ -873,7 +1054,7 @@ export async function action({request, params, context}) {
         error:
           error instanceof Error
             ? error.message
-            : 'Unknown error during order cancellation.',
+            : 'An unexpected error occurred while processing your request.',
       },
       {status: 500},
     );
