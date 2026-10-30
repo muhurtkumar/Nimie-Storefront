@@ -42,7 +42,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       '.tryhydrogen.dev',
-      'korean-director-chester-montgomery.trycloudflare.com',
+      'leave-allocated-cited-fork.trycloudflare.com',
     ],
   },
 });
